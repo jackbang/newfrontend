@@ -1,0 +1,107 @@
+@import '~taro-ui/dist/style/variables/default.scss';
+@import "~taro-ui/dist/style/components/flex.scss";
+@import "~taro-ui/dist/style/components/search-bar.scss";
+@import "~taro-ui/dist/style/components/button.scss";
+@import "~taro-ui/dist/style/components/icon.scss";
+@import "~taro-ui/dist/style/components/avatar.scss";
+@import "~taro-ui/dist/style/components/tabs.scss";
+
+.at-search-bar{
+    background-color: rgba(255, 255, 255, 0);
+    border-inline: 0px none;
+    padding: $spacing-v-sm 50px;
+}
+
+.at-search-bar__input-cnt{
+    opacity: 0.7;
+}
+
+.store-pic-position-info{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.store-name-position-info{
+    height:100px;
+    font-size: 40px;
+    font-weight:bold;
+    display: table-cell;
+    vertical-align:bottom;
+    padding-left: 5%;
+}
+
+.store-auth-position-info{
+    height:50px;
+    padding-left: 2%;
+    display:flex;
+    align-items:center;
+}
+
+.store-auth-info{
+    width:18vw;
+    height:5vw;
+}
+
+.store-pic-info{
+    width:24vw;
+    height:24vw;
+}
+
+.store-clock-position-info{
+    height:40px;
+    padding-left: 3%;
+    font-size: 24px;
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+}
+
+.store-clock-pic-info{
+    width:4vw;
+    height:4vw;
+}
+
+.store-address-position-info{
+    height:100px;
+    width: 85%;
+    padding-left: 3.5%;
+    padding-top: 1%;
+    font-size: 24px;
+    display:flex;
+    flex-direction:row;
+    align-items:top;
+    word-break:break-all;
+    word-wrap: break-word;
+    white-space: pre-line;
+}
+
+.store-address-pic-info{
+    width:4.5vw;
+    height:4vw;
+}
+
+.store-info-page{
+    background-image: url(../../img/background.png);
+    background-size: 100%;
+}
+
+.store-info-background{
+    height:400px;
+}
+.store-info-background-img{
+    height:320px;
+    background-image: url(../../img/storeinfobk.png);
+    background-position:50% 100%;
+    background-repeat:no-repeat;
+    background-size: 90%;
+}
+.bg-red{
+    background-color:red;
+}
+.bg-blue{
+    background-color:blue;
+}
+.bg-green{
+    background-color:green;
+}
