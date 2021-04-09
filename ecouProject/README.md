@@ -1,7 +1,7 @@
 👽 Taro v3.2.1
 
-
   Taro CLI 3.2.1 environment info:
+  
     System:
       OS: macOS 11.2.3
       Shell: 3.2.57 - /bin/bash
@@ -20,4 +20,10 @@
       eslint-config-taro: 3.2.1 => 3.2.1 
       react: ^17.0.0 => 17.0.2 
       taro-ui: ^3.0.0-alpha.3 => 3.0.0-alpha.10
+# 4月10日
 
+## 微信开发者工具:
+![avatar](frontend-progress-img/WeChatMiniProgramDev_4_10.jpeg)
+
+## Iphone12 测试:
+![avatar](frontend-progress-img/Iphone12_4_10.jpeg)
