@@ -1,8 +1,8 @@
 import Taro from '@tarojs/taro'
 import { Component } from 'react'
-import { View } from '@tarojs/components'
+import { View, ScrollView} from '@tarojs/components'
 import { AtTabBar, AtSearchBar, AtAvatar, AtTabs, AtTabsPane} from 'taro-ui'
-import {diyAtTabs} from '../../components/diyAtTabs'
+
 import './StoreInfo.scss'
 
 import store_pic from '../../img/storepic.png'
@@ -19,6 +19,16 @@ class StoreInfo extends Component {
       value: ''
     }
   }
+
+  onScrollToUpper() {}
+
+  // or 使用箭头函数
+  // onScrollToUpper = () => {}
+
+  onScroll(e){
+    //console.log(e.detail)
+  }
+
   onChange (value) {
     this.setState({
       value: value
@@ -33,8 +43,27 @@ class StoreInfo extends Component {
     })
   }
   render () {
+    
+    var systemInfo = wx.getSystemInfoSync()
+	  var screenHeight = systemInfo.screenHeight;
+    var windowHeight = systemInfo.windowHeight;
+    var statusBarHeight = systemInfo.statusBarHeight;
+    var pixelRatio = systemInfo.pixelRatio;
+    const tabbarHeight = ( screenHeight - windowHeight - statusBarHeight ) * pixelRatio
+    console.log(screenHeight)
+    console.log(windowHeight)
+
+
     var top_height = wx.getSystemInfoSync().statusBarHeight+41;
     var system_width = wx.getSystemInfoSync().screenWidth/3;
+    var screen_height = wx.getSystemInfoSync().screenHeight;
+    var view_height = windowHeight - 200 - 41 - statusBarHeight;
+    const scrollTop = 0
+    const Threshold = 100
+    var scrollStyle = {
+      height: `${view_height}px`
+    }
+
     return (
       <View className='store-info-page'>
         <View className='at-col' style={{padding: `${top_height}px 0px 0px 0px`}}>
@@ -68,7 +97,7 @@ class StoreInfo extends Component {
             </View>
           </View>
           <View className='at-row' style='background-color:#ffffff'>
-            <AtTabs
+            <AtTabs /* TODO: 这部分需要重构，红点没实现，列表不同日期显示不同灰度也没实现 */
               current={this.state.current}
               scroll
               tabList={[
@@ -81,9 +110,23 @@ class StoreInfo extends Component {
               ]}
               onClick={this.handleClick.bind(this)}>
               <AtTabsPane current={this.state.current} index={0}>
-                <View style='font-size:18px;text-align:center;height:100px;'>
-                  Test
-                </View>
+                <ScrollView
+                  className='scrollview'
+                  scrollY
+                  scrollWithAnimation
+                  scrollTop={scrollTop}
+                  style={scrollStyle}
+                  lowerThreshold={Threshold}
+                  upperThreshold={Threshold}
+                  onScrollToUpper={this.onScrollToUpper.bind(this)} // 使用箭头函数的时候 可以这样写 `onScrollToUpper={this.onScrollToUpper}`
+                  onScroll={this.onScroll}
+                >
+                  <View className='at-row queue-tab-info'></View>
+                  <View className='at-row queue-tab-info'></View>
+                  <View className='at-row queue-tab-info'></View>
+                  <View className='at-row queue-tab-info'></View>
+                  <View className='at-row queue-tab-info'></View>
+                </ScrollView>
               </AtTabsPane>
               <AtTabsPane current={this.state.current} index={1}>
                 <View style='font-size:18px;text-align:center;height:100px;'>标签页二的内容</View>
