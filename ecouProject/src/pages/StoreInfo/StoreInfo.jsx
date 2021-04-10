@@ -2,6 +2,7 @@ import Taro from '@tarojs/taro'
 import { Component } from 'react'
 import { View } from '@tarojs/components'
 import { AtTabBar, AtSearchBar, AtAvatar, AtTabs, AtTabsPane} from 'taro-ui'
+import {diyAtTabs} from '../../components/diyAtTabs'
 import './StoreInfo.scss'
 
 import store_pic from '../../img/storepic.png'
@@ -71,16 +72,18 @@ class StoreInfo extends Component {
               current={this.state.current}
               scroll
               tabList={[
-                { title: '标签页1' },
-                { title: '标签页2' },
-                { title: '标签页3' },
-                { title: '标签页4' },
-                { title: '标签页5' },
-                { title: '标签页6' }
+                { title: '今天 04-10', queueNum: 1},
+                { title: '周日 04-11', queueNum: 0},
+                { title: '周一 04-12', queueNum: 0},
+                { title: '周二 04-13', queueNum: 1},
+                { title: '周三 04-14', queueNum: 1},
+                { title: '周四 04-15', queueNum: 1}
               ]}
               onClick={this.handleClick.bind(this)}>
               <AtTabsPane current={this.state.current} index={0}>
-                <View style='font-size:18px;text-align:center;height:100px;'>标签页一的内容</View>
+                <View style='font-size:18px;text-align:center;height:100px;'>
+                  Test
+                </View>
               </AtTabsPane>
               <AtTabsPane current={this.state.current} index={1}>
                 <View style='font-size:18px;text-align:center;height:100px;'>标签页二的内容</View>

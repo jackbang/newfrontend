@@ -16,6 +16,16 @@
     opacity: 0.7;
 }
 
+.at-tabs__item{
+    background-color: #FCF4EB;
+    width: 13.5%;
+    word-break:keep-all;
+    word-wrap: break-word;
+    white-space: pre-line;
+    font-size: 34px;
+    padding: 10px $spacing-h-lg;
+}
+
 .store-pic-position-info{
     display: flex;
     justify-content: flex-end;
