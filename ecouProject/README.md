@@ -20,6 +20,18 @@
       eslint-config-taro: 3.2.1 => 3.2.1 
       react: ^17.0.0 => 17.0.2 
       taro-ui: ^3.0.0-alpha.3 => 3.0.0-alpha.10
+
+
+Taro CLI 3.2.1 environment info (Windows):
+
+    System:
+      OS: Windows 10
+    Binaries:
+      Node: 14.16.1 - C:\Program Files\nodejs\node.EXE
+      npm: 6.14.12 - C:\Program Files\nodejs\npm.CMD
+
+
+
 # 4月10日
 
 ## 微信开发者工具:

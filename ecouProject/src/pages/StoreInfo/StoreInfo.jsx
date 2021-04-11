@@ -129,7 +129,7 @@ class StoreInfo extends Component {
                   onScroll={this.onScroll}
                 >
                   <View className='at-row queue-tab-info'>
-
+                    {/*  每个tab上信息显示 */}
                     <View className='at-row play-pic-position-info' style='width:21vw'>
                       <image className='play-pic-info' src={play_pic}>
                       <text className='play-pic-label-info'>本格</text>
@@ -168,7 +168,7 @@ class StoreInfo extends Component {
 
                   </View>
                   <View className='at-row queue-tab-info'>
-
+                    {/*  每个tab上信息显示 */}
                     <View className='at-row play-pic-position-info' style='width:21vw'>
                       <image className='play-pic-info' src={play_pic}>
                       <text className='play-pic-label-info'>本格</text>
