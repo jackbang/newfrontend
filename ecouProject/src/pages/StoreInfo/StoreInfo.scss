@@ -1,10 +1,16 @@
 @import '~taro-ui/dist/style/variables/default.scss';
 @import "~taro-ui/dist/style/components/flex.scss";
 @import "~taro-ui/dist/style/components/search-bar.scss";
+/* search-bar 中
+要将
+@include hairline-bottom();
+注释掉
+*/
 @import "~taro-ui/dist/style/components/button.scss";
 @import "~taro-ui/dist/style/components/icon.scss";
 @import "~taro-ui/dist/style/components/avatar.scss";
 @import "~taro-ui/dist/style/components/tabs.scss";
+@import "~taro-ui/dist/style/components/button.scss";
 
 .at-search-bar{
     background-color: rgba(255, 255, 255, 0);
@@ -22,21 +28,27 @@
     word-break:keep-all;
     word-wrap: break-word;
     white-space: pre-line;
-    font-size: 34px;
-    font-weight:bold;
+    font-size: 30px;
     padding: 10px $spacing-h-lg;
+    font-weight: 520;
 }
 
 .at-tabs__item--active{
     color: #FCA62F;
+    font-weight:bold;
 }
 
 .at-tabs__item-underline{
     left: 35%;
-    bottom: 5%;
+    bottom: 8%;
     width: 30%;
     height: 5%;
     background-color: #FCA62F;
+    border-radius: 5px;
+}
+
+.at-tabs__header{
+    height: 110rpx;
 }
 
 .store-pic-position-info{
@@ -49,21 +61,21 @@
     height:100px;
     font-size: 40px;
     font-weight:bold;
-    display: table-cell;
-    vertical-align:bottom;
+    display:flex;
+    align-items:flex-end;
     padding-left: 5%;
 }
 
 .store-auth-position-info{
     height:50px;
-    padding-left: 2%;
+    padding-left: 2.75%;
     display:flex;
     align-items:center;
 }
 
 .store-auth-info{
-    width:18vw;
-    height:5vw;
+    width:4.5vw;
+    height:4.5vw;
 }
 
 .store-pic-info{
@@ -73,7 +85,7 @@
 
 .store-clock-position-info{
     height:40px;
-    padding-left: 3%;
+    padding-left: 2.8%;
     font-size: 24px;
     display:flex;
     flex-direction:row;
@@ -88,7 +100,7 @@
 .store-address-position-info{
     height:100px;
     width: 85%;
-    padding-left: 3.5%;
+    padding-left: 3%;
     padding-top: 1%;
     font-size: 24px;
     display:flex;
@@ -100,7 +112,7 @@
 }
 
 .store-address-pic-info{
-    width:4.5vw;
+    width:6vw;
     height:4vw;
 }
 
@@ -109,9 +121,6 @@
     background-size: 100%;
 }
 
-.store-info-background{
-    height:400px;
-}
 .store-info-background-img{
     height:320px;
     background-image: url(../../img/storeinfobk.png);
@@ -133,6 +142,135 @@
     box-shadow: 0px 8px 8px #979797;
 }
 
+.play-pic-info{
+    width:18.5vw;
+    height:26vw;
+    border-radius: 10%;
+}
+
+.play-pic-position-info{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    position: relative;
+}
+
+.play-pic-label-info{
+    position: absolute;
+    font-size: 18px;
+    color: #fff;
+    top: 11%;
+    left: 65%;
+    box-sizing: content-box;
+    border: 0px none #000;
+    background-color: #32323277;
+    padding: 1% 4%;
+    border-radius: 15%;
+}
+
+.play-intro-info{
+    margin-left: 5%;
+}
+
+.play-name-position-info{
+    height: 60px;
+    font-size: 36px;
+    font-weight:bold;
+    display:flex;
+    align-items:flex-end;
+}
+
+.play-time-position-info{
+    height: 55px;
+    font-size: 24px;
+    font-weight:bold;
+    display:flex;
+    align-items:flex-end;
+}
+
+.play-headcount-position-info{
+    height: 45px;
+}
+
+.play-headcount-info{
+    font-size: 24px;
+    font-weight:bold;
+    display:flex;
+    align-items:flex-end;
+}
+
+.play-male-position-info{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 5%;
+    margin-bottom: 1%;
+    font-size: 20px;
+    color: #1296DB;
+    background-color: #78aef94f;
+    margin-top: 5.5%;
+    width: 8.5vw;
+    border-radius: 10px;
+}
+
+.play-female-position-info{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 5%;
+    margin-bottom: 1%;
+    font-size: 20px;
+    color: #E99BBF;
+    background-color: #E89CC04f;
+    margin-top: 5.5%;
+    width: 8.5vw;
+    border-radius: 10px;
+}
+
+.gender-icon-info{
+    width:3vw;
+    height:3vw;
+}
+
+.play-antigender-position-info{
+    height: 55px;
+    display:flex;
+    align-items:flex-end;
+}
+
+.play-antigender-info{
+    font-size: 20px;
+    color: #046BFA;
+    font-weight:bold;
+    border: 3.5px solid #046BFA; 
+    border-radius: 20px;
+    padding: 0% 2%;
+}
+
+.play-label-info{
+    font-size: 20px;
+    color: #FCA62F;
+    font-weight:bold;
+    border: 3.5px solid #FCA62F; 
+    border-radius: 20px;
+    padding: 0% 2%;
+    margin-left: 3%;
+}
+
+.at-button {
+    align-items: center;
+    height: 55%;
+    width: 85%;
+    top: 30%;
+    font-size: 24px;
+    border: 0PX none;
+    background-color: #FCA62F;
+}
+
+.at-button--disabled{
+    background-color: #A5A5A5;
+}
+
 .bg-red{
     background-color:red;
 }
@@ -141,4 +279,7 @@
 }
 .bg-green{
     background-color:green;
+}
+.tab-blank{
+    height:10rpx;
 }

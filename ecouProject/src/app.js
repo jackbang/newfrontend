@@ -1,8 +1,12 @@
 import { Component } from 'react'
+import Taro from '@tarojs/taro'
 import './app.scss'
+import {setGlobalData} from "./globaldata"
 
 class App extends Component {
 
+  onLaunch () {}
+  
   componentDidMount () {}
 
   componentDidShow () {}

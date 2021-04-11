@@ -10,16 +10,25 @@ export default {
     navigationBarTitleText: 'WeChat',
     navigationBarTextStyle: 'black'
   },
+  
   tabBar: {
+    color: "#8A8A8A",
+    selectedColor: "#000000",
     list:[{
       pagePath: 'pages/StoreInfo/StoreInfo',
-      text: 'queue'
+      selectedIconPath: "img/queueList.png",
+      iconPath: "img/queueList.png",
+      text: '拼车信息'
     }, {
       pagePath: 'pages/index/index',
-      text: '+'
+      selectedIconPath: "img/createQueue.png",
+      iconPath: "img/createQueue.png",
     }, {
       pagePath: 'pages/StoreInfo/StoreInfo',
-      text: 'my'
+      selectedIconPath: "img/mineInfo.png",
+      iconPath: "img/mineInfo.png",
+      text: '我的'
     }]
   }
+  
 }
