@@ -34,11 +34,11 @@
 
 ## 微信开发者工具：
 
-![WeChatMiniProgramDev_4_11](C:\Users\JackBang\Desktop\WeChatProject\FrontEnd\newfrontend\ecouProject\frontend-progress-img\WeChatMiniProgramDev_4_11.png)
+![WeChatMiniProgramDev_4_11](frontend-progress-img\WeChatMiniProgramDev_4_11.png)
 
 ## Iphone12测试：
 
-![Iphone12_4_11](C:\Users\JackBang\Desktop\WeChatProject\FrontEnd\newfrontend\ecouProject\frontend-progress-img\Iphone12_4_11.png)
+![Iphone12_4_11](frontend-progress-img\Iphone12_4_11.png)
 
 ## 当前页面的TODO List：
 
