@@ -12,6 +12,12 @@
 @import "~taro-ui/dist/style/components/tabs.scss";
 @import "~taro-ui/dist/style/components/button.scss";
 
+/*
+此文档注释懒得写了，回头闲了没事再写吧。
+每个item的名字再jsx文件中都有使用，at开头的则是复写的
+taroUI的css文件。
+*/
+
 .at-search-bar{
     background-color: rgba(255, 255, 255, 0);
     border-inline: 0px none;
