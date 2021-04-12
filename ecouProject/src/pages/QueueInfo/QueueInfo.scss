@@ -1,9 +1,14 @@
 @import '~taro-ui/dist/style/variables/default.scss';
 @import "~taro-ui/dist/style/components/flex.scss";
 @import "~taro-ui/dist/style/components/nav-bar.scss";
+//nav-bar.scss
+//注释掉:@include hairline-bottom();
 @import "~taro-ui/dist/style/components/icon.scss";
 @import "~taro-ui/dist/style/components/accordion.scss";
 @import "~taro-ui/dist/style/components/input-number.scss";
+//input-number.scss
+//注释掉@include border-thin($width: 1PX); 
+//注释掉 @include border-thin($width: 1PX, $directions: left right);
 @import "~taro-ui/dist/style/components/button.scss";
 
 
