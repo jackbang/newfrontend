@@ -47,6 +47,12 @@ class StoreInfo extends Component {
       current: value
     })
   }
+
+  handleButtonClick (queueId){
+    console.log(queueId)
+    Taro.navigateTo({url: '../QueueInfo/QueueInfo'})
+  }
+
   render () {
     var systemInfo = wx.getSystemInfoSync();
 	  var screenHeight = systemInfo.screenHeight;
@@ -165,7 +171,7 @@ class StoreInfo extends Component {
                         </View>
                         <View className='at-row' style='width:20vw' /*第二列是用来放按钮 */>
                           {/* Button  激活与不激活 具体看taroui中的文档*/}
-                          <AtButton type='primary' circle='true' className='join-button'>我要上车</AtButton>
+                          <AtButton type='primary' circle='true' className='join-button' onClick={this.handleButtonClick.bind(this, 'queueID')}>我要上车</AtButton>
                         </View>
                       </View>
                       <View className='at-col play-antigender-position-info'>

@@ -1,7 +1,7 @@
 export default {
   pages: [
-    'pages/QueueInfo/QueueInfo',
     'pages/StoreInfo/StoreInfo',
+    'pages/QueueInfo/QueueInfo',
     'pages/index/index'
   ],
   window: {
