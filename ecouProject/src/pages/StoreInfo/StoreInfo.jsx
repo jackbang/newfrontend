@@ -165,7 +165,7 @@ class StoreInfo extends Component {
                         </View>
                         <View className='at-row' style='width:20vw' /*第二列是用来放按钮 */>
                           {/* Button  激活与不激活 具体看taroui中的文档*/}
-                          <AtButton type='primary' circle='true'>我要上车</AtButton>
+                          <AtButton type='primary' circle='true' className='join-button'>我要上车</AtButton>
                         </View>
                       </View>
                       <View className='at-col play-antigender-position-info'>
@@ -204,7 +204,7 @@ class StoreInfo extends Component {
                         </View>
                         <View className='at-row' style='width:20vw'>
                           {/* Button */}
-                          <AtButton type='primary' circle='true' disabled='true'>已发车</AtButton>
+                          <AtButton type='primary' circle='true' disabled='true' className='join-button'>已发车</AtButton>
                         </View>
                       </View>
                       <View className='at-col play-antigender-position-info'>
@@ -222,7 +222,25 @@ class StoreInfo extends Component {
                 </ScrollView>
               </AtTabsPane>
               <AtTabsPane current={this.state.current} index={1}>
-                <View style='font-size:18px;text-align:center;height:100px;'>标签页二的内容</View>
+                <ScrollView
+                    className='scrollview'
+                    scrollY
+                    scrollWithAnimation
+                    scrollTop={scrollTop}
+                    style={scrollStyle}
+                    lowerThreshold={Threshold}
+                    upperThreshold={Threshold}
+                    onScrollToUpper={this.onScrollToUpper.bind(this)} // 使用箭头函数的时候 可以这样写 `onScrollToUpper={this.onScrollToUpper}`
+                    onScroll={this.onScroll}
+                  >
+                    <View className='queue-tab-info'>
+                      <View className='at-col' /*注意。想要column排列，有时需要再嵌套一层，可能是因为 queue-tab-info这个css属性影响力 at-col */>
+                      <View style='height:75rpx;font-size:13px;font-weight:550;align-items:flex-end;display:flex;justify-content:center'>当日暂时没有在拼车队哦</View>
+                      <View style='height:75rpx;font-size:13px;font-weight:550;align-items:flex-end;display:flex;justify-content:center'><AtButton type='primary' circle='true' className='create-button'>我要发车</AtButton></View>
+                      <View style='height:75rpx;font-size:13px;font-weight:550;align-items:center;display:flex;justify-content:center'><AtButton type='primary' circle='true' disabled='true' className='create-button'>看看其他日期</AtButton></View>
+                      </View>
+                    </View>
+                </ScrollView>
               </AtTabsPane>
               <AtTabsPane current={this.state.current} index={2}>
                 <View style='font-size:18px;text-align:center;height:100px;'>标签页三的内容</View>

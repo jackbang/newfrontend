@@ -1,5 +1,6 @@
 export default {
   pages: [
+    'pages/QueueInfo/QueueInfo',
     'pages/StoreInfo/StoreInfo',
     'pages/index/index'
   ],

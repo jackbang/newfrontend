@@ -263,7 +263,7 @@ taroUI的css文件。
     margin-left: 3%;
 }
 
-.at-button {
+.join-button {
     align-items: center;
     height: 55%;
     width: 85%;
@@ -271,10 +271,23 @@ taroUI的css文件。
     font-size: 24px;
     border: 0PX none;
     background-color: #FCA62F;
+    &.at-button--disabled {
+        background-color: #A5A5A5;
+    }
 }
 
-.at-button--disabled{
-    background-color: #A5A5A5;
+.create-button{
+    align-items: center;
+    height: 65%;
+    width: 30%;
+    font-size: 24px;
+    border: 0PX none;
+    background-color: #FCA62F;
+    &.at-button--disabled {
+        background-color: #ffffff00;
+        color: #000;
+        border: 1PX solid #000;
+    }
 }
 
 .bg-red{
