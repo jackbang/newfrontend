@@ -38,9 +38,9 @@ Taro CLI 3.2.1 environment info (Windows):
 
 ### 样例：
 
-![204a8718-78b9-4b68-a9b4-9fe36f60d50a](frontend-progress-img\204a8718-78b9-4b68-a9b4-9fe36f60d50a.png)
+![204a8718-78b9-4b68-a9b4-9fe36f60d50a](frontend-progress-img/204a8718-78b9-4b68-a9b4-9fe36f60d50a.png)
 
-![d53e7e2f-5d0f-4713-b752-9ff006d2d719](frontend-progress-img\d53e7e2f-5d0f-4713-b752-9ff006d2d719.png)
+![d53e7e2f-5d0f-4713-b752-9ff006d2d719](frontend-progress-img/d53e7e2f-5d0f-4713-b752-9ff006d2d719.png)
 
 
 
