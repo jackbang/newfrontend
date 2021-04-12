@@ -1,5 +1,5 @@
 ---
-typora-root-url: frontend-progress-img
+
 ---
 
 👽 Taro v3.2.1
@@ -101,10 +101,10 @@ Taro CLI 3.2.1 environment info (Windows):
 
 ### 微信开发者工具：
 
-![image-20210413023624057](/image-20210413023624057.png)
+![image-20210413023624057](frontend-progress-img/image-20210413023624057.png)
 
 
 
 ### Iphone12测试：
 
-![image-20210413023659017](/image-20210413023659017.png)
+![image-20210413023659017](frontend-progress-img/image-20210413023659017.png)
