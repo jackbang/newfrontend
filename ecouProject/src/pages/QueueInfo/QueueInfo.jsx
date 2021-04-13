@@ -187,7 +187,7 @@ export default class Queueinfo extends Component {
                 {/* 车队成员列表 */}
                 <View className='at-row' style='height:50rpx;border:0px solid #979797;border-bottom-width:1px;width:90%;margin-left:5%'>
                   <View className='at-col' style='font-size:16px;font-weight:600;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:0%'>车队成员</View>
-                  <View className='at-col' style='font-size:12px;color:#000;align-items:flex-end;display:flex;justify-content:flex-end;padding-right:5%'>等待上车
+                  <View className='at-col' style='font-size:12px;color:#000;align-items:flex-end;display:flex;justify-content:flex-end;padding-right:1%'>等待上车
                     <View className='play-male-position-info'>
                       <image className='gender-icon-info' src={malePic}></image>
                       <text>2</text>
