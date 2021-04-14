@@ -1,9 +1,10 @@
 export default {
   pages: [
+    
     'pages/StoreInfo/StoreInfo',
     'pages/QueueInfo/QueueInfo',
     'pages/JoinQueueSelectInfo/JoinQueueSelectInfo',
-    
+    'pages/JoinQueueComfirmInfo/JoinQueueComfirmInfo',
     'pages/index/index'
   ],
   window: {
@@ -12,8 +13,8 @@ export default {
     navigationBarBackgroundColor: '#fff',
     navigationBarTitleText: 'WeChat',
     navigationBarTextStyle: 'black'
-  },
-  
+  }
+  /*
   tabBar: {
     color: "#8A8A8A",
     selectedColor: "#000000",
@@ -33,5 +34,5 @@ export default {
       text: '我的'
     }]
   }
-  
+  */
 }

@@ -58,7 +58,7 @@ export default class Queueinfo extends Component {
 
   render () {
 
-    var top_height = wx.getSystemInfoSync().statusBarHeight+40;
+    var top_height = wx.getSystemInfoSync().statusBarHeight;
     var system_width = wx.getSystemInfoSync().screenWidth/3;
 
     const scrollTop = 0

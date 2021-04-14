@@ -20,6 +20,10 @@ export default class Joinqueueselectinfo extends Component {
     }
   }
 
+  handleCreateQueue (){
+    Taro.navigateTo({url: '../JoinQueueComfirmInfo/JoinQueueComfirmInfo'})
+  }
+
   onScrollToUpper() {}
 
   // or 使用箭头函数
@@ -45,7 +49,7 @@ export default class Joinqueueselectinfo extends Component {
   }
 
   handleNavBack(){
-    Taro.reLaunch({url: '../StoreInfo/StoreInfo'})
+    Taro.navigateBack()
   }
 
   onActionClick () {
@@ -60,7 +64,7 @@ export default class Joinqueueselectinfo extends Component {
   }
 
   render () {
-    Taro.hideTabBar();
+    //Taro.hideTabBar();
 
     var top_height = wx.getSystemInfoSync().statusBarHeight;
     var screenHeight = wx.getSystemInfoSync().screenHeight;
@@ -177,7 +181,7 @@ export default class Joinqueueselectinfo extends Component {
                     </View>
                     <View className='at-row' style='width:20vw' /*第二列是用来放按钮 */>
                       {/* Button  激活与不激活 具体看taroui中的文档*/}
-                      <AtButton type='primary' circle='true' className='join-button'>发车</AtButton>
+                      <AtButton type='primary' circle='true' className='join-button' onClick={this.handleCreateQueue.bind(this)}>发车</AtButton>
                     </View>
                   </View>
                   <View className='at-col play-label-position-info'>
@@ -221,7 +225,7 @@ export default class Joinqueueselectinfo extends Component {
                     </View>
                     <View className='at-row' style='width:20vw' /*第二列是用来放按钮 */>
                       {/* Button  激活与不激活 具体看taroui中的文档*/}
-                      <AtButton type='primary' circle='true' className='join-button'>发车</AtButton>
+                      <AtButton type='primary' circle='true' className='join-button' onClick={this.handleCreateQueue.bind(this)}>发车</AtButton>
                     </View>
                   </View>
                   <View className='at-col play-label-position-info'>
@@ -265,7 +269,7 @@ export default class Joinqueueselectinfo extends Component {
                     </View>
                     <View className='at-row' style='width:20vw' /*第二列是用来放按钮 */>
                       {/* Button  激活与不激活 具体看taroui中的文档*/}
-                      <AtButton type='primary' circle='true' className='join-button'>发车</AtButton>
+                      <AtButton type='primary' circle='true' className='join-button' onClick={this.handleCreateQueue.bind(this)}>发车</AtButton>
                     </View>
                   </View>
                   <View className='at-col play-label-position-info'>

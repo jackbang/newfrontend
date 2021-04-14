@@ -14,6 +14,9 @@ import position_icon from '../../img/position_icon.png'
 import play_pic from '../../img/play_pic.jpg'
 import male_icon from '../../img/male.png'
 import female_icon from '../../img/female.png'
+import first_icon from '../../img/queueList.png'
+import second_icon from '../../img/createQueue.png'
+import third_icon from '../../img/mineInfo.png'
 
 class StoreInfo extends Component {
 
@@ -21,7 +24,8 @@ class StoreInfo extends Component {
     super(...arguments)
     this.state = {
       current: 0,
-      value: ''
+      value: '',
+      currentTabBar: 0
     }
   }
 
@@ -54,11 +58,24 @@ class StoreInfo extends Component {
   }
 
   handleButtonClickCreateQueue (){
-    Taro.switchTab({url: '../JoinQueueSelectInfo/JoinQueueSelectInfo'})
+    Taro.navigateTo({url: '../JoinQueueSelectInfo/JoinQueueSelectInfo'})
+  }
+
+  handleTabBarClick (value) {
+    this.setState({
+      currentTabBar: value
+    })
+    if (value == 0){
+
+    }else if (value ==1){
+      /* 进入JoinQueueSelectPage*/
+      Taro.navigateTo({url: '../JoinQueueSelectInfo/JoinQueueSelectInfo'})
+    }else if (value ==2){
+
+    }
   }
 
   render () {
-    Taro.showTabBar();
     var systemInfo = wx.getSystemInfoSync();
 	  var screenHeight = systemInfo.screenHeight;
     var screenWidth = systemInfo.screenWidth;
@@ -83,7 +100,7 @@ class StoreInfo extends Component {
     const scrollTop = 0
     const Threshold = 100
     var scrollStyle = {
-      height: `${windowHeight_rpx - top_height_rpx - 400 - 110}rpx`
+      height: `${windowHeight_rpx - top_height_rpx - 400 - 110 - 180}rpx`
     }
 
     return (
@@ -269,6 +286,17 @@ class StoreInfo extends Component {
               </AtTabsPane>
             </AtTabs>
           </View>
+          <AtTabBar
+              className='tab-bar-info'
+              fixed
+              tabList={[
+                { title: '拼车信息',image:first_icon},
+                { title:'', image:second_icon},
+                { title: '我的',image:third_icon}
+              ]}
+              onClick={this.handleTabBarClick.bind(this)}
+              current={this.state.currentTabBar}
+            />
         </View>
       </View>
     )

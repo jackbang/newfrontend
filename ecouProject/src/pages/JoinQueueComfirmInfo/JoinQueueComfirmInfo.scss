@@ -1,0 +1,292 @@
+@import '~taro-ui/dist/style/variables/default.scss';
+@import "~taro-ui/dist/style/components/flex.scss";
+@import "~taro-ui/dist/style/components/nav-bar.scss";
+@import "~taro-ui/dist/style/components/icon.scss";
+@import "~taro-ui/dist/style/components/button.scss";
+@import "~taro-ui/dist/style/components/list.scss";
+@import "~taro-ui/dist/style/components/float-layout.scss";
+@import "~taro-ui/dist/style/components/input-number.scss";
+@import "~taro-ui/dist/style/components/switch.scss";
+
+.queue-info-page{
+    size: 100%;
+    filter: blur(20px) brightness(70%);  
+}
+
+.nav-bar-info{
+    &.at-nav-bar{
+        background-color:rgba(255, 255, 255, 0);
+    }
+    .at-icon{
+        color:#fff;
+    }
+}
+
+.play-pic-position-info{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    position: relative;
+}
+
+.play-pic-label-info{
+    position: absolute;
+    font-size: 20px;
+    color: #fff;
+    top: 0%;
+    left: 75%;
+    box-sizing: content-box;
+    border: 0px none #000;
+    background-color: #32323277;
+    padding: 1.5% 3%;
+    border-radius: 8px;
+}
+
+.play-name-position-info{
+    height:40px;
+    font-size: 40px;
+    color:#fff;
+    display:flex;
+    align-items:flex-end;
+    padding-left: 8.5%;
+}
+
+.play-score-position-info{
+    height:65px;
+    font-size: 26px;
+    color: #c0c0c0;
+    padding-left: 8.5%;
+    display:flex;
+    align-items:flex-end;
+}
+
+.play-score-pic-info{
+    height: 5vw;
+    width: 5vw;
+}
+
+.play-headcount-position-info{
+    height:60px;
+    font-size: 26px;
+    color: #c0c0c0;
+    padding-left: 8.5%;
+    display:flex;
+    align-items:flex-end;
+}
+
+.play-duration-position-info{
+    height:60px;
+    font-size: 26px;
+    color: #c0c0c0;
+    padding-left: 8.5%;
+    display:flex;
+    align-items:flex-end;
+}
+
+.play-label-position-info{
+    height:70px;
+    font-size: 26px;
+    color: #c0c0c0;
+    padding-left: 8.5%;
+    display:flex;
+    align-items:flex-end;
+}
+
+.play-label-info{
+    font-size: 26px;
+    color: #c0c0c0;
+    border: 3.5px solid #c0c0c0; 
+    border-radius: 20px;
+    padding: 0% 2%;
+    margin-right: 3%;
+}
+
+.reselect-play-button{
+    &.at-button{
+        align-items: center;
+        justify-content: center;
+        height: 35rpx;
+        width: 17%;
+        font-size: 24px;
+        border: 0PX none;
+        background-color: #c0c0c0;
+        margin-left: 10%;
+        margin-top: 4%;
+    }
+    .at-button--disabled {
+        background-color: #A5A5A5;
+    }
+}
+
+.queue-play-intro-tab-info{
+    display:flex;
+    height: auto;
+    width: 92%;
+    margin-left: 4%;
+    margin-bottom: 2%;
+    border-radius: 20px;
+    background-color: #ffffff;
+    background-size: 100%;
+    box-shadow: 0px 8px 8px #979797;
+    position: relative;
+    top: 10px;
+}
+
+.play-intro-info{
+    font-size: 26px;
+    color: #000;
+    word-break:break-all;
+    word-wrap: break-word;
+    white-space: pre-line;
+    width: 94%;
+    //padding-left: 5%;
+    //display: -webkit-box;
+}
+
+.play-intro-title-info{
+    font-size:30px;
+    font-weight:bold;
+    color:#000;
+    height:50px;
+    align-items:center;
+    display:flex;
+    justify-content:flex-start;
+    border: 0px solid #828282;
+}
+
+.play-time-selecter-info{
+    font-size:26px;
+    color:#5C5C5BFF;
+    height:50px;
+    align-items:center;
+    display:flex;
+    justify-content:flex-end;
+    margin-right: 1%;
+    border: 0px solid #828282;
+}
+
+.play-join-queue-title-info{
+    font-size:30px;
+    font-weight:bold;
+    color:#000;
+    height:50px;
+    align-items:flex-end;
+    display:flex;
+    justify-content:flex-start;
+    border: 0px solid #828282;
+}
+
+.play-male-position-info{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 2%;
+    margin-bottom: 1%;
+    font-size: 24px;
+    color: #1296DB;
+    background-color: #78aef94f;
+    padding: 0% 2%;
+    margin-top: 1.5%;
+    border-radius: 10px;
+}
+
+.play-female-position-info{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 2%;
+    margin-bottom: 1%;
+    font-size: 24px;
+    color: #E99BBF;
+    background-color: #E89CC04f;
+    padding: 0% 2%;
+    margin-top: 1.5%;
+    border-radius: 10px;
+}
+
+.gender-icon-info{
+    width:4vw;
+    height:4vw;
+}
+
+.queue-join-input-number{
+    &.at-input-number {
+        background-color: rgba(0, 0, 0, 0);
+        border-radius: 0;
+        .at-input-number__btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: $at-input-number-btn-padding;
+            color: #FCA62F;
+            background-color: rgba(252, 166, 47, 0.5);
+            font-size: 0;
+            text-align: center;
+            line-height: $line-height-base;
+            overflow: hidden;
+            @include active;
+            border-radius: 8px;
+            &-subtract,
+            &-add {
+              font-size: $at-input-number-btn-size;
+              line-height: $at-input-number-btn-size;
+            }
+          }
+        .at-input-number--disabled{
+            color: #A5A5A5;
+            background-color: #D8D8D8;
+        }
+    }
+}
+
+.switch-info{
+    zoom: 0.7;
+    align-items: center;
+    display:flex;
+    margin-right: 9%;
+}
+
+.room-select-icon{
+    &.at-icon{
+        position: absolute;
+        top:1%;
+        right: 2%;
+    }
+}
+
+.join-queue-button{
+    align-items: center;
+    height: 50%;
+    width: 48%;
+    right: 5%;
+    font-size: 32px;
+    border: 0PX none;
+    background-color: #FCA62F;
+    &.at-button--disabled {
+        background-color: #A5A5A5;
+    }
+}
+
+.invite-friends-button{
+    align-items: center;
+    height: 50%;
+    width: 23%;
+    left: 5%;
+    color: #FCA62F;
+    font-size: 32px;
+    border: 1PX solid #FCA62F;
+    &.at-button--disabled {
+        background-color: #A5A5A5;
+    }
+}
+
+.bg-red{
+    background-color:rgb(255, 47, 47);
+}
+.bg-blue{
+    background-color:blue;
+}
+.bg-green{
+    background-color:green;
+}
