@@ -2,6 +2,8 @@ export default {
   pages: [
     'pages/StoreInfo/StoreInfo',
     'pages/QueueInfo/QueueInfo',
+    'pages/JoinQueueSelectInfo/JoinQueueSelectInfo',
+    
     'pages/index/index'
   ],
   window: {
@@ -21,7 +23,7 @@ export default {
       iconPath: "img/queueList.png",
       text: '拼车信息'
     }, {
-      pagePath: 'pages/index/index',
+      pagePath: 'pages/JoinQueueSelectInfo/JoinQueueSelectInfo',
       selectedIconPath: "img/createQueue.png",
       iconPath: "img/createQueue.png",
     }, {
