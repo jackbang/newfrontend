@@ -128,10 +128,16 @@ export default class Joinqueuecomfirminfo extends Component {
     var top_height = wx.getSystemInfoSync().statusBarHeight;
     var system_width = wx.getSystemInfoSync().screenWidth/3;
 
+    var screenHeight = wx.getSystemInfoSync().screenHeight;
+    var screenWidth = wx.getSystemInfoSync().screenWidth;
+    var windowHeight = wx.getSystemInfoSync().windowHeight;
+    var screenHeight_rpx = 750*(screenHeight/screenWidth);
+    var windowHeight_rpx = 750*(windowHeight/screenWidth);
+
     const scrollTop = 0
     const Threshold = 20
     var scrollStyle = {
-      height: '90vh'
+      height: `${windowHeight_rpx}rpx`
     }
     var scrollStyleX = {
       width: '86vw'
@@ -143,6 +149,7 @@ export default class Joinqueuecomfirminfo extends Component {
           className='scrollview'
           scrollY
           scrollWithAnimation
+          show-scrollbar='false'
           scrollTop={scrollTop}
           style={scrollStyle}
           lowerThreshold={Threshold}
@@ -210,7 +217,7 @@ export default class Joinqueuecomfirminfo extends Component {
                         {this.state.selectArrowShow ? "请选择" : this.state.timeSeleted}
                         {this.state.selectArrowShow ? <AtIcon value='chevron-right' size='22' color='#5C5C5BFF'></AtIcon>: ""}
                       </View>
-                      <AtFloatLayout title="开局时间" isOpened={this.state.timePickerShow} onClose={this.handleClose.bind(this)}>
+                      <AtFloatLayout title="开局时间" isOpened={this.state.timePickerShow} onClose={this.handleClose.bind(this)} className='diy-float-layout'>
                         <CustomPicker
                           style='background-color: #ffffff00;'
                           dateTime={dateTime}
@@ -232,9 +239,10 @@ export default class Joinqueuecomfirminfo extends Component {
                         <image className='gender-icon-info' src={femalePic}></image>
                         <text>2</text>
                       </View>
+                      <View className='at-col' style='font-size:12px;color:#000;align-items:flex-end;display:flex;justify-content:flex-end;padding-right:5%'>定金10元/人</View>
                     </View>
-                    <View className='at-row' style='height:90rpx;'>
-                      <View className='at-col' style='font-size:16px;font-weight:600;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:8%'>男玩家</View>
+                    <View className='at-row' style='height:90rpx;padding-top:3%;'>
+                      <View className='at-col' style='font-size:16px;font-weight:600;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:4%'>男玩家</View>
                       <View className='at-col' style='align-items:center;display:flex;justify-content:flex-end;padding-right:10%'>
                         <AtInputNumber
                           className ='queue-join-input-number'
@@ -247,7 +255,7 @@ export default class Joinqueuecomfirminfo extends Component {
                       </View>
                     </View>
                     <View className='at-row' style='height:90rpx;'>
-                      <View className='at-col' style='font-size:16px;font-weight:600;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:8%'>女玩家</View>
+                      <View className='at-col' style='font-size:16px;font-weight:600;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:4%'>女玩家</View>
                       <View className='at-col' style='align-items:center;display:flex;justify-content:flex-end;padding-right:10%'>
                         <AtInputNumber
                           className ='queue-join-input-number'
@@ -259,10 +267,10 @@ export default class Joinqueuecomfirminfo extends Component {
                         />
                       </View>
                     </View>
-                    <View className='at-row' style=''>
+                    <View className='at-row' style='padding-top:3%;padding-bottom:5%;'>
                       <View className='at-col'>
-                        <View className='at-col' style='font-size:14px;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:8%'>是否接受反串</View>
-                        <View className='at-col' style='font-size:10px;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:8%'>
+                        <View className='at-col' style='font-size:14px;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:4%'>是否接受反串</View>
+                        <View className='at-col' style='font-size:10px;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:4%'>
                           <AtIcon value='alert-circle' size='14' color='rgb(255, 47, 47)'></AtIcon>
                           DM不建议反串哦
                         </View>
@@ -276,11 +284,12 @@ export default class Joinqueuecomfirminfo extends Component {
               <View className='at-row queue-play-intro-tab-info' style='padding-top:2%;padding-bottom:5rpx;'>
                 <View className='at-row'>
                   <View className='at-col' style='padding: 0 3%;'>
-                    <View className='at-row play-intro-title-info' >选择房间</View>
+                    <View className='at-row play-intro-title-info' style='padding-bottom:3%;' >选择房间</View>
                     <ScrollView
                     className='scrollview'
                     scrollX
                     scrollWithAnimation
+                    show-scrollbar='false'
                     scrollTop={scrollTop}
                     style={scrollStyleX}
                     lowerThreshold={Threshold}
@@ -327,12 +336,13 @@ export default class Joinqueuecomfirminfo extends Component {
               </View>
 
             </View>
+            <View style='height:180rpx;'></View>
+          </View>
+          <View className='at-row' style='position:fixed;bottom:0;height:150rpx;padding-top:2%;background-color:#fff'>
+              <AtButton type='second' circle='true' className='invite-friends-button'>邀请好友</AtButton>
+              <AtButton type='primary' circle='true' className='join-queue-button'>确认发车并支付定金</AtButton>
           </View>
         </ScrollView>
-        <View className='at-row' style='position:absolute;height:10vh;padding-top:2%;background-color:#fff'>
-              <AtButton type='second' circle='true' className='invite-friends-button'>邀请好友</AtButton>
-              <AtButton type='primary' circle='true' className='join-queue-button'>加入拼车并支付定金</AtButton>
-        </View>
       </View>
     )
   }

@@ -61,10 +61,16 @@ export default class Queueinfo extends Component {
     var top_height = wx.getSystemInfoSync().statusBarHeight;
     var system_width = wx.getSystemInfoSync().screenWidth/3;
 
+    var screenHeight = wx.getSystemInfoSync().screenHeight;
+    var screenWidth = wx.getSystemInfoSync().screenWidth;
+    var windowHeight = wx.getSystemInfoSync().windowHeight;
+    var screenHeight_rpx = 750*(screenHeight/screenWidth);
+    var windowHeight_rpx = 750*(windowHeight/screenWidth);
+
     const scrollTop = 0
     const Threshold = 20
     var scrollStyle = {
-      height: '90vh'
+      height: `${windowHeight_rpx-150}rpx`
     }
 
     return (
@@ -73,6 +79,7 @@ export default class Queueinfo extends Component {
           className='scrollview'
           scrollY
           scrollWithAnimation
+          show-scrollbar='false'
           scrollTop={scrollTop}
           style={scrollStyle}
           lowerThreshold={Threshold}
@@ -243,7 +250,7 @@ export default class Queueinfo extends Component {
             </View>
           </View>
         </ScrollView>
-        <View className='at-row' style='position:absolute;height:10vh;padding-top:3%;background-color:#fff'>
+        <View className='at-row' style='position:absolute;height:150rpx;padding-top:3%;background-color:#fff'>
               <AtButton type='second' circle='true' className='invite-friends-button'>邀请好友</AtButton>
               <AtButton type='primary' circle='true' className='join-queue-button'>加入拼车并支付定金</AtButton>
         </View>

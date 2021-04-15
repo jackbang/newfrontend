@@ -115,6 +115,7 @@ export default class Joinqueueselectinfo extends Component {
                 style=''
                 scrollX
                 scrollWithAnimation
+                show-scrollbar='false'
                 scrollTop={scrollTop}
                 style={scrollStyle}
                 lowerThreshold={Threshold}
@@ -141,6 +142,7 @@ export default class Joinqueueselectinfo extends Component {
             className='scrollviewY'
             scrollY
             scrollWithAnimation
+            show-scrollbar='false'
             scrollTop={scrollTop}
             style={scrollStyleY}
             lowerThreshold={Threshold}

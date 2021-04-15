@@ -281,6 +281,36 @@
     }
 }
 
+.diy-float-layout{
+    &.at-float-layout{
+        .layout-header__btn-close{
+            right: 30px;
+            top:0;
+            transform: translate(0, 0);
+
+            &::before {
+                position: absolute;
+                top: 25%;
+                left: 0%;
+                display: inline-block;
+                color: rgb(4, 35, 209);
+                content: "确认";
+                background-color: #00000000;
+            }
+            &::after {
+                background-color: #00000000;
+            }
+            &::before {
+                transform: translate3d(0, 0, 0) rotate(0);
+            }
+    
+            &::after {
+                transform: translate3d(0, 0, 0) rotate(0);
+            }
+        }
+    }
+}
+
 .bg-red{
     background-color:rgb(255, 47, 47);
 }

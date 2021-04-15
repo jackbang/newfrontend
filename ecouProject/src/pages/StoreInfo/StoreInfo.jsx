@@ -254,6 +254,7 @@ class StoreInfo extends Component {
                     className='scrollview'
                     scrollY
                     scrollWithAnimation
+                    show-scrollbar='false'
                     scrollTop={scrollTop}
                     style={scrollStyle}
                     lowerThreshold={Threshold}
