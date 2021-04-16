@@ -1,10 +1,10 @@
 export default {
   pages: [
-    
     'pages/StoreInfo/StoreInfo',
     'pages/QueueInfo/QueueInfo',
     'pages/JoinQueueSelectInfo/JoinQueueSelectInfo',
     'pages/JoinQueueComfirmInfo/JoinQueueComfirmInfo',
+    'pages/ComfirmQueueInfo/ComfirmQueueInfo',
     'pages/index/index'
   ],
   window: {

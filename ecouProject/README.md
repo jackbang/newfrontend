@@ -144,3 +144,19 @@ Taro CLI 3.2.1 environment info (Windows):
 ### Iphone12 测试:
 
 ![iphone12_joinqueue.jpg](frontend-progress-img/iphone12_joinqueue.jpg)
+
+# ComfirmQueueInfo页面：
+
+### 样例：
+
+![f8eadb13-9210-48c5-97bc-5391a8b162c4](frontend-progress-img/f8eadb13-9210-48c5-97bc-5391a8b162c4.png)
+
+## 4月16日开发进度：
+
+### 微信开发者工具：
+
+![5ef7ddfc65b8b11a38acf475a4aa5e1](frontend-progress-img/5ef7ddfc65b8b11a38acf475a4aa5e1.png)
+
+### Iphone12 测试：
+
+![79e8723cba9556b83f1642cc01bf36f](frontend-progress-img/79e8723cba9556b83f1642cc01bf36f.jpg)

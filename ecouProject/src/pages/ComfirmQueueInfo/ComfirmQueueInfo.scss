@@ -1,0 +1,77 @@
+@import '~taro-ui/dist/style/variables/default.scss';
+@import "~taro-ui/dist/style/components/flex.scss";
+@import "~taro-ui/dist/style/components/icon.scss";
+@import "~taro-ui/dist/style/components/nav-bar.scss";
+
+.ComfirmQueueInfo{
+    background: #F9F9F9;
+}
+
+.nav-bar-info{
+    &.at-nav-bar{
+        background-color:rgba(255, 255, 255, 0);
+    }
+    .at-icon{
+        color:#fff;
+    }
+}
+
+.play-pic-position-info{
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    position: relative;
+}
+
+.play-pic-label-info{
+    position: absolute;
+    font-size: 20px;
+    color: #fff;
+    top: 10%;
+    left: 73%;
+    box-sizing: content-box;
+    border: 0px none #000;
+    background-color: #32323277;
+    padding: 1.5% 3%;
+    border-radius: 8px;
+}
+
+.play-score-position-info{
+    height:65px;
+    color: #000;
+    padding-left: 38%;
+    display:flex;
+    align-items:flex-end;
+}
+
+.play-label-position-info{
+    color: #000;
+    display:flex;
+    align-items:flex-end;
+}
+
+.play-label-info{
+    color: #000;
+    border: 3.5px solid #000; 
+    border-radius: 20px;
+    padding: 0% 2%;
+    margin-right: 3%;
+}
+
+.play-score-pic-info{
+    height: 5vw;
+    width: 5vw;
+}
+
+.comfirm-button{
+    font-size:40px;
+    height:80px;
+    width:250px;
+    left:5vw;
+    align-items: center;
+    border: 0PX none;
+    background-color: #FCA62F;
+    &.at-button--disabled {
+        background-color: #A5A5A5;
+    }
+}

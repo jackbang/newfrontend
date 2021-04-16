@@ -33,6 +33,10 @@ export default class Joinqueuecomfirminfo extends Component {
     Taro.navigateBack()
   }
 
+  handleJoinQueueBut(){
+    Taro.navigateTo({url: '../ComfirmQueueInfo/ComfirmQueueInfo'})
+  }
+
   onDateTimeChange = e => {
     console.log(e)
   }
@@ -133,11 +137,12 @@ export default class Joinqueuecomfirminfo extends Component {
     var windowHeight = wx.getSystemInfoSync().windowHeight;
     var screenHeight_rpx = 750*(screenHeight/screenWidth);
     var windowHeight_rpx = 750*(windowHeight/screenWidth);
+    var top_height_rpx = 750*(top_height/screenWidth);
 
     const scrollTop = 0
     const Threshold = 20
     var scrollStyle = {
-      height: `${windowHeight_rpx}rpx`
+      height: `${windowHeight_rpx-top_height_rpx-100}rpx`
     }
     var scrollStyleX = {
       width: '86vw'
@@ -145,6 +150,13 @@ export default class Joinqueuecomfirminfo extends Component {
 
     return (
       <View className='JoinQueueComfirmInfo'>
+        <image className='queue-info-page' mode='widthFix' src={playpic} style='width:100vw;position:absolute'></image>
+          <View className='at-col' style={{padding: `${top_height}px 0px 0px 0px`, position:'absolute', top:0, left:0, width:'100%'}}>
+            <AtNavBar className='nav-bar-info'
+              onClickLeftIcon={this.handleNavBack}
+              color='#ffff'
+              leftIconType='chevron-left'
+              ><View style='color:#fff;font-size:18px'>我要发车</View></AtNavBar>
         <ScrollView
           className='scrollview'
           scrollY
@@ -157,13 +169,7 @@ export default class Joinqueuecomfirminfo extends Component {
           onScrollToUpper={this.onScrollToUpper.bind(this)} // 使用箭头函数的时候 可以这样写 `onScrollToUpper={this.onScrollToUpper}`
           onScroll={this.onScroll}
           >
-          <image className='queue-info-page' mode='widthFix' src={playpic} style='width:100vw;position:absolute'></image>
-          <View className='at-col' style={{padding: `${top_height}px 0px 0px 0px`, position:'absolute', top:0, left:0, width:'100%'}}>
-            <AtNavBar className='nav-bar-info'
-              onClickLeftIcon={this.handleNavBack}
-              color='#ffff'
-              leftIconType='chevron-left'
-              ><View style='color:#fff;font-size:18px'>我要发车</View></AtNavBar>
+          
             <View className='at-row' style='height:300rpx;padding-top:5%;'>
               <View className='at-row play-pic-position-info' style={{width: `${system_width}px`}} /* 这里是用来规划image放置的位置 */> 
                   <image src={playpic} mode='widthFix' style='width:90%;border-radius:10px;'>
@@ -337,12 +343,13 @@ export default class Joinqueuecomfirminfo extends Component {
 
             </View>
             <View style='height:180rpx;'></View>
-          </View>
+          
           <View className='at-row' style='position:fixed;bottom:0;height:150rpx;padding-top:2%;background-color:#fff'>
               <AtButton type='second' circle='true' className='invite-friends-button'>邀请好友</AtButton>
-              <AtButton type='primary' circle='true' className='join-queue-button'>确认发车并支付定金</AtButton>
+              <AtButton type='primary' circle='true' className='join-queue-button' onClick={this.handleJoinQueueBut.bind(this)}>确认发车并支付定金</AtButton>
           </View>
         </ScrollView>
+        </View>
       </View>
     )
   }
