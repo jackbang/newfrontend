@@ -1,4 +1,4 @@
 export default {
-    navigationBarTitleText: '确认发车',
+    navigationBarTitleText: '我的信息',
     disableScroll: true
   }

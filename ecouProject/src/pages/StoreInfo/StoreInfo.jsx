@@ -29,6 +29,8 @@ class StoreInfo extends Component {
     }
   }
 
+  
+
   onScrollToUpper() {}
 
   // or 使用箭头函数
@@ -71,11 +73,12 @@ class StoreInfo extends Component {
       /* 进入JoinQueueSelectPage*/
       Taro.navigateTo({url: '../JoinQueueSelectInfo/JoinQueueSelectInfo'})
     }else if (value ==2){
-
+      Taro.navigateTo({url: '../MineInfo/MineInfo'})
     }
   }
 
   render () {
+    this.state.currentTabBar=0;
     var systemInfo = wx.getSystemInfoSync();
 	  var screenHeight = systemInfo.screenHeight;
     var screenWidth = systemInfo.screenWidth;

@@ -5,6 +5,8 @@ export default {
     'pages/JoinQueueSelectInfo/JoinQueueSelectInfo',
     'pages/JoinQueueComfirmInfo/JoinQueueComfirmInfo',
     'pages/ComfirmQueueInfo/ComfirmQueueInfo',
+    'pages/QueueHistoryInfo/QueueHistoryInfo',
+    'pages/MineInfo/MineInfo',
     'pages/index/index'
   ],
   window: {

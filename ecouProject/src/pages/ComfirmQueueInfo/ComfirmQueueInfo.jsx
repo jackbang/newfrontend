@@ -151,6 +151,7 @@ export default class Comfirmqueueinfo extends Component {
                 </View>
               </View>
             </View>
+            <View className='at-col' style='height:10rpx;'></View>
           </ScrollView>
           <View className='at-row' style='position:fixed;bottom:0;height:150rpx;padding-top:2%;background-color:#fff'>
             <View style='width:50vw;display:table-cell;text-align:left;padding-left:4%;'>

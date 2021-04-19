@@ -13,7 +13,7 @@ import scoreActive from '../../img/scoreActive.png'
 import scoreDeactive from '../../img/scoreDeactive.png'
 import femalePic from '../../img/female.png'
 import malePic from '../../img/male.png'
-import roomPic from '../../img/room.png'
+import roomPic from '../../img/room.jpeg'
 
 export default class Joinqueuecomfirminfo extends Component {
 

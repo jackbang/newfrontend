@@ -13,8 +13,8 @@
 
 
 .queue-info-page{
-    size: cover;
-    filter: blur(10px) brightness(50%);
+    size: 100%;
+    filter: blur(20px) brightness(70%);
             
 }
 
@@ -163,7 +163,6 @@
 }
 
 .queue-join-tab-info{
-    height: 240px;
     width: 92%;
     margin-left: 4%;
     margin-bottom: 2%;
@@ -224,8 +223,8 @@
 .join-queue-button{
     align-items: center;
     height: 50%;
-    width: 48%;
-    right: 5%;
+    width: 80%;
+    right: 0%;
     font-size: 32px;
     border: 0PX none;
     background-color: #FCA62F;
