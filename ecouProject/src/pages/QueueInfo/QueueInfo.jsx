@@ -144,7 +144,7 @@ export default class Queueinfo extends Component {
                   </View>
                 </View>
               </View>
-              <View className='at-col' style='background-color:#F9F9F9;margin-top:1%;'>
+              <View className='at-col' style='background-color:#F9F9F9;margin-top:1%;padding-bottom:5%;'>
 
                 <View className='at-row queue-time-tab-info' style='padding-top:2%'>
                   {/*这部分是开车时间的tab */}

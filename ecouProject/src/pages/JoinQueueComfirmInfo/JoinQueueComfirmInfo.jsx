@@ -150,7 +150,7 @@ export default class Joinqueuecomfirminfo extends Component {
 
     return (
       <View className='JoinQueueComfirmInfo'>
-        <image className='queue-info-page' mode='widthFix' src={playpic} style='width:100vw;position:absolute'></image>
+        <image className='queue-info-page' src={playpic} style='width:100vw;height:100vh;position:absolute'></image>
           <View className='at-col' style={{padding: `${top_height}px 0px 0px 0px`, position:'absolute', top:0, left:0, width:'100%'}}>
             <AtNavBar className='nav-bar-info'
               onClickLeftIcon={this.handleNavBack}
@@ -172,7 +172,7 @@ export default class Joinqueuecomfirminfo extends Component {
           
             <View className='at-row' style='height:300rpx;padding-top:5%;'>
               <View className='at-row play-pic-position-info' style={{width: `${system_width}px`}} /* 这里是用来规划image放置的位置 */> 
-                  <image src={playpic} mode='widthFix' style='width:90%;border-radius:10px;'>
+                  <image src={playpic} style='height:100%;width:90%;border-radius:10px;'>
                     <text className='play-pic-label-info'>本格</text>
                   </image>
               </View>
@@ -204,7 +204,7 @@ export default class Joinqueuecomfirminfo extends Component {
               <AtButton type='primary' circle='true' className='reselect-play-button' onClick={this.handleNavBack.bind(this)}>重新选择</AtButton>
             </View>
 
-            <View className='at-col' style='background-color:#F9F9F9;margin-top:1%;padding-bottom:1%;'>
+            <View className='at-col' style='background-color:#F9F9F9;margin-top:1%;padding-bottom:1%;padding-bottom:5%;'>
               <View className='at-row queue-play-intro-tab-info' style='padding-top:2%;padding-bottom:5rpx;'>
                 <View className='at-row'>
                   <View className='at-col' style='padding: 0 3%;'>
@@ -342,7 +342,7 @@ export default class Joinqueuecomfirminfo extends Component {
               </View>
 
             </View>
-            <View style='height:180rpx;'></View>
+            <View style='height:180rpx;background-color:#F9F9F9;padding-bottom:5%;'></View>
           
           <View className='at-row' style='position:fixed;bottom:0;height:150rpx;padding-top:2%;background-color:#fff'>
               <AtButton type='second' circle='true' className='invite-friends-button'>邀请好友</AtButton>

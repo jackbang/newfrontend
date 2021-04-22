@@ -18,6 +18,9 @@ import first_icon from '../../img/queueList.png'
 import second_icon from '../../img/createQueue.png'
 import third_icon from '../../img/mineInfo.png'
 
+import {test_store_info, test_get_pic} from '../../service/api'
+import {base} from '../../service/config'
+
 class StoreInfo extends Component {
 
   constructor () {
@@ -25,11 +28,25 @@ class StoreInfo extends Component {
     this.state = {
       current: 0,
       value: '',
-      currentTabBar: 0
+      currentTabBar: 0,
+      storeId: 4,
+      storeInfo: {},
+      storePic: store_pic
     }
   }
 
-  
+  async componentDidMount () {
+    var pages = getCurrentPages();
+    console.log(pages);
+    let _this = this;
+    await test_store_info(4).then(function(res) {
+      _this.setState({
+        storeInfo: res.data,
+        storePic: base+res.data.data.store_logo
+      })
+    })
+  }
+
 
   onScrollToUpper() {}
 
@@ -121,7 +138,7 @@ class StoreInfo extends Component {
 
             <View className='at-row store-info-background-img' /* 这里是StoreInfo背景那个不规则图形*/>
               <View className='at-row store-pic-position-info' style={{width: `${system_width}px`}} /* 这里是用来规划image放置的位置 */> 
-                <AtAvatar className='store-pic-info' image={store_pic}></AtAvatar>
+                <AtAvatar className='store-pic-info' image={this.state.storePic}></AtAvatar>
               </View>
               <View className='at-col' /*这里写的是StoreInfo 文字部分*/> 
                 <View className='at-col store-name-position-info'>

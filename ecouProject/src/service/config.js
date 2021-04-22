@@ -1,0 +1,1 @@
+export const base = "https://api.ecou.com.cn";
