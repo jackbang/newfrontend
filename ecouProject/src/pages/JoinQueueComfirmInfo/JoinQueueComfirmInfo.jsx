@@ -15,6 +15,8 @@ import femalePic from '../../img/female.png'
 import malePic from '../../img/male.png'
 import roomPic from '../../img/room.jpeg'
 
+import {base} from '../../service/config'
+
 export default class Joinqueuecomfirminfo extends Component {
 
   constructor () {
@@ -25,8 +27,13 @@ export default class Joinqueuecomfirminfo extends Component {
       selectArrowShow: true,
       male:0,
       female:0,
-      roomSelectId:0
+      roomSelectId:0,
+      play_info:{},
+      play_main_label:'  '
     }
+  }
+
+  async componentDidMount () {
   }
 
   handleNavBack() {
@@ -118,6 +125,8 @@ export default class Joinqueuecomfirminfo extends Component {
 
   render () {
 
+    this.state.play_info = Taro.getStorageSync('JoinQueueSelectedPlay');
+    
     const dateTime = [
       // {mode: 'year', unit: '年', start: '2020'},
       // {mode: 'month', unit: '月'},
@@ -147,10 +156,19 @@ export default class Joinqueuecomfirminfo extends Component {
     var scrollStyleX = {
       width: '86vw'
     }
+    console.log(this.state.play_info)
+    let labels_list = this.state.play_info.play_labels.map((label_item, label_idx) => {
+      if (label_idx == 0) {
+        this.state.play_main_label=label_item;
+      }
+      return (
+        <text className='play-label-info'>{label_item}</text>
+      )
+    })
 
     return (
       <View className='JoinQueueComfirmInfo'>
-        <image className='queue-info-page' src={playpic} style='width:100vw;height:100vh;position:absolute'></image>
+        <image className='queue-info-page' src={base+this.state.play_info.play_pic} style='width:100vw;height:100vh;position:absolute'></image>
           <View className='at-col' style={{padding: `${top_height}px 0px 0px 0px`, position:'absolute', top:0, left:0, width:'100%'}}>
             <AtNavBar className='nav-bar-info'
               onClickLeftIcon={this.handleNavBack}
@@ -172,12 +190,12 @@ export default class Joinqueuecomfirminfo extends Component {
           
             <View className='at-row' style='height:300rpx;padding-top:5%;'>
               <View className='at-row play-pic-position-info' style={{width: `${system_width}px`}} /* 这里是用来规划image放置的位置 */> 
-                  <image src={playpic} style='height:100%;width:90%;border-radius:10px;'>
-                    <text className='play-pic-label-info'>本格</text>
+                  <image src={base+this.state.play_info.play_pic} style='height:100%;width:90%;border-radius:10px;'>
+                    <text className='play-pic-label-info'>{this.state.play_main_label}</text>
                   </image>
               </View>
               <View className='at-col' /*这里写的是StoreInfo 文字部分*/> 
-                <View className='play-name-position-info'>木夕僧之戏</View>
+                <View className='play-name-position-info'>{this.state.play_info.play_name}</View>
                 <View className='play-score-position-info'>难度
                   <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%'>
                     <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
@@ -187,16 +205,14 @@ export default class Joinqueuecomfirminfo extends Component {
                     <image src={scoreDeactive} className='play-score-pic-info' style='position:relative;left:-12px;'></image>
                   </View>
                 </View>
-                <View className='play-headcount-position-info'>7人本
+                <View className='play-headcount-position-info'>{this.state.play_info.play_headcount}人本
                   <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%;'>
-                    <text style='background-color:#c0c0c0;color:rgb(80, 80, 80);padding: 0% 10%;border-radius:3px;'>4男3女</text>
+                    <text style='background-color:#c0c0c0;color:rgb(80, 80, 80);padding: 0% 10%;border-radius:3px;'>{this.state.play_info.play_male_num}男{this.state.play_info.play_female_num}女</text>
                   </View>
                 </View>
-                <View className='play-duration-position-info'>游戏时长约6小时</View>
+                <View className='play-duration-position-info'>游戏时长约{this.state.play_info.play_duration}小时</View>
                 <View className='play-label-position-info'>
-                  <text className='play-label-info'>本格</text>
-                  <text className='play-label-info'>硬核</text>
-                  <text className='play-label-info'>现代</text>
+                  {labels_list}
                 </View>
               </View>
             </View>
@@ -209,7 +225,7 @@ export default class Joinqueuecomfirminfo extends Component {
                 <View className='at-row'>
                   <View className='at-col' style='padding: 0 3%;'>
                     <View className='at-col play-intro-title-info' >剧情简介</View>
-                    <text className='play-intro-info' decode="{{true}}">&nbsp;&nbsp;&nbsp;&nbsp;某个蝉鸣聒噪的夏日，一行七人被莫名聚集在古老的木夕神社。他们被邀请来参与一场莫名其妙的游戏。 而邀请他们前来此处的，正是那个身着玄色僧袍的和尚...... 蝉鸣阵阵中，似有人在他们的耳边呢喃，声音深远悠长——声音深远悠长</text>
+                    <text className='play-intro-info' decode="{{true}}">&nbsp;&nbsp;&nbsp;&nbsp;{this.state.play_info.play_intro}</text>
                   </View>
                 </View>
               </View>

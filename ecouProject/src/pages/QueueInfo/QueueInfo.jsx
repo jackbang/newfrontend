@@ -140,7 +140,7 @@ export default class Queueinfo extends Component {
                     </View>
                   </View>
                   <View className='at-row' style='padding-left:2%;'>
-                    <text className={this.state.isHide? 'play-intro-info play-intro-hide' : 'play-intro-info'}>某个蝉鸣聒噪的夏日，一行七人被莫名聚集在古老的木夕神社。他们被邀请来参与一场莫名其妙的游戏。 而邀请他们前来此处的，正是那个身着玄色僧袍的和尚...... 蝉鸣阵阵中，似有人在他们的耳边呢喃，声音深远悠长——</text>
+                    <text className={this.state.isHide? 'play-intro-info play-intro-hide' : 'play-intro-info'}>{'某个蝉鸣聒噪的夏日，\n一行七人被莫名聚集在古老的木夕神社。他们被邀请来参与一场莫名其妙的游戏。 而邀请他们前来此处的，正是那个身着玄色僧袍的和尚...... 蝉鸣阵阵中，似有人在他们的耳边呢喃，声音深远悠长——'}</text>
                   </View>
                 </View>
               </View>

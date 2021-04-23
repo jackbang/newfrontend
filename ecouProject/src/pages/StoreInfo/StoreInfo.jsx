@@ -39,7 +39,7 @@ class StoreInfo extends Component {
     var pages = getCurrentPages();
     console.log(pages);
     let _this = this;
-    await test_store_info(4).then(function(res) {
+    await test_store_info(7).then(function(res) {
       _this.setState({
         storeInfo: res.data,
         storePic: base+res.data.data.store_logo

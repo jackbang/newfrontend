@@ -10,3 +10,8 @@ export const test_get_pic = (pic_url) => {
     let url = pic_url;
     return request.get(url, '');
 }
+
+export const test_search_plays = (store_id ,search_content) => {
+    let url = '/test/stores/'+store_id+'/plays?title='+search_content
+    return request.get(url, '');
+}

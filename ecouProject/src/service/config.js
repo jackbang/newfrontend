@@ -1,1 +1,1 @@
-export const base = "https://api.ecou.com.cn";
+export const base = "https://121.4.174.114";

@@ -10,17 +10,34 @@ import male_icon from '../../img/male.png'
 import female_icon from '../../img/female.png'
 import scoreActive from '../../img/scoreActive.png'
 
+import {test_search_plays} from '../../service/api'
+import {base} from '../../service/config'
+
 export default class Joinqueueselectinfo extends Component {
 
   constructor () {
     super(...arguments)
     this.state = {
       value: '',
-      tagActiveNum: 0
+      tagActiveNum: 0,
+      plays_num: 0,
+      plays_list: []
     }
   }
 
-  handleCreateQueue (){
+  async componentDidMount () {
+    let _this = this;
+    await test_search_plays(7,this.state.value).then(res => {
+      _this.setState({
+        plays_num: res.data.data.total_play_num,
+        plays_list: res.data.data.plays_list
+      })
+    })
+  }
+
+  handleCreateQueue (item){
+    Taro.setStorage({key:'JoinQueueSelectedPlay', data:item});
+    console.log(Taro.getStorageSync('JoinQueueSelectedPlay'));
     Taro.navigateTo({url: '../JoinQueueComfirmInfo/JoinQueueComfirmInfo'})
   }
 
@@ -53,7 +70,13 @@ export default class Joinqueueselectinfo extends Component {
   }
 
   onActionClick () {
-    console.log('开始搜索')
+    let _this = this;
+    test_search_plays(7,this.state.value).then(res => {
+      _this.setState({
+        plays_num: res.data.data.total_play_num,
+        plays_list: res.data.data.plays_list
+      })
+    })
   }
 
   onTagClick (active){
@@ -83,6 +106,65 @@ export default class Joinqueueselectinfo extends Component {
     var scrollStyleY = {
       height: `${screenHeight_rpx - top_height_rpx - 250}rpx`
     }
+    console.log(this.state.plays_list)
+    
+
+    let play_tab_list = this.state.plays_list.map((item, i)=>{
+      let main_label = "  ";
+      let play_labels_list = item.play_labels.map((label_item, item_idx)=>{
+        if (item_idx==0){
+          main_label = label_item;
+        }
+        return(
+          <text className='play-label-info'>{label_item}</text>
+        )
+      })
+      return(
+      <View className='at-row queue-tab-info'>
+        <View className='at-row play-pic-position-info' style='width:21vw' /* 这里写的是 每个tab上剧本图片的位置*/>
+          <image className='play-pic-info' src={base+item.play_pic}>
+          <text className='play-pic-label-info'>{main_label}</text>
+          </image>
+        </View>
+        <View className='at-col play-intro-info' /*这里的信息是每个tab上 剧本的一些文字信息 */>
+          <View className='at-col play-name-position-info'>{item.play_name}</View>
+          <View className='at-row' /* =- 这一部分是这样，两列，第一列有两行文字，第二列用来放按钮 */>
+            <View className='at-col' /* 第一列 有两行*/>
+              <View className='play-score-position-info'>难度
+                <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%'>
+                  <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
+                  <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-3px;'></image>
+                  <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-6px;'></image>
+                </View>
+              </View>
+              <View className='at-row play-headcount-position-info' /* 这一部分有三列 */>
+                <View className='play-headcount-info'><text decode="{{true}}">{item.play_headcount}人本</text></View>
+                <View className='play-male-position-info'>
+                  <image className='gender-icon-info' src={male_icon}></image>
+                  <text>{item.play_male_num}</text>
+                </View>
+
+                <View className='play-female-position-info'>
+                  <image className='gender-icon-info' src={female_icon}></image>
+                  <text>{item.play_female_num}</text>
+                </View>
+
+              </View>
+            </View>
+            <View className='at-row' style='width:20vw' /*第二列是用来放按钮 */>
+              {/* Button  激活与不激活 具体看taroui中的文档*/}
+              <AtButton type='primary' circle='true' className='join-button' onClick={this.handleCreateQueue.bind(this, item)}>发车</AtButton>
+            </View>
+          </View>
+          <View className='at-col play-label-position-info'>
+            {play_labels_list}
+          </View>
+        </View>
+      </View>
+      )
+    });
+
+
 
     return (
       <View className='JoinQueueSelectInfo'>
@@ -150,149 +232,7 @@ export default class Joinqueueselectinfo extends Component {
             onScrollToUpper={this.onScrollToUpperY.bind(this)} // 使用箭头函数的时候 可以这样写 `onScrollToUpper={this.onScrollToUpper}`
             onScroll={this.onScrollY}
             >
-              <View className='at-row queue-tab-info'>
-                <View className='at-row play-pic-position-info' style='width:21vw' /* 这里写的是 每个tab上剧本图片的位置*/>
-                  <image className='play-pic-info' src={play_pic}>
-                  <text className='play-pic-label-info'>本格</text>
-                  </image>
-                </View>
-                <View className='at-col play-intro-info' /*这里的信息是每个tab上 剧本的一些文字信息 */>
-                  <View className='at-col play-name-position-info'>木兮僧之戏</View>
-                  <View className='at-row' /* =- 这一部分是这样，两列，第一列有两行文字，第二列用来放按钮 */>
-                    <View className='at-col' /* 第一列 有两行*/>
-                      <View className='play-score-position-info'>难度
-                        <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%'>
-                          <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
-                          <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-3px;'></image>
-                          <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-6px;'></image>
-                        </View>
-                      </View>
-                      <View className='at-row play-headcount-position-info' /* 这一部分有三列 */>
-                        <View className='play-headcount-info'><text decode="{{true}}">7人本</text></View>
-                        <View className='play-male-position-info'>
-                          <image className='gender-icon-info' src={male_icon}></image>
-                          <text>4</text>
-                        </View>
-
-                        <View className='play-female-position-info'>
-                          <image className='gender-icon-info' src={female_icon}></image>
-                          <text>3</text>
-                        </View>
-
-                      </View>
-                    </View>
-                    <View className='at-row' style='width:20vw' /*第二列是用来放按钮 */>
-                      {/* Button  激活与不激活 具体看taroui中的文档*/}
-                      <AtButton type='primary' circle='true' className='join-button' onClick={this.handleCreateQueue.bind(this)}>发车</AtButton>
-                    </View>
-                  </View>
-                  <View className='at-col play-label-position-info'>
-                    <text className='play-label-info'>本格</text>
-                    <text className='play-label-info'>现代</text>
-                    <text className='play-label-info'>硬核</text>
-                  </View>
-                </View>
-              </View>
-
-              <View className='at-row queue-tab-info'>
-                <View className='at-row play-pic-position-info' style='width:21vw' /* 这里写的是 每个tab上剧本图片的位置*/>
-                  <image className='play-pic-info' src={play_pic}>
-                  <text className='play-pic-label-info'>本格</text>
-                  </image>
-                </View>
-                <View className='at-col play-intro-info' /*这里的信息是每个tab上 剧本的一些文字信息 */>
-                  <View className='at-col play-name-position-info'>木兮僧之戏</View>
-                  <View className='at-row' /* =- 这一部分是这样，两列，第一列有两行文字，第二列用来放按钮 */>
-                    <View className='at-col' /* 第一列 有两行*/>
-                      <View className='play-score-position-info'>难度
-                        <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%'>
-                          <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
-                          <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-3px;'></image>
-                          <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-6px;'></image>
-                        </View>
-                      </View>
-                      <View className='at-row play-headcount-position-info' /* 这一部分有三列 */>
-                        <View className='play-headcount-info'><text decode="{{true}}">7人本</text></View>
-                        <View className='play-male-position-info'>
-                          <image className='gender-icon-info' src={male_icon}></image>
-                          <text>4</text>
-                        </View>
-
-                        <View className='play-female-position-info'>
-                          <image className='gender-icon-info' src={female_icon}></image>
-                          <text>3</text>
-                        </View>
-
-                      </View>
-                    </View>
-                    <View className='at-row' style='width:20vw' /*第二列是用来放按钮 */>
-                      {/* Button  激活与不激活 具体看taroui中的文档*/}
-                      <AtButton type='primary' circle='true' className='join-button' onClick={this.handleCreateQueue.bind(this)}>发车</AtButton>
-                    </View>
-                  </View>
-                  <View className='at-col play-label-position-info'>
-                    <text className='play-label-info'>本格</text>
-                    <text className='play-label-info'>现代</text>
-                    <text className='play-label-info'>硬核</text>
-                  </View>
-                </View>
-              </View>
-
-              <View className='at-row queue-tab-info'>
-                <View className='at-row play-pic-position-info' style='width:21vw' /* 这里写的是 每个tab上剧本图片的位置*/>
-                  <image className='play-pic-info' src={play_pic}>
-                  <text className='play-pic-label-info'>本格</text>
-                  </image>
-                </View>
-                <View className='at-col play-intro-info' /*这里的信息是每个tab上 剧本的一些文字信息 */>
-                  <View className='at-col play-name-position-info'>木兮僧之戏</View>
-                  <View className='at-row' /* =- 这一部分是这样，两列，第一列有两行文字，第二列用来放按钮 */>
-                    <View className='at-col' /* 第一列 有两行*/>
-                      <View className='play-score-position-info'>难度
-                        <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%'>
-                          <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
-                          <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-3px;'></image>
-                          <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-6px;'></image>
-                        </View>
-                      </View>
-                      <View className='at-row play-headcount-position-info' /* 这一部分有三列 */>
-                        <View className='play-headcount-info'><text decode="{{true}}">7人本</text></View>
-                        <View className='play-male-position-info'>
-                          <image className='gender-icon-info' src={male_icon}></image>
-                          <text>4</text>
-                        </View>
-
-                        <View className='play-female-position-info'>
-                          <image className='gender-icon-info' src={female_icon}></image>
-                          <text>3</text>
-                        </View>
-
-                      </View>
-                    </View>
-                    <View className='at-row' style='width:20vw' /*第二列是用来放按钮 */>
-                      {/* Button  激活与不激活 具体看taroui中的文档*/}
-                      <AtButton type='primary' circle='true' className='join-button' onClick={this.handleCreateQueue.bind(this)}>发车</AtButton>
-                    </View>
-                  </View>
-                  <View className='at-col play-label-position-info'>
-                    <text className='play-label-info'>本格</text>
-                    <text className='play-label-info'>现代</text>
-                    <text className='play-label-info'>硬核</text>
-                  </View>
-                </View>
-              </View>
-
-              <View className='at-row queue-tab-info'>
-              </View>
-
-              <View className='at-row queue-tab-info'>
-              </View>
-
-              <View className='at-row queue-tab-info'>
-              </View>
-
-              <View className='at-row queue-tab-info'>
-              </View>
+              {play_tab_list}
 
               <View className='at-row tab-blank'></View> {/*切记，每个AtTabsPane最下面要加一小条空白，否则阴影部分显示不全，会很难看 */}
 
