@@ -7,6 +7,7 @@
 @import "~taro-ui/dist/style/components/float-layout.scss";
 @import "~taro-ui/dist/style/components/input-number.scss";
 @import "~taro-ui/dist/style/components/switch.scss";
+@import "~taro-ui/dist/style/components/toast.scss";
 
 .queue-info-page{
     size: 100%;
@@ -111,7 +112,7 @@
         border: 0PX none;
         background-color: #c0c0c0;
         margin-left: 10%;
-        margin-top: 4%;
+        margin-top: 2%;
     }
     .at-button--disabled {
         background-color: #A5A5A5;
@@ -309,6 +310,25 @@
             }
         }
     }
+}
+
+.play-intro-info{
+    font-size: 24px;
+    color: #c0c0c0;
+    word-break:break-all;
+    word-wrap: break-word;
+    white-space: pre-line;
+    width: 95%;
+    padding-top: 1%;
+    padding-bottom: 0.5%;
+    display: -webkit-box;
+}
+
+.play-intro-hide{
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .bg-red{

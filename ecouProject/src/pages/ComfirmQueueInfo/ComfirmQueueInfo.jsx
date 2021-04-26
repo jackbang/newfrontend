@@ -64,7 +64,7 @@ export default class Comfirmqueueinfo extends Component {
             >
             <View className='at-row' style='height:100rpx;padding-top:5%;'>
               <View className='at-row play-pic-position-info' style={{width: `${system_width}px`}} /* 这里是用来规划image放置的位置 */> 
-                  <image src={playpic} mode='widthFix' style='width:90%;border-radius:10px;'>
+                  <image src={playpic} style='height:300rpx;width:90%;border-radius:10px;'>
                     <text className='play-pic-label-info'>本格</text>
                   </image>
               </View>

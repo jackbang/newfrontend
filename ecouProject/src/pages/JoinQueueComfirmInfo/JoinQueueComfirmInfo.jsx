@@ -1,7 +1,9 @@
 import { Component } from 'react'
 import Taro from '@tarojs/taro'
 import { View, Text, ScrollView, Switch} from '@tarojs/components'
-import { AtButton, AtNavBar, AtFloatLayout, AtIcon, AtInputNumber, AtSwitch} from 'taro-ui'
+import { AtButton, AtNavBar, AtFloatLayout, AtIcon, AtInputNumber, AtSwitch, AtToast} from 'taro-ui'
+import dayjs from 'dayjs'
+import 'dayjs/locale/zh-cn'
 
 import "taro-ui/dist/style/components/button.scss" // 按需引入
 import './JoinQueueComfirmInfo.scss'
@@ -22,6 +24,7 @@ export default class Joinqueuecomfirminfo extends Component {
   constructor () {
     super(...arguments)
     this.state = {
+      isHide: true,
       timePickerShow: false,
       timeSeleted: '请选择',
       selectArrowShow: true,
@@ -29,12 +32,11 @@ export default class Joinqueuecomfirminfo extends Component {
       female:0,
       roomSelectId:0,
       play_info:{},
-      play_main_label:'  '
+      play_main_label:'  ',
+      show_toast:false
     }
   }
 
-  async componentDidMount () {
-  }
 
   handleNavBack() {
     Taro.navigateBack()
@@ -74,6 +76,7 @@ export default class Joinqueuecomfirminfo extends Component {
 
   handleInitial = value => {
     var str_list = value.slice(5,7)+'月'+value.slice(8,10)+'日'+' '+value.slice(11,16);
+    console.log(`the init time is ${str_list}`)
     this.setState({
       timeSeleted: str_list,
     })
@@ -81,11 +84,24 @@ export default class Joinqueuecomfirminfo extends Component {
 
   handleConfirm = value => {
     var str_list = value.slice(5,7)+'月'+value.slice(8,10)+'日'+' '+value.slice(11,16);
-    console.log('confirm value: ', value)
-    this.setState({
-      timeSeleted: str_list,
-      selectArrowShow: false
-    })
+    if (dayjs(value).isBefore(dayjs())) {
+      this.setState({
+        selectArrowShow: true,
+        timeSeleted: "请选择"
+      });
+      wx.showToast({
+        title:"时间选择有误",
+        icon:"none",
+        duration: 1000,
+        mask: false
+      });
+      this.handleInitial(dayjs().format());
+    }else {
+      this.setState({
+        timeSeleted: str_list,
+        selectArrowShow: false
+      })
+    }
   }
 
   handleCancel = () => {
@@ -98,10 +114,9 @@ export default class Joinqueuecomfirminfo extends Component {
     })
   }
 
-  handleClose(){
+  handleClose() {
     this.setState({
-      timePickerShow: !this.state.timePickerShow,
-      selectArrowShow: false
+      timePickerShow: !this.state.timePickerShow
     })
   }
 
@@ -120,6 +135,12 @@ export default class Joinqueuecomfirminfo extends Component {
   handleRoomSelect (id){
     this.setState({
       roomSelectId: id
+    })
+  }
+
+  handleIntroClick () {
+    this.setState({
+      isHide: !this.state.isHide
     })
   }
 
@@ -187,7 +208,6 @@ export default class Joinqueuecomfirminfo extends Component {
           onScrollToUpper={this.onScrollToUpper.bind(this)} // 使用箭头函数的时候 可以这样写 `onScrollToUpper={this.onScrollToUpper}`
           onScroll={this.onScroll}
           >
-          
             <View className='at-row' style='height:300rpx;padding-top:5%;'>
               <View className='at-row play-pic-position-info' style={{width: `${system_width}px`}} /* 这里是用来规划image放置的位置 */> 
                   <image src={base+this.state.play_info.play_pic} style='height:100%;width:90%;border-radius:10px;'>
@@ -220,15 +240,22 @@ export default class Joinqueuecomfirminfo extends Component {
               <AtButton type='primary' circle='true' className='reselect-play-button' onClick={this.handleNavBack.bind(this)}>重新选择</AtButton>
             </View>
 
-            <View className='at-col' style='background-color:#F9F9F9;margin-top:1%;padding-bottom:1%;padding-bottom:5%;'>
-              <View className='at-row queue-play-intro-tab-info' style='padding-top:2%;padding-bottom:5rpx;'>
-                <View className='at-row'>
-                  <View className='at-col' style='padding: 0 3%;'>
-                    <View className='at-col play-intro-title-info' >剧情简介</View>
-                    <text className='play-intro-info' decode="{{true}}">&nbsp;&nbsp;&nbsp;&nbsp;{this.state.play_info.play_intro}</text>
+            <View className='at-row' style='padding-top:2%'>
+              <View className='at-col' style='background-color:rgba(201, 201, 201, 0.295);margin:0% 3.5%;padding-top:1%;border-radius:5px;'>
+                <View className='at-row' style='position:relative;color:#c0c0c0;'>
+                  <View className='at-row' style='align-items:flex-end;display:flex;justify-content:flex-start;padding-left:2%;font-size:14px;'>剧情简介</View>
+                  <View className='at-row' style='align-items:center;display:flex;justify-content:flex-end;padding-right:2%;font-size:12px;' onClick={this.handleIntroClick.bind(this)}>
+                    {this.state.isHide? '展开' : '收起'}
+                    <AtIcon value={this.state.isHide? 'chevron-down' : 'chevron-up'} size='20'></AtIcon> 
                   </View>
                 </View>
+                <View className='at-row' style='padding-left:2%;'>
+                  <text className={this.state.isHide? 'play-intro-info play-intro-hide' : 'play-intro-info'} decode="{{true}}">&nbsp;&nbsp;&nbsp;&nbsp;{this.state.play_info.play_intro}</text>
+                </View>
               </View>
+            </View>
+
+            <View className='at-col' style='background-color:#F9F9F9;margin-top:1%;padding-bottom:1%;padding-bottom:5%;'>
 
               <View className='at-row queue-play-intro-tab-info' style='padding-top:2%;padding-bottom:5rpx;'>
                 <View className='at-row'>
@@ -248,6 +275,7 @@ export default class Joinqueuecomfirminfo extends Component {
                           onConfirm={this.handleConfirm}
                           onCancel={this.handleCancel}
                         />
+                        
                       </AtFloatLayout>
                     </View>
                     <View className='at-row'>

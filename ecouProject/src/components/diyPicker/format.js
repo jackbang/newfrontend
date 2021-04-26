@@ -11,7 +11,9 @@ const format = (dateTime, dayjs) => {
         now = now.set(item.mode, item.selected[index])
       }
     })
-    dateTime.map(item => {
+    console.log(`dateTime is ${dateTime}`)
+    dateTime.map((item, item_id ) => {
+      
       const key = item.mode
       if (['hour', 'minute', 'second', 'month'].includes(key)) {
         // 默认值跟随当前时间来设定
@@ -24,6 +26,7 @@ const format = (dateTime, dayjs) => {
             else return true
           })
           .map(index => (key === 'month' ? index + 1 : index) + item.unit))
+        console.log(`res is ${res.item}`)
         res.value.push(item.selected
           ? item.selected.findIndex(value => value === now.get(item.mode))
           : ~~(now.get(item.mode) / fields))
