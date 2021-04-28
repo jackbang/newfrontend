@@ -93,6 +93,7 @@ taroUI的css文件。
 
 .store-clock-position-info{
     height:40px;
+    width: 90%;
     padding-left: 2.8%;
     font-size: 24px;
     display:flex;
@@ -107,20 +108,16 @@ taroUI的css文件。
 
 .store-address-position-info{
     height:100px;
-    width: 85%;
-    padding-left: 3%;
+    padding-left: 2.8%;
     padding-top: 1%;
     font-size: 24px;
     display:flex;
     flex-direction:row;
-    align-items:top;
-    word-break:break-all;
-    word-wrap: break-word;
-    white-space: pre-line;
+    align-items:flex-start;
 }
 
 .store-address-pic-info{
-    width:6vw;
+    width:4vw;
     height:4vw;
 }
 

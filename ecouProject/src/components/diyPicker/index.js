@@ -38,7 +38,6 @@ class Index extends Component {
       item: this.state.source.item
     }
     const { onConfirm, mode } = this.props;
-    console.log(this.getDayjs(mode))
     onConfirm&& onConfirm(this.getDayjs(mode));
   }
 

@@ -13,6 +13,7 @@ import memberPic from '../../img/member.png'
 import emptyPic from '../../img/empty.png'
 import femalePic from '../../img/female.png'
 import malePic from '../../img/male.png'
+import {base} from '../../service/config'
 
 export default class Queueinfo extends Component {
 
@@ -21,8 +22,22 @@ export default class Queueinfo extends Component {
     this.state = {
       isHide: true,
       male:0,
-      female:0
+      female:0,
+      queueInfo:{},
+      playInfo:{},
+      infoLoading: true
     }
+  }
+
+  componentDidMount() {
+    var pages = getCurrentPages();
+    let currentPage = pages[pages.length-1];
+    let pages_option = currentPage.options;
+    this.state.queueInfo = Taro.getStorageSync(`queue_id_${pages_option.queueId}`);
+    this.state.playInfo = Taro.getStorageSync(`play_id_${this.state.queueInfo.play_id}`);
+    this.setState({
+      infoLoading: false
+    })
   }
 
   onScrollToUpper() {}
@@ -35,6 +50,7 @@ export default class Queueinfo extends Component {
   }
 
   handleNavBack(){
+    Taro.removeStorage({key: `queue_id_${this.state.queueInfo.queue_id}`});
     Taro.navigateBack()
   }
 
@@ -77,13 +93,20 @@ export default class Queueinfo extends Component {
     var scrollStyle = {
       height: `${windowHeight_rpx-top_height_rpx-150-100}rpx`
     }
-
+    let play_labels_info;
+    if (this.state.infoLoading==false){
+      play_labels_info = this.state.playInfo.play_labels.map((label_item, label_idx)=>{
+        return(
+          <text className='play-label-info'>{label_item}</text>
+        )
+      })
+    }
     return (
       <View className='at-col Queueinfo' style='position:relative'>
-        <image className='queue-info-page' src={playpic} style='width:100vw;height:100vh;position:absolute'></image>
+        <image className='queue-info-page' src={this.state.infoLoading ? playpic:`${base+this.state.playInfo.play_pic}`} style='width:100vw;height:100vh;position:absolute'></image>
         <View className='at-col' style={{padding: `${top_height}px 0px 0px 0px`, position:'absolute', top:0, left:0, width:'100%'}}>
             <AtNavBar className='nav-bar-info'
-              onClickLeftIcon={this.handleNavBack}
+              onClickLeftIcon={this.handleNavBack.bind(this)}
               color='#ffff'
               leftIconType='chevron-left'
             ><View style='color:#fff;font-size:18px'>拼车详情</View></AtNavBar>
@@ -102,12 +125,12 @@ export default class Queueinfo extends Component {
             
               <View className='at-row' style='height:300rpx;padding-top:5%;'>
                 <View className='at-row play-pic-position-info' style={{width: `${system_width}px`}} /* 这里是用来规划image放置的位置 */> 
-                    <image src={playpic}  style='height:100%;width:90%;border-radius:10px;'>
-                      <text className='play-pic-label-info'>本格</text>
+                    <image src={this.state.infoLoading ? playpic:`${base+this.state.playInfo.play_pic}`}  style='height:100%;width:90%;border-radius:10px;'>
+                      <text className='play-pic-label-info'>{this.state.infoLoading ? `...`:this.state.playInfo.play_labels[0]}</text>
                     </image>
                 </View>
                 <View className='at-col' /*这里写的是StoreInfo 文字部分*/> 
-                  <View className='play-name-position-info'>木夕僧之戏</View>
+                  <View className='play-name-position-info'>{this.state.infoLoading ? `加载中`:this.state.playInfo.play_name}</View>
                   <View className='play-score-position-info'>难度
                     <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%'>
                       <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
@@ -117,16 +140,14 @@ export default class Queueinfo extends Component {
                       <image src={scoreDeactive} className='play-score-pic-info' style='position:relative;left:-12px;'></image>
                     </View>
                   </View>
-                  <View className='play-headcount-position-info'>7人本
+                  <View className='play-headcount-position-info'>{this.state.infoLoading ? `0`:this.state.playInfo.play_headcount}人本
                     <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%;'>
-                      <text style='background-color:#c0c0c0;color:rgb(80, 80, 80);padding: 0% 10%;border-radius:3px;'>4男3女</text>
+                      <text style='background-color:#c0c0c0;color:rgb(80, 80, 80);padding: 0% 10%;border-radius:3px;'>{this.state.infoLoading ? `0`:this.state.playInfo.play_male_num}男{this.state.infoLoading ? `0`:this.state.playInfo.play_female_num}女</text>
                     </View>
                   </View>
-                  <View className='play-duration-position-info'>游戏时长约6小时</View>
+                  <View className='play-duration-position-info'>游戏时长约{this.state.infoLoading ? `0`:this.state.playInfo.play_duration}小时</View>
                   <View className='play-label-position-info'>
-                    <text className='play-label-info'>本格</text>
-                    <text className='play-label-info'>硬核</text>
-                    <text className='play-label-info'>现代</text>
+                    {play_labels_info}
                   </View>
                 </View>
               </View>
@@ -140,7 +161,7 @@ export default class Queueinfo extends Component {
                     </View>
                   </View>
                   <View className='at-row' style='padding-left:2%;'>
-                    <text className={this.state.isHide? 'play-intro-info play-intro-hide' : 'play-intro-info'}>{'某个蝉鸣聒噪的夏日，\n一行七人被莫名聚集在古老的木夕神社。他们被邀请来参与一场莫名其妙的游戏。 而邀请他们前来此处的，正是那个身着玄色僧袍的和尚...... 蝉鸣阵阵中，似有人在他们的耳边呢喃，声音深远悠长——'}</text>
+                    <text className={this.state.isHide? 'play-intro-info play-intro-hide' : 'play-intro-info'}>{this.state.infoLoading ? `...`:this.state.playInfo.play_intro}</text>
                   </View>
                 </View>
               </View>
@@ -151,13 +172,13 @@ export default class Queueinfo extends Component {
                   <View className='at-row'>
                     <View className='at-col'>
                       <View className='at-row queue-start-time-info' >开局时间</View>
-                      <View className='at-row' style='font-size:14px;color:#000;height:70%;align-items:center;display:flex;justify-content:flex-start;padding-left:10%;'>4月06日 周二 15:00</View>
+                      <View className='at-row' style='font-size:14px;color:#000;height:70%;align-items:center;display:flex;justify-content:flex-start;padding-left:10%;'>{this.state.infoLoading ? `0`:this.state.queueInfo.queue_end_time}</View>
                     </View>
                   </View>
                   <View className='at-row'>
                     <View className='at-col'>
                       <View className='at-row queue-antigender-info'>是否接受反串</View>
-                      <View className='at-row' style='font-size:14px;color:#000;height:70%;align-items:center;display:flex;justify-content:flex-start;padding-left:10%;'>接受反串</View>
+                      <View className='at-row' style='font-size:14px;color:#000;height:70%;align-items:center;display:flex;justify-content:flex-start;padding-left:10%;'>{this.state.infoLoading ? `0`: this.state.queueInfo.queue_antigender? `接受`:`不接受`}反串</View>
                     </View>
                   </View>
                 </View>
@@ -166,7 +187,7 @@ export default class Queueinfo extends Component {
                   {/*这部分是加入车队的tab */}
                   <View className='at-row' style='height:50rpx;border:0px solid #979797;border-bottom-width:1px;width:90%;margin-left:5%'>
                     <View className='at-col' style='font-size:16px;font-weight:600;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:0%'>加入车队</View>
-                    <View className='at-col' style='font-size:12px;color:#000;align-items:flex-end;display:flex;justify-content:flex-end;padding-right:5%'>定价10元/人</View>
+                    <View className='at-col' style='font-size:12px;color:#000;align-items:flex-end;display:flex;justify-content:flex-end;padding-right:5%'>定价0元/人</View>
                   </View>
                   <View className='at-row' style='height:90rpx;'>
                     <View className='at-col' style='font-size:16px;font-weight:600;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:8%'>男玩家</View>
@@ -203,12 +224,12 @@ export default class Queueinfo extends Component {
                     <View className='at-col' style='font-size:12px;color:#000;align-items:flex-end;display:flex;justify-content:flex-end;padding-right:1%'>等待上车
                       <View className='play-male-position-info'>
                         <image className='gender-icon-info' src={malePic}></image>
-                        <text>2</text>
+                        <text>{this.state.infoLoading ? '0':this.state.playInfo.play_male_num-this.state.queueInfo.queue_current_male_num}</text>
                       </View>
 
                       <View className='play-female-position-info'>
                         <image className='gender-icon-info' src={femalePic}></image>
-                        <text>2</text>
+                        <text>{this.state.infoLoading ? '0':this.state.playInfo.play_female_num-this.state.queueInfo.queue_current_female_num}</text>
                       </View>
                     </View>
                   </View>

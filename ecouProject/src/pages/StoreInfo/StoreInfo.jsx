@@ -3,6 +3,10 @@ import { Component } from 'react'
 import { View, ScrollView} from '@tarojs/components'
 import { AtTabBar, AtSearchBar, AtAvatar, AtTabs, AtTabsPane, AtButton } from 'taro-ui'
 import classNames from 'classnames';
+
+import dayjs from 'dayjs'
+import 'dayjs/locale/zh-cn'
+
 import {setGlobalData, getGlobalData} from "../../globaldata"
 
 import './StoreInfo.scss'
@@ -18,7 +22,7 @@ import first_icon from '../../img/queueList.png'
 import second_icon from '../../img/createQueue.png'
 import third_icon from '../../img/mineInfo.png'
 
-import {test_store_info, test_get_pic} from '../../service/api'
+import {test_store_info, test_queue_info} from '../../service/api'
 import {base} from '../../service/config'
 
 class StoreInfo extends Component {
@@ -31,7 +35,10 @@ class StoreInfo extends Component {
       currentTabBar: 0,
       storeId: 4,
       storeInfo: {},
-      storePic: store_pic
+      storePic: store_pic,
+      queueInfo: {},
+      storeInfoLoading: true,
+      QueueInfoLoading: true
     }
   }
 
@@ -42,9 +49,17 @@ class StoreInfo extends Component {
     await test_store_info(7).then(function(res) {
       _this.setState({
         storeInfo: res.data,
-        storePic: base+res.data.data.store_logo
+        storePic: base+res.data.data.store_logo,
+        storeInfoLoading: false
       })
     })
+    await test_queue_info(7).then(function(res) {
+      _this.setState({
+        queueInfo: res.data,
+        QueueInfoLoading: false
+      })
+    })
+    console.log(this.state.queueInfo)
   }
 
 
@@ -71,9 +86,9 @@ class StoreInfo extends Component {
     })
   }
 
-  handleButtonClick (queueId){
-    console.log(queueId)
-    Taro.navigateTo({url: '../QueueInfo/QueueInfo'})
+  handleButtonClick (queueInfo){
+    Taro.setStorage({key:`queue_id_${queueInfo.queue_id}`, data:queueInfo})
+    Taro.navigateTo({url: `../QueueInfo/QueueInfo?queueId=${queueInfo.queue_id}`})
   }
 
   handleButtonClickCreateQueue (){
@@ -122,6 +137,117 @@ class StoreInfo extends Component {
     var scrollStyle = {
       height: `${windowHeight_rpx - top_height_rpx - 400 - 110 - 180}rpx`
     }
+    let tabInfoList = [];
+    let dayList = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+    tabInfoList.push({title: "今天 "+dayjs().format('MM-DD')});
+    for (let index = 1; index < 14; index++) {
+      tabInfoList.push({title: dayList[index%7]+" "+dayjs().add(index, 'day').format('MM-DD')});
+    }
+    let tabsPaneInfo;
+    if (this.state.QueueInfoLoading == false){
+      var totalTabsNum = 0;
+      tabsPaneInfo = this.state.queueInfo.data.queue_num.map((item, idx) => {
+        if (item==0) {
+          return(
+            <AtTabsPane current={this.state.current} index={idx}>
+              <ScrollView
+                  className='scrollview'
+                  scrollY
+                  scrollWithAnimation
+                  show-scrollbar='false'
+                  scrollTop={scrollTop}
+                  style={scrollStyle}
+                  lowerThreshold={Threshold}
+                  upperThreshold={Threshold}
+                  onScrollToUpper={this.onScrollToUpper.bind(this)} // 使用箭头函数的时候 可以这样写 `onScrollToUpper={this.onScrollToUpper}`
+                  onScroll={this.onScroll}
+                >
+                  <View className='queue-tab-info'>
+                    <View className='at-col' /*注意。想要column排列，有时需要再嵌套一层，可能是因为 queue-tab-info这个css属性影响力 at-col */>
+                    <View style='height:75rpx;font-size:13px;font-weight:550;align-items:flex-end;display:flex;justify-content:center'>当日暂时没有在拼车队哦</View>
+                      <View style='height:75rpx;font-size:13px;font-weight:550;align-items:flex-end;display:flex;justify-content:center'>
+                        <AtButton type='primary' circle='true' className='create-button' onClick={this.handleButtonClickCreateQueue.bind(this)}>我要发车</AtButton>
+                      </View>
+                    <View style='height:75rpx;font-size:13px;font-weight:550;align-items:center;display:flex;justify-content:center'><AtButton type='primary' circle='true' disabled='true' className='create-button'>看看其他日期</AtButton></View>
+                    </View>
+                  </View>
+              </ScrollView>
+            </AtTabsPane>
+          )
+        } else {
+          let tabsView = [];
+          for (let index = totalTabsNum; index < totalTabsNum + item; index++) {
+            Taro.setStorage({key:`play_id_${this.state.queueInfo.data.play_data[index].play_id}`, data:this.state.queueInfo.data.play_data[index]});
+            let play_labels_info = this.state.queueInfo.data.play_data[index].play_labels.map((label_item, label_idx)=>{
+              return(
+                <text className='play-label-info'>{label_item}</text>
+              )
+            })
+            tabsView.push(
+            <View className='at-row queue-tab-info'>
+              {/*  每个tab上信息显示 */}
+              <View className='at-row play-pic-position-info' style='width:21vw' /* 这里写的是 每个tab上剧本图片的位置*/>
+                <image className='play-pic-info' src={base+this.state.queueInfo.data.play_data[index].play_pic}>
+                <text className='play-pic-label-info'>{this.state.queueInfo.data.play_data[index].play_labels[0]}</text>
+                </image>
+              </View>
+              <View className='at-col play-intro-info' /*这里的信息是每个tab上 剧本的一些文字信息 */>
+                <View className='at-col play-name-position-info'>{this.state.queueInfo.data.play_data[index].play_name}</View>
+                <View className='at-row' /* =- 这一部分是这样，两列，第一列有两行文字，第二列用来放按钮 */>
+                  <View className='at-col' /* 第一列 有两行*/>
+                    <View className='at-row play-time-position-info'><text decode="{{true}}">{this.state.queueInfo.data.queue_data[index].queue_end_time}</text></View>
+                    <View className='at-row play-headcount-position-info' /* 这一部分有三列 */>
+                      <View className='play-headcount-info'><text decode="{{true}}">人数：{this.state.queueInfo.data.queue_data[index].queue_current_num}/{this.state.queueInfo.data.play_data[index].play_headcount}</text></View>
+                      <View className='play-male-position-info'>
+                        <image className='gender-icon-info' src={male_icon}></image>
+                        <text>{this.state.queueInfo.data.queue_data[index].queue_current_male_num}/{this.state.queueInfo.data.play_data[index].play_male_num}</text>
+                      </View>
+
+                      <View className='play-female-position-info'>
+                        <image className='gender-icon-info' src={female_icon}></image>
+                        <text>{this.state.queueInfo.data.queue_data[index].queue_current_female_num}/{this.state.queueInfo.data.play_data[index].play_female_num}</text>
+                      </View>
+
+                    </View>
+                  </View>
+                  <View className='at-row' style='width:20vw' /*第二列是用来放按钮 */>
+                    {/* Button  激活与不激活 具体看taroui中的文档*/}
+                    <AtButton type='primary' circle='true' className='join-button' onClick={this.handleButtonClick.bind(this, this.state.queueInfo.data.queue_data[index])}>我要上车</AtButton>
+                  </View>
+                </View>
+                <View className='at-col play-antigender-position-info'>
+                  <text className='play-antigender-info'>{this.state.queueInfo.data.queue_data[index].queue_antigender ? `可反串` : `不可反串`}</text>
+                  {play_labels_info}
+                </View>
+              </View>
+
+            </View>
+            );
+          }
+          totalTabsNum = totalTabsNum + item;
+          return (          
+          <AtTabsPane current={this.state.current} index={idx}>
+            <ScrollView
+              className='scrollview'
+              scrollY
+              scrollWithAnimation
+              show-scrollbar='false'
+              scrollTop={scrollTop}
+              style={scrollStyle}
+              lowerThreshold={Threshold}
+              upperThreshold={Threshold}
+              onScrollToUpper={this.onScrollToUpper.bind(this)} // 使用箭头函数的时候 可以这样写 `onScrollToUpper={this.onScrollToUpper}`
+              onScroll={this.onScroll}
+            >
+            {tabsView}
+            </ScrollView>
+          </AtTabsPane>
+          )
+        }
+      }) 
+    }
+
+    
 
     return (
       <View className='store-info-page' /* 这个标签主要是用来放background*/>
@@ -142,18 +268,18 @@ class StoreInfo extends Component {
               </View>
               <View className='at-col' /*这里写的是StoreInfo 文字部分*/> 
                 <View className='at-col store-name-position-info'>
-                  京剧馆·剧本杀·狼人杀
+                  {this.state.storeInfoLoading? `加载中`:this.state.storeInfo.data.store_name}
                 </View>
                 <View className='at-col store-auth-position-info'>
                   <image className='store-auth-info' src={auth_pic}></image>
                 </View>
                 <View className='at-col store-clock-position-info'>
                   <image className='store-clock-pic-info' src={clock_pic}></image>
-                  <text style='padding-left:2%'> 营业时间：周一至周日11:00-24:00 </text>
+                  <text style='padding-left:2%'> {this.state.storeInfoLoading? `加载中`:this.state.storeInfo.data.store_info} </text>
                 </View>
                 <View className='at-col store-address-position-info'>
                   <image className='store-address-pic-info' src={position_icon}></image>
-                  <text style='padding-left:2%'>上海市浦东新区川和路333弄万科翡翠公园6期31号楼501 </text>
+                  <text style='padding-left:1.5%;width:80%;word-break:break-all;word-wrap: break-word;white-space: pre-line;'>{this.state.storeInfoLoading? `加载中`:this.state.storeInfo.data.store_address} </text>
                 </View>
               </View>
             </View>
@@ -164,16 +290,10 @@ class StoreInfo extends Component {
             <AtTabs /* TODO: 这部分需要重构，红点没实现，列表不同日期显示不同灰度也没实现 */
               current={this.state.current}
               scroll
-              tabList={[
-                { title: '今天 04-10', queueNum: 1},
-                { title: '周日 04-11', queueNum: 0},
-                { title: '周一 04-12', queueNum: 0},
-                { title: '周二 04-13', queueNum: 1},
-                { title: '周三 04-14', queueNum: 1},
-                { title: '周四 04-15', queueNum: 1}
-              ]}
+              tabList={tabInfoList}
               onClick={this.handleClick.bind(this)}>
-              <AtTabsPane current={this.state.current} index={0}>
+              {tabsPaneInfo}
+              <AtTabsPane current={this.state.current} index={99}>
                 <ScrollView
                   className='scrollview'
                   scrollY
@@ -268,42 +388,6 @@ class StoreInfo extends Component {
                   <View className='at-row queue-tab-info'></View>
                   <View className='at-row tab-blank'></View> {/*切记，每个AtTabsPane最下面要加一小条空白，否则阴影部分显示不全，会很难看 */}
                 </ScrollView>
-              </AtTabsPane>
-              <AtTabsPane current={this.state.current} index={1}>
-                <ScrollView
-                    className='scrollview'
-                    scrollY
-                    scrollWithAnimation
-                    show-scrollbar='false'
-                    scrollTop={scrollTop}
-                    style={scrollStyle}
-                    lowerThreshold={Threshold}
-                    upperThreshold={Threshold}
-                    onScrollToUpper={this.onScrollToUpper.bind(this)} // 使用箭头函数的时候 可以这样写 `onScrollToUpper={this.onScrollToUpper}`
-                    onScroll={this.onScroll}
-                  >
-                    <View className='queue-tab-info'>
-                      <View className='at-col' /*注意。想要column排列，有时需要再嵌套一层，可能是因为 queue-tab-info这个css属性影响力 at-col */>
-                      <View style='height:75rpx;font-size:13px;font-weight:550;align-items:flex-end;display:flex;justify-content:center'>当日暂时没有在拼车队哦</View>
-                        <View style='height:75rpx;font-size:13px;font-weight:550;align-items:flex-end;display:flex;justify-content:center'>
-                          <AtButton type='primary' circle='true' className='create-button' onClick={this.handleButtonClickCreateQueue.bind(this)}>我要发车</AtButton>
-                        </View>
-                      <View style='height:75rpx;font-size:13px;font-weight:550;align-items:center;display:flex;justify-content:center'><AtButton type='primary' circle='true' disabled='true' className='create-button'>看看其他日期</AtButton></View>
-                      </View>
-                    </View>
-                </ScrollView>
-              </AtTabsPane>
-              <AtTabsPane current={this.state.current} index={2}>
-                <View style='font-size:18px;text-align:center;height:100px;'>标签页三的内容</View>
-              </AtTabsPane>
-              <AtTabsPane current={this.state.current} index={3}>
-                <View style='font-size:18px;text-align:center;height:100px;'>标签页四的内容</View>
-              </AtTabsPane>
-              <AtTabsPane current={this.state.current} index={4}>
-                <View style='font-size:18px;text-align:center;height:100px;'>标签页五的内容</View>
-              </AtTabsPane>
-              <AtTabsPane current={this.state.current} index={5}>
-                <View style='font-size:18px;text-align:center;height:100px;'>标签页六的内容</View>
               </AtTabsPane>
             </AtTabs>
           </View>
