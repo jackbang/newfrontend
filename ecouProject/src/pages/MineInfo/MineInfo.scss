@@ -5,38 +5,35 @@
 @import "~taro-ui/dist/style/components/tabs.scss";
 @import "~taro-ui/dist/style/components/tab-bar.scss";
 @import "~taro-ui/dist/style/components/badge.scss";
-
-.nav-bar-info{
-    &.at-nav-bar{
-        background-color:rgba(255, 255, 255, 0);
+@import "~taro-ui/dist/style/components/button.scss";
+.nav-bar-info {
+    &.at-nav-bar {
+        background-color: rgba(255, 255, 255, 0);
     }
-    .at-icon{
-        color:#fff;
+    .at-icon {
+        color: #fff;
     }
 }
 
-.tabs-info{
-    width:750rpx;
+.tabs-info {
+    width: 750rpx;
     position: relative;
-    top:20rpx;
+    top: 20rpx;
     //right:200rpx;
     margin-bottom: 20rpx;
-
-    .at-tabs__item{
-        right:200rpx;
+    .at-tabs__item {
+        right: 200rpx;
         background-color: #fff;
         width: 100rpx;
         font-size: 36px;
         padding: 10px $spacing-h-lg;
         font-weight: 520;
     }
-
-    .at-tabs__item--active{
+    .at-tabs__item--active {
         color: #FCA62F;
-        font-weight:bold;
+        font-weight: bold;
     }
-
-    .at-tabs__item-underline{
+    .at-tabs__item-underline {
         left: 27%;
         bottom: 8%;
         width: 50%;
@@ -44,18 +41,16 @@
         background-color: #FCA62F;
         border-radius: 5px;
     }
-
-    .at-tabs__header{
+    .at-tabs__header {
         height: 80rpx;
     }
-
-    .at-tabs__underline{
+    .at-tabs__underline {
         background-color: #ffffff00;
     }
 }
 
-.queue-tab-info{
-    display:flex;
+.queue-tab-info {
+    display: flex;
     height: 230px;
     width: 90%;
     margin-left: 5%;
@@ -67,20 +62,20 @@
     box-shadow: 0px 8px 8px #979797;
 }
 
-.play-pic-info{
-    width:18.5vw;
-    height:26vw;
+.play-pic-info {
+    width: 18.5vw;
+    height: 26vw;
     border-radius: 10%;
 }
 
-.play-pic-position-info{
+.play-pic-position-info {
     display: flex;
     justify-content: flex-end;
     align-items: center;
     position: relative;
 }
 
-.play-pic-label-info{
+.play-pic-label-info {
     position: absolute;
     font-size: 18px;
     color: #fff;
@@ -93,38 +88,38 @@
     border-radius: 15%;
 }
 
-.play-intro-info{
+.play-intro-info {
     margin-left: 5%;
 }
 
-.play-name-position-info{
+.play-name-position-info {
     height: 60px;
     font-size: 36px;
-    font-weight:bold;
-    display:flex;
-    align-items:flex-end;
+    font-weight: bold;
+    display: flex;
+    align-items: flex-end;
 }
 
-.play-time-position-info{
+.play-time-position-info {
     height: 55px;
     font-size: 24px;
-    font-weight:bold;
-    display:flex;
-    align-items:flex-end;
+    font-weight: bold;
+    display: flex;
+    align-items: flex-end;
 }
 
-.play-headcount-position-info{
+.play-headcount-position-info {
     height: 50px;
 }
 
-.play-headcount-info{
+.play-headcount-info {
     font-size: 24px;
-    font-weight:bold;
-    display:flex;
-    align-items:flex-end;
+    font-weight: bold;
+    display: flex;
+    align-items: flex-end;
 }
 
-.play-male-position-info{
+.play-male-position-info {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -138,7 +133,7 @@
     border-radius: 10px;
 }
 
-.play-female-position-info{
+.play-female-position-info {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -152,9 +147,9 @@
     border-radius: 10px;
 }
 
-.gender-icon-info{
-    width:3vw;
-    height:3vw;
+.gender-icon-info {
+    width: 3vw;
+    height: 3vw;
 }
 
 .join-button {
@@ -170,21 +165,35 @@
     }
 }
 
-.play-store-position-info{
+.play-store-position-info {
     height: 55px;
     font-size: 24px;
-    font-weight:bold;
-    display:flex;
-    align-items:center;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
 }
 
-.tab-bar-info{
-    &.at-tab-bar{
-        height:180rpx;
+.tab-bar-info {
+    &.at-tab-bar {
+        height: 180rpx;
         justify-content: center;
         align-items: center;
     }
-    .at-tab-bar__inner-img{
+    .at-tab-bar__inner-img {
         height: 100rpx;
+    }
+}
+
+.login-button {
+    align-items: center;
+    height: 30%;
+    width: 30%;
+    font-size: 30px;
+    border: 0PX none;
+    background-color: #FCA62F;
+    &.at-button--disabled {
+        background-color: #ffffff00;
+        color: #000;
+        border: 1PX solid #000;
     }
 }

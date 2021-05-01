@@ -46,14 +46,14 @@ class StoreInfo extends Component {
     var pages = getCurrentPages();
     console.log(pages);
     let _this = this;
-    await test_store_info(7).then(function(res) {
+    await test_store_info(1).then(function(res) {
       _this.setState({
         storeInfo: res.data,
         storePic: base+res.data.data.store_logo,
         storeInfoLoading: false
       })
     })
-    await test_queue_info(7).then(function(res) {
+    await test_queue_info(1).then(function(res) {
       _this.setState({
         queueInfo: res.data,
         QueueInfoLoading: false
