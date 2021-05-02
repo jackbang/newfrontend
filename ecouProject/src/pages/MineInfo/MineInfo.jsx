@@ -3,6 +3,9 @@ import Taro from '@tarojs/taro'
 import { View, Text, ScrollView } from '@tarojs/components'
 import { AtButton, AtNavBar, AtTabs, AtTabsPane, AtTabBar} from 'taro-ui'
 
+import dayjs from 'dayjs'
+import 'dayjs/locale/zh-cn'
+
 import "taro-ui/dist/style/components/button.scss" // 按需引入
 import './MineInfo.scss'
 
@@ -29,6 +32,13 @@ export default class Mineinfo extends Component {
       clickWhat: 0, //0 is tab, 1 is but
       userInfo: {},
       isLogin: false
+    }
+  }
+
+  componentWillMount () {
+    this.state.userInfo = Taro.getStorageSync(`user_info`)
+    if (this.state.userInfo) {
+      this.state.isLogin = true
     }
   }
 
@@ -98,6 +108,7 @@ export default class Mineinfo extends Component {
       desc:'用于参与剧本杀拼桌',
       success: (res) => {
         console.log(res);
+        var timeToken = (dayjs().unix() + 1000 ) * 2;
         userInfo = {
           encryptedData: res.encryptedData,
           iv: res.iv,
@@ -105,17 +116,24 @@ export default class Mineinfo extends Component {
           signature: res.signature,
           code: code,
           userInfo: res.userInfo,
-          systemInfo: wx.getSystemInfoSync()
+          systemInfo: wx.getSystemInfoSync(),
+          watermark:{
+            appId: wx.getAccountInfoSync().miniProgram.appId,
+            token: timeToken
+          }
         }
-        this.setState({
-          userInfo: userInfo.userInfo,
-          isLogin: true
-        })
-        console.log(userInfo);
+        console.log(userInfo)
         test_wechat_login(userInfo).then((result)=>{
-          console.log(result);
+          console.log(result.data.data.sessionId);
+          userInfo.userInfo['sessionId'] = result.data.data.sessionId;
+          this.state.userInfo = userInfo.userInfo;
+          Taro.setStorage({key:`user_info`, data:userInfo.userInfo,
+            success: 
+              this.setState({
+                isLogin: true
+              })
+          });
         });
-        
       }
     })
     
@@ -183,7 +201,7 @@ export default class Mineinfo extends Component {
       login_tab = [];
     }
 
-
+    console.log(this.state.userInfo)
     return (
       <View className='MineInfo'>
         <image mode='widthFix' src={background_img} style='width:100vw;position:absolute;'></image>

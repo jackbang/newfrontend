@@ -86,9 +86,23 @@ class StoreInfo extends Component {
     })
   }
 
+
   handleButtonClick (queueInfo){
-    Taro.setStorage({key:`queue_id_${queueInfo.queue_id}`, data:queueInfo})
-    Taro.navigateTo({url: `../QueueInfo/QueueInfo?queueId=${queueInfo.queue_id}`})
+    let userInfo = Taro.getStorageSync(`user_info`);
+    if (userInfo) {
+      Taro.setStorage({key:`queue_id_${queueInfo.queue_id}`, data:queueInfo});
+      Taro.navigateTo({url: `../QueueInfo/QueueInfo?queueId=${queueInfo.queue_id}`});
+    } else {
+      wx.showToast({
+        title:"请登录",
+        icon:"none",
+        duration: 1000,
+        mask: false
+      });
+      setTimeout(function () {
+        Taro.navigateTo({url: '../MineInfo/MineInfo'})
+      }, 500)
+    }
   }
 
   handleButtonClickCreateQueue (){
@@ -177,12 +191,30 @@ class StoreInfo extends Component {
         } else {
           let tabsView = [];
           for (let index = totalTabsNum; index < totalTabsNum + item; index++) {
+            let tab_male_female_display = [];
             Taro.setStorage({key:`play_id_${this.state.queueInfo.data.play_data[index].play_id}`, data:this.state.queueInfo.data.play_data[index]});
             let play_labels_info = this.state.queueInfo.data.play_data[index].play_labels.map((label_item, label_idx)=>{
               return(
                 <text className='play-label-info'>{label_item}</text>
               )
             })
+            if (this.state.queueInfo.data.play_data[index].play_female_num == 999 || this.state.queueInfo.data.play_data[index].play_male_num == 999){
+              tab_male_female_display = [];
+            } else {
+              tab_male_female_display.push(
+                <View className='play-male-position-info'>
+                  <image className='gender-icon-info' src={male_icon}></image>
+                  <text>{this.state.queueInfo.data.queue_data[index].queue_current_male_num}/{this.state.queueInfo.data.play_data[index].play_male_num}</text>
+                </View>
+              )
+              tab_male_female_display.push(
+                <View className='play-female-position-info'>
+                  <image className='gender-icon-info' src={female_icon}></image>
+                  <text>{this.state.queueInfo.data.queue_data[index].queue_current_female_num}/{this.state.queueInfo.data.play_data[index].play_female_num}</text>
+                </View>
+              )
+            }
+
             tabsView.push(
             <View className='at-row queue-tab-info'>
               {/*  每个tab上信息显示 */}
@@ -198,15 +230,7 @@ class StoreInfo extends Component {
                     <View className='at-row play-time-position-info'><text decode="{{true}}">{this.state.queueInfo.data.queue_data[index].queue_end_time}</text></View>
                     <View className='at-row play-headcount-position-info' /* 这一部分有三列 */>
                       <View className='play-headcount-info'><text decode="{{true}}">人数：{this.state.queueInfo.data.queue_data[index].queue_current_num}/{this.state.queueInfo.data.play_data[index].play_headcount}</text></View>
-                      <View className='play-male-position-info'>
-                        <image className='gender-icon-info' src={male_icon}></image>
-                        <text>{this.state.queueInfo.data.queue_data[index].queue_current_male_num}/{this.state.queueInfo.data.play_data[index].play_male_num}</text>
-                      </View>
-
-                      <View className='play-female-position-info'>
-                        <image className='gender-icon-info' src={female_icon}></image>
-                        <text>{this.state.queueInfo.data.queue_data[index].queue_current_female_num}/{this.state.queueInfo.data.play_data[index].play_female_num}</text>
-                      </View>
+                      {tab_male_female_display}
 
                     </View>
                   </View>

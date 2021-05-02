@@ -13,6 +13,8 @@ import memberPic from '../../img/member.png'
 import emptyPic from '../../img/empty.png'
 import femalePic from '../../img/female.png'
 import malePic from '../../img/male.png'
+
+import {test_queue_players_info} from '../../service/api'
 import {base} from '../../service/config'
 
 export default class Queueinfo extends Component {
@@ -22,19 +24,30 @@ export default class Queueinfo extends Component {
     this.state = {
       isHide: true,
       male:0,
+      maleIdx:[],
       female:0,
+      femaleIdx:[],
+      totalNum:0,
       queueInfo:{},
       playInfo:{},
+      userInfo:{},
+      playerInfo:[],
       infoLoading: true
-    }
+    },
+    this.players_info = []
   }
 
-  componentDidMount() {
+  componentWillMount() {
     var pages = getCurrentPages();
     let currentPage = pages[pages.length-1];
     let pages_option = currentPage.options;
     this.state.queueInfo = Taro.getStorageSync(`queue_id_${pages_option.queueId}`);
     this.state.playInfo = Taro.getStorageSync(`play_id_${this.state.queueInfo.play_id}`);
+    this.state.userInfo = Taro.getStorageSync(`user_info`);
+    let _this = this;
+    test_queue_players_info(this.state.queueInfo.queue_id).then(function(res) {
+      _this.state.playerInfo = res.data.data.player_info
+    })
     this.setState({
       infoLoading: false
     })
@@ -64,15 +77,67 @@ export default class Queueinfo extends Component {
     })
   }
 
+  handleJoinPlayerList (pop_idx) {
+    for (let index = 0; index < this.state.maleIdx.length; index++) {
+      if (this.state.maleIdx[index] > pop_idx){
+        this.state.maleIdx[index] = this.state.maleIdx[index] - 1;
+      }
+    }
+    for (let index = 0; index < this.state.femaleIdx.length; index++) {
+      if (this.state.femaleIdx[index] > pop_idx){
+        this.state.femaleIdx[index] = this.state.femaleIdx[index] - 1;
+      }
+    }
+  }
+
   handleChangeMale (male) {
+    if (male > this.state.male) {
+      var tempMaleIdx = this.state.playerInfo.push({
+        player_name: this.state.userInfo.nickName,
+        player_gender: 1,
+        player_pic: this.state.userInfo.avatarUrl
+      })
+      this.state.maleIdx.push(tempMaleIdx)
+    } else {
+      var tampPopIdx = this.state.maleIdx.pop()-1;
+      this.handleJoinPlayerList (tampPopIdx);
+      this.state.playerInfo.splice(tampPopIdx,1)
+    }
     this.setState({
-      male
+      male:male
     })
   }
 
   handleChangeFemale (female) {
+    if (female > this.state.female) {
+      var tempFemaleIdx = this.state.playerInfo.push({
+        player_name: this.state.userInfo.nickName,
+        player_gender: 0,
+        player_pic: this.state.userInfo.avatarUrl
+      })
+      this.state.femaleIdx.push(tempFemaleIdx)
+    } else {
+      var tampPopIdx = this.state.femaleIdx.pop()-1;
+      this.handleJoinPlayerList (tampPopIdx);
+      this.state.playerInfo.splice(tampPopIdx,1)
+    }
     this.setState({
-      female
+      female:female
+    })
+  }
+
+  handleChangeTotal (totalNum) {
+    if (totalNum > this.state.totalNum) {
+      var tempFemaleIdx = this.state.playerInfo.push({
+        player_name: this.state.userInfo.nickName,
+        player_gender: 3,
+        player_pic: this.state.userInfo.avatarUrl
+      })
+    } else {
+      this.state.playerInfo.pop()
+    }
+    this.setState({
+      totalNum: totalNum
     })
   }
 
@@ -94,13 +159,117 @@ export default class Queueinfo extends Component {
       height: `${windowHeight_rpx-top_height_rpx-150-100}rpx`
     }
     let play_labels_info;
+    let select_player_tab_info=[];
+    let male_female_display = [];
+    let play_info_male_female_display = [];
     if (this.state.infoLoading==false){
       play_labels_info = this.state.playInfo.play_labels.map((label_item, label_idx)=>{
         return(
           <text className='play-label-info'>{label_item}</text>
         )
       })
+
+      console.log(this.state.playerInfo.length)
+      this.players_info = [];
+      for (let player_index = 0; player_index < this.state.playInfo.play_headcount; player_index++) {
+        if (player_index < this.state.playerInfo.length) {
+          this.players_info.push(
+            <View className='at-row' style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative'>
+              <image src={this.state.playerInfo[player_index].player_pic} style='height:15vw;width:15vw;border-radius:100%;background-color:gray;'></image>
+              <View style='width:15vw;position:absolute;top:19vw;align-items:flex-end;display:flex;justify-content:center;'>
+                <image src={this.state.playerInfo[player_index].player_gender==3? null:this.state.playerInfo[player_index].player_gender? malePic:femalePic} style='height:4vw;width:4vw;'></image>
+                <text style='width:12vw;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;'>{this.state.playerInfo[player_index].player_name}</text>
+              </View>
+            </View>
+          )
+        } else {
+          this.players_info.push(
+            <View className='at-row' style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative'>
+              <image src={emptyPic} style='height:15vw;width:15vw;border-radius:100%;background-color:gray;'></image>
+              <View style='width:15vw;position:absolute;top:19vw;align-items:flex-end;display:flex;justify-content:center;'>
+                <text style='font-size:12px'>等待加入</text>
+              </View>
+            </View>
+          )
+        }
+      }
+
+      if (this.state.playInfo.play_male_num == 999 || this.state.playInfo.play_female_num == 999){
+        male_female_display= [];
+        play_info_male_female_display = [];
+        select_player_tab_info.push(
+          <View className='at-row' style='height:90rpx;'>
+            <View className='at-col' style='font-size:16px;font-weight:600;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:8%'>玩家数</View>
+            <View className='at-col' style='align-items:center;display:flex;justify-content:flex-end;padding-right:10%'>
+              <AtInputNumber
+                className ='queue-join-input-number'
+                min={0}
+                max={this.state.infoLoading? 0:this.state.playInfo.play_headcount-this.state.queueInfo.queue_current_num}
+                step={1}
+                value={this.state.totalNum}
+                onChange={this.handleChangeTotal.bind(this)}
+              />
+            </View>
+          </View>
+        )
+      } else {
+        play_info_male_female_display.push(
+          <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%;'>
+            <text style='background-color:#c0c0c0;color:rgb(80, 80, 80);padding: 0% 10%;border-radius:3px;'>{this.state.infoLoading ? `0`:this.state.playInfo.play_male_num}男{this.state.infoLoading ? `0`:this.state.playInfo.play_female_num}女</text>
+          </View>
+        )
+
+        male_female_display.push(
+          <View className='at-col' style='font-size:12px;color:#000;align-items:flex-end;display:flex;justify-content:flex-end;padding-right:1%'>等待上车
+            <View className='play-male-position-info'>
+              <image className='gender-icon-info' src={malePic}></image>
+              <text>{this.state.infoLoading ? '0':this.state.playInfo.play_male_num-this.state.queueInfo.queue_current_male_num}</text>
+            </View>
+
+            <View className='play-female-position-info'>
+              <image className='gender-icon-info' src={femalePic}></image>
+              <text>{this.state.infoLoading ? '0':this.state.playInfo.play_female_num-this.state.queueInfo.queue_current_female_num}</text>
+            </View>
+          </View>
+        )
+
+        select_player_tab_info.push(
+          <View className='at-row' style='height:90rpx;'>
+            <View className='at-col' style='font-size:16px;font-weight:600;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:8%'>男玩家</View>
+            <View className='at-col' style='align-items:center;display:flex;justify-content:flex-end;padding-right:10%'>
+              <AtInputNumber
+                className ='queue-join-input-number'
+                min={0}
+                max={this.state.infoLoading? 0:this.state.playInfo.play_male_num}
+                step={1}
+                value={this.state.male}
+                onChange={this.handleChangeMale.bind(this)}
+              />
+            </View>
+          </View>
+        )
+        select_player_tab_info.push(
+          <View className='at-row' style='height:90rpx;'>
+            <View className='at-col' style='font-size:16px;font-weight:600;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:8%'>女玩家</View>
+            <View className='at-col' style='align-items:center;display:flex;justify-content:flex-end;padding-right:10%'>
+              <AtInputNumber
+                className ='queue-join-input-number'
+                min={0}
+                max={this.state.infoLoading? 0:this.state.playInfo.play_female_num}
+                step={1}
+                value={this.state.female}
+                onChange={this.handleChangeFemale.bind(this)}
+              />
+            </View>
+          </View>
+        )
+      }
     }
+
+    
+
+    
+
     return (
       <View className='at-col Queueinfo' style='position:relative'>
         <image className='queue-info-page' src={this.state.infoLoading ? playpic:`${base+this.state.playInfo.play_pic}`} style='width:100vw;height:100vh;position:absolute'></image>
@@ -141,9 +310,7 @@ export default class Queueinfo extends Component {
                     </View>
                   </View>
                   <View className='play-headcount-position-info'>{this.state.infoLoading ? `0`:this.state.playInfo.play_headcount}人本
-                    <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%;'>
-                      <text style='background-color:#c0c0c0;color:rgb(80, 80, 80);padding: 0% 10%;border-radius:3px;'>{this.state.infoLoading ? `0`:this.state.playInfo.play_male_num}男{this.state.infoLoading ? `0`:this.state.playInfo.play_female_num}女</text>
-                    </View>
+                    {play_info_male_female_display}
                   </View>
                   <View className='play-duration-position-info'>游戏时长约{this.state.infoLoading ? `0`:this.state.playInfo.play_duration}小时</View>
                   <View className='play-label-position-info'>
@@ -183,94 +350,22 @@ export default class Queueinfo extends Component {
                   </View>
                 </View>
 
-                <View className='at-col queue-join-tab-info' style='padding-top:2%;height:260rpx'>
+                <View className='at-col queue-join-tab-info' style='padding-top:2%;'>
                   {/*这部分是加入车队的tab */}
                   <View className='at-row' style='height:50rpx;border:0px solid #979797;border-bottom-width:1px;width:90%;margin-left:5%'>
                     <View className='at-col' style='font-size:16px;font-weight:600;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:0%'>加入车队</View>
                     <View className='at-col' style='font-size:12px;color:#000;align-items:flex-end;display:flex;justify-content:flex-end;padding-right:5%'>定价0元/人</View>
                   </View>
-                  <View className='at-row' style='height:90rpx;'>
-                    <View className='at-col' style='font-size:16px;font-weight:600;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:8%'>男玩家</View>
-                    <View className='at-col' style='align-items:center;display:flex;justify-content:flex-end;padding-right:10%'>
-                      <AtInputNumber
-                        className ='queue-join-input-number'
-                        min={0}
-                        max={10}
-                        step={1}
-                        value={this.state.male}
-                        onChange={this.handleChangeMale.bind(this)}
-                      />
-                    </View>
-                  </View>
-                  <View className='at-row' style='height:90rpx;'>
-                    <View className='at-col' style='font-size:16px;font-weight:600;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:8%'>女玩家</View>
-                    <View className='at-col' style='align-items:center;display:flex;justify-content:flex-end;padding-right:10%'>
-                      <AtInputNumber
-                        className ='queue-join-input-number'
-                        min={0}
-                        max={10}
-                        step={1}
-                        value={this.state.female}
-                        onChange={this.handleChangeFemale.bind(this)}
-                      />
-                    </View>
-                  </View>
+                  {select_player_tab_info}
                 </View>
 
                 <View className='at-row at-row--wrap queue-member-tab-info' style='padding-top:2%;padding-bottom:4%;'>
                   {/* 车队成员列表 */}
                   <View className='at-row' style='height:50rpx;border:0px solid #979797;border-bottom-width:1px;width:90%;margin-left:5%'>
                     <View className='at-col' style='font-size:16px;font-weight:600;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:0%'>车队成员</View>
-                    <View className='at-col' style='font-size:12px;color:#000;align-items:flex-end;display:flex;justify-content:flex-end;padding-right:1%'>等待上车
-                      <View className='play-male-position-info'>
-                        <image className='gender-icon-info' src={malePic}></image>
-                        <text>{this.state.infoLoading ? '0':this.state.playInfo.play_male_num-this.state.queueInfo.queue_current_male_num}</text>
-                      </View>
-
-                      <View className='play-female-position-info'>
-                        <image className='gender-icon-info' src={femalePic}></image>
-                        <text>{this.state.infoLoading ? '0':this.state.playInfo.play_female_num-this.state.queueInfo.queue_current_female_num}</text>
-                      </View>
-                    </View>
+                    {male_female_display}
                   </View>
-                  <View className='at-row' style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative'>
-                    <image src={memberPic} style='height:15vw;width:15vw;border-radius:100%;background-color:gray;'></image>
-                    <View style='width:15vw;position:absolute;top:19vw;align-items:flex-end;display:flex;justify-content:center;'>
-                      <image src={femalePic} style='height:4vw;width:4vw;'></image>
-                      <text style='font-size:12px'>绚姐</text>
-                    </View>
-                  </View>
-                  <View className='at-row' style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative'>
-                    <image src={memberPic} style='height:15vw;width:15vw;border-radius:100%;background-color:gray;'></image>
-                    <View style='width:15vw;position:absolute;top:19vw;align-items:flex-end;display:flex;justify-content:center;'>
-                      <image src={malePic} style='height:4vw;width:4vw;'></image>
-                      <text style='font-size:12px'>周哥</text>
-                    </View>
-                  </View>
-                  <View className='at-row' style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative'>
-                    <image src={emptyPic} style='height:15vw;width:15vw;border-radius:100%;background-color:gray;'></image>
-                    <View style='width:15vw;position:absolute;top:19vw;align-items:flex-end;display:flex;justify-content:center;'>
-                      <text style='font-size:12px'>等待加入</text>
-                    </View>
-                  </View>
-                  <View className='at-row' style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative'>
-                    <image src={emptyPic} style='height:15vw;width:15vw;border-radius:100%;background-color:gray;'></image>
-                    <View style='width:15vw;position:absolute;top:19vw;align-items:flex-end;display:flex;justify-content:center;'>
-                      <text style='font-size:12px'>等待加入</text>
-                    </View>
-                  </View>
-                  <View className='at-row' style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative'>
-                    <image src={emptyPic} style='height:15vw;width:15vw;border-radius:100%;background-color:gray;'></image>
-                    <View style='width:15vw;position:absolute;top:19vw;align-items:flex-end;display:flex;justify-content:center;'>
-                      <text style='font-size:12px'>等待加入</text>
-                    </View>
-                  </View>
-                  <View className='at-row' style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative'>
-                    <image src={emptyPic} style='height:15vw;width:15vw;border-radius:100%;background-color:gray;'></image>
-                    <View style='width:15vw;position:absolute;top:19vw;align-items:flex-end;display:flex;justify-content:center;'>
-                      <text style='font-size:12px'>等待加入</text>
-                    </View>
-                  </View>
+                  {this.players_info}
 
 
                 </View>

@@ -26,3 +26,8 @@ export const test_wechat_login = (user_data) => {
     let url = '/test/onlogin'
     return request.post(url, user_data, 'application/json')
 }
+
+export const test_queue_players_info = (queue_id) => {
+    let url = `/test/queues/${queue_id}/players`
+    return request.get(url, '')
+}

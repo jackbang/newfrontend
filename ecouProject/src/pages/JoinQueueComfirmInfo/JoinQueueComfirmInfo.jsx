@@ -33,8 +33,19 @@ export default class Joinqueuecomfirminfo extends Component {
       roomSelectId:0,
       play_info:{},
       play_main_label:'  ',
+      infoLoading: true,
       show_toast:false
     }
+  }
+
+  componentDidMount() {
+    var pages = getCurrentPages();
+    let currentPage = pages[pages.length-1];
+    let pages_option = currentPage.options;
+    this.setState({
+      play_info: Taro.getStorageSync(`play_id_${pages_option.playId}`),
+      infoLoading: false
+    })
   }
 
 
@@ -145,8 +156,6 @@ export default class Joinqueuecomfirminfo extends Component {
   }
 
   render () {
-
-    this.state.play_info = Taro.getStorageSync('JoinQueueSelectedPlay');
     
     const dateTime = [
       // {mode: 'year', unit: '年', start: '2020'},
@@ -155,7 +164,7 @@ export default class Joinqueuecomfirminfo extends Component {
       // {mode: 'day', start: '21', duration: 30, unit: '日' },
       // { mode: 'hour', unit: ':00', format: 'H:s', selected: [8, 12, 16] },
       { mode: 'hour', unit: '时' },
-      {mode: 'minute', fields: 5, unit: '分'},
+      {mode: 'minute', fields: 15, unit: '分'},
       // {mode: 'second', fields: 30, unit: '秒'},
     ]
 
@@ -177,19 +186,22 @@ export default class Joinqueuecomfirminfo extends Component {
     var scrollStyleX = {
       width: '86vw'
     }
-    console.log(this.state.play_info)
-    let labels_list = this.state.play_info.play_labels.map((label_item, label_idx) => {
-      if (label_idx == 0) {
-        this.state.play_main_label=label_item;
-      }
-      return (
-        <text className='play-label-info'>{label_item}</text>
-      )
-    })
+    let labels_list;
+    if (this.state.infoLoading == false) {
+      console.log(this.state.play_info)
+      labels_list = this.state.play_info.play_labels.map((label_item, label_idx) => {
+        if (label_idx == 0) {
+          this.state.play_main_label=label_item;
+        }
+        return (
+          <text className='play-label-info'>{label_item}</text>
+        )
+      })
+    }
 
     return (
       <View className='JoinQueueComfirmInfo'>
-        <image className='queue-info-page' src={base+this.state.play_info.play_pic} style='width:100vw;height:100vh;position:absolute'></image>
+        <image className='queue-info-page' src={this.state.infoLoading ? null:base+this.state.play_info.play_pic} style='width:100vw;height:100vh;position:absolute'></image>
           <View className='at-col' style={{padding: `${top_height}px 0px 0px 0px`, position:'absolute', top:0, left:0, width:'100%'}}>
             <AtNavBar className='nav-bar-info'
               onClickLeftIcon={this.handleNavBack}
@@ -210,12 +222,12 @@ export default class Joinqueuecomfirminfo extends Component {
           >
             <View className='at-row' style='height:300rpx;padding-top:5%;'>
               <View className='at-row play-pic-position-info' style={{width: `${system_width}px`}} /* 这里是用来规划image放置的位置 */> 
-                  <image src={base+this.state.play_info.play_pic} style='height:100%;width:90%;border-radius:10px;'>
-                    <text className='play-pic-label-info'>{this.state.play_main_label}</text>
+                  <image src={this.state.infoLoading ? null:base+this.state.play_info.play_pic} style='height:100%;width:90%;border-radius:10px;'>
+                    <text className='play-pic-label-info'>{this.state.infoLoading ? null:this.state.play_info.play_labels[0]}</text>
                   </image>
               </View>
               <View className='at-col' /*这里写的是StoreInfo 文字部分*/> 
-                <View className='play-name-position-info'>{this.state.play_info.play_name}</View>
+                <View className='play-name-position-info'>{this.state.infoLoading ? "加载中":this.state.play_info.play_name}</View>
                 <View className='play-score-position-info'>难度
                   <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%'>
                     <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
@@ -225,14 +237,14 @@ export default class Joinqueuecomfirminfo extends Component {
                     <image src={scoreDeactive} className='play-score-pic-info' style='position:relative;left:-12px;'></image>
                   </View>
                 </View>
-                <View className='play-headcount-position-info'>{this.state.play_info.play_headcount}人本
+                <View className='play-headcount-position-info'>{this.state.infoLoading ? 0:this.state.play_info.play_headcount}人本
                   <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%;'>
-                    <text style='background-color:#c0c0c0;color:rgb(80, 80, 80);padding: 0% 10%;border-radius:3px;'>{this.state.play_info.play_male_num}男{this.state.play_info.play_female_num}女</text>
+                    <text style='background-color:#c0c0c0;color:rgb(80, 80, 80);padding: 0% 10%;border-radius:3px;'>{this.state.infoLoading ? 0:this.state.play_info.play_male_num}男{this.state.infoLoading ? 0:this.state.play_info.play_female_num}女</text>
                   </View>
                 </View>
-                <View className='play-duration-position-info'>游戏时长约{this.state.play_info.play_duration}小时</View>
+                <View className='play-duration-position-info'>游戏时长约{this.state.infoLoading ? 0:this.state.play_info.play_duration}小时</View>
                 <View className='play-label-position-info'>
-                  {labels_list}
+                  {this.state.infoLoading ? "加载中":labels_list}
                 </View>
               </View>
             </View>

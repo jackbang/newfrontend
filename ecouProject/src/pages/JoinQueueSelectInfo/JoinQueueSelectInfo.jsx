@@ -36,9 +36,7 @@ export default class Joinqueueselectinfo extends Component {
   }
 
   handleCreateQueue (item){
-    Taro.setStorage({key:'JoinQueueSelectedPlay', data:item});
-    console.log(Taro.getStorageSync('JoinQueueSelectedPlay'));
-    Taro.navigateTo({url: '../JoinQueueComfirmInfo/JoinQueueComfirmInfo'})
+    Taro.navigateTo({url: `../JoinQueueComfirmInfo/JoinQueueComfirmInfo?playId=${item.play_id}`})
   }
 
   onScrollToUpper() {}
@@ -110,6 +108,7 @@ export default class Joinqueueselectinfo extends Component {
     
 
     let play_tab_list = this.state.plays_list.map((item, i)=>{
+      Taro.setStorage({key:`play_id_${item.play_id}`, data:item});
       let main_label = "  ";
       let play_labels_list = item.play_labels.map((label_item, item_idx)=>{
         if (item_idx==0){
