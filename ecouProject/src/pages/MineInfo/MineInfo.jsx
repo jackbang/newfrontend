@@ -126,6 +126,7 @@ export default class Mineinfo extends Component {
         test_wechat_login(userInfo).then((result)=>{
           console.log(result.data.data.sessionId);
           userInfo.userInfo['sessionId'] = result.data.data.sessionId;
+          userInfo.userInfo['user_id'] = result.data.data.userId;
           this.state.userInfo = userInfo.userInfo;
           Taro.setStorage({key:`user_info`, data:userInfo.userInfo,
             success: 

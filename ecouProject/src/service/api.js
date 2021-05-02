@@ -31,3 +31,13 @@ export const test_queue_players_info = (queue_id) => {
     let url = `/test/queues/${queue_id}/players`
     return request.get(url, '')
 }
+
+export const test_get_phonenum_info = (phone_data) => {
+    let url = '/test/getPhoneNum'
+    return request.post(url, phone_data, 'application/json')
+}
+
+export const test_join_queue = (player_data) => {
+    let url = '/test/joinQueue'
+    return request.post(url, player_data, 'application/json')
+}

@@ -41,19 +41,28 @@ class StoreInfo extends Component {
       QueueInfoLoading: true
     }
   }
-
-  async componentDidMount () {
+  async componentWillMount () {
     var pages = getCurrentPages();
+    let storeId= 1;
     console.log(pages);
     let _this = this;
-    await test_store_info(1).then(function(res) {
+    await test_store_info(storeId).then(function(res) {
+      res.data.data['store_id'] = storeId;
       _this.setState({
         storeInfo: res.data,
         storePic: base+res.data.data.store_logo,
         storeInfoLoading: false
-      })
+      });
+      Taro.setStorage({key:`store_info`, data:res.data.data});
     })
-    await test_queue_info(1).then(function(res) {
+  }
+
+  async componentDidShow () {
+    var pages = getCurrentPages();
+    let storeId= 1;
+    console.log(pages);
+    let _this = this;
+    await test_queue_info(storeId).then(function(res) {
       _this.setState({
         queueInfo: res.data,
         QueueInfoLoading: false
@@ -61,7 +70,6 @@ class StoreInfo extends Component {
     })
     console.log(this.state.queueInfo)
   }
-
 
   onScrollToUpper() {}
 

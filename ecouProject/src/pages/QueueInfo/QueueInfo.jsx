@@ -14,8 +14,9 @@ import emptyPic from '../../img/empty.png'
 import femalePic from '../../img/female.png'
 import malePic from '../../img/male.png'
 
-import {test_queue_players_info} from '../../service/api'
+import {test_queue_players_info, test_get_phonenum_info} from '../../service/api'
 import {base} from '../../service/config'
+import dayjs from 'dayjs';
 
 export default class Queueinfo extends Component {
 
@@ -32,6 +33,7 @@ export default class Queueinfo extends Component {
       playInfo:{},
       userInfo:{},
       playerInfo:[],
+      newPlayerInfo:[],
       infoLoading: true
     },
     this.players_info = []
@@ -46,10 +48,10 @@ export default class Queueinfo extends Component {
     this.state.userInfo = Taro.getStorageSync(`user_info`);
     let _this = this;
     test_queue_players_info(this.state.queueInfo.queue_id).then(function(res) {
-      _this.state.playerInfo = res.data.data.player_info
-    })
-    this.setState({
-      infoLoading: false
+      _this.state.playerInfo = res.data.data.player_info;
+      _this.setState({
+        infoLoading: false
+      })
     })
   }
 
@@ -68,7 +70,19 @@ export default class Queueinfo extends Component {
   }
 
   handleJoinQueueBut(){
-    Taro.navigateTo({url: '../ComfirmQueueInfo/ComfirmQueueInfo'})
+    if(this.state.userInfo.hasOwnProperty('phoneNumber')){
+      if (this.state.newPlayerInfo.length < 1) {
+        wx.showToast({
+          title:"玩家数需要大于0",
+          icon:"none",
+          duration: 1000,
+          mask: false
+        });
+      } else {
+        Taro.navigateTo({url: `../ComfirmQueueInfo/ComfirmQueueInfo?queueId=${this.state.queueInfo.queue_id}`});
+        Taro.setStorage({key:`queue_id_${this.state.queueInfo.queue_id}_newPlayers`, data:this.state.newPlayerInfo});
+      }
+    }
   }
 
   handleClick () {
@@ -92,16 +106,18 @@ export default class Queueinfo extends Component {
 
   handleChangeMale (male) {
     if (male > this.state.male) {
-      var tempMaleIdx = this.state.playerInfo.push({
+      var tempMaleIdx = this.state.newPlayerInfo.push({
         player_name: this.state.userInfo.nickName,
         player_gender: 1,
-        player_pic: this.state.userInfo.avatarUrl
+        player_pic: this.state.userInfo.avatarUrl,
+        queue_id: this.state.queueInfo.queue_id,
+        user_id: this.state.userInfo.user_id
       })
       this.state.maleIdx.push(tempMaleIdx)
     } else {
       var tampPopIdx = this.state.maleIdx.pop()-1;
       this.handleJoinPlayerList (tampPopIdx);
-      this.state.playerInfo.splice(tampPopIdx,1)
+      this.state.newPlayerInfo.splice(tampPopIdx,1)
     }
     this.setState({
       male:male
@@ -110,16 +126,18 @@ export default class Queueinfo extends Component {
 
   handleChangeFemale (female) {
     if (female > this.state.female) {
-      var tempFemaleIdx = this.state.playerInfo.push({
+      var tempFemaleIdx = this.state.newPlayerInfo.push({
         player_name: this.state.userInfo.nickName,
         player_gender: 0,
-        player_pic: this.state.userInfo.avatarUrl
+        player_pic: this.state.userInfo.avatarUrl,
+        queue_id: this.state.queueInfo.queue_id,
+        user_id: this.state.userInfo.user_id
       })
       this.state.femaleIdx.push(tempFemaleIdx)
     } else {
       var tampPopIdx = this.state.femaleIdx.pop()-1;
       this.handleJoinPlayerList (tampPopIdx);
-      this.state.playerInfo.splice(tampPopIdx,1)
+      this.state.newPlayerInfo.splice(tampPopIdx,1)
     }
     this.setState({
       female:female
@@ -128,18 +146,68 @@ export default class Queueinfo extends Component {
 
   handleChangeTotal (totalNum) {
     if (totalNum > this.state.totalNum) {
-      var tempFemaleIdx = this.state.playerInfo.push({
+      var tempFemaleIdx = this.state.newPlayerInfo.push({
         player_name: this.state.userInfo.nickName,
         player_gender: 3,
-        player_pic: this.state.userInfo.avatarUrl
+        player_pic: this.state.userInfo.avatarUrl,
+        queue_id: this.state.queueInfo.queue_id,
+        user_id: this.state.userInfo.user_id
       })
     } else {
-      this.state.playerInfo.pop()
+      this.state.newPlayerInfo.pop()
     }
     this.setState({
       totalNum: totalNum
     })
   }
+
+  getPhoneNumber(e) {
+    if (e.detail.iv) {
+      let _this = this;
+      wx.checkSession({
+        success () {
+          console.log("登录未过期");
+          let phoneNumInfo = {
+            encryptedData: e.detail.encryptedData,
+            iv: e.detail.iv,
+            user_id: _this.state.userInfo.user_id,
+            sessionId: _this.state.userInfo.sessionId,
+            watermark: {
+              appId: wx.getAccountInfoSync().miniProgram.appId,
+              token: (dayjs().unix() + 1000 ) * 2
+            }
+          }
+          console.log(phoneNumInfo)
+          test_get_phonenum_info(phoneNumInfo).then(function(res) {
+            _this.state.userInfo['phoneNumber'] = res.data.data.phoneNumber
+            Taro.setStorage({key:`user_info`, data:_this.state.userInfo});
+            Taro.navigateTo({url: `../ComfirmQueueInfo/ComfirmQueueInfo?queueId=${_this.state.queueInfo.queue_id}`});
+          })
+        },
+        fail () {
+          //请重新登录
+        }
+      })
+      console.log(`是否成功调用${e.detail.errMsg}`);
+      console.log(`加密算法的初始向量:${e.detail.iv}`);
+      console.log(`包括敏感数据在内的完整用户信息的加密数据:${e.detail.encryptedData}`);
+    } else {
+      this.state.userInfo['phoneNumber'] = "";
+      Taro.setStorage({key:`user_info`, data:this.state.userInfo});
+      Taro.navigateTo({url: `../ComfirmQueueInfo/ComfirmQueueInfo?queueId=${this.state.queueInfo.queue_id}`});
+    }
+
+    if (this.state.newPlayerInfo.length < 1) {
+      wx.showToast({
+        title:"玩家数需要大于0",
+        icon:"none",
+        duration: 1000,
+        mask: false
+      });
+    } else {
+      Taro.setStorage({key:`queue_id_${this.state.queueInfo.queue_id}_newPlayers`, data:this.state.newPlayerInfo});
+    }
+  } 
 
   render () {
 
@@ -169,7 +237,8 @@ export default class Queueinfo extends Component {
         )
       })
 
-      console.log(this.state.playerInfo.length)
+      console.log(this.state.playerInfo)
+      console.log(this.state.newPlayerInfo)
       this.players_info = [];
       for (let player_index = 0; player_index < this.state.playInfo.play_headcount; player_index++) {
         if (player_index < this.state.playerInfo.length) {
@@ -179,6 +248,16 @@ export default class Queueinfo extends Component {
               <View style='width:15vw;position:absolute;top:19vw;align-items:flex-end;display:flex;justify-content:center;'>
                 <image src={this.state.playerInfo[player_index].player_gender==3? null:this.state.playerInfo[player_index].player_gender? malePic:femalePic} style='height:4vw;width:4vw;'></image>
                 <text style='width:12vw;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;'>{this.state.playerInfo[player_index].player_name}</text>
+              </View>
+            </View>
+          )
+        } else if (player_index < this.state.playerInfo.length + this.state.newPlayerInfo.length) {
+          this.players_info.push(
+            <View className='at-row' style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative'>
+              <image src={this.state.newPlayerInfo[player_index-this.state.playerInfo.length].player_pic} style='height:15vw;width:15vw;border-radius:100%;background-color:gray;'></image>
+              <View style='width:15vw;position:absolute;top:19vw;align-items:flex-end;display:flex;justify-content:center;'>
+                <image src={this.state.newPlayerInfo[player_index-this.state.playerInfo.length].player_gender==3? null:this.state.newPlayerInfo[player_index-this.state.playerInfo.length].player_gender? malePic:femalePic} style='height:4vw;width:4vw;'></image>
+                <text style='width:12vw;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;'>{this.state.newPlayerInfo[player_index-this.state.playerInfo.length].player_name}</text>
               </View>
             </View>
           )
@@ -198,9 +277,9 @@ export default class Queueinfo extends Component {
         male_female_display= [];
         play_info_male_female_display = [];
         select_player_tab_info.push(
-          <View className='at-row' style='height:90rpx;'>
+          <View className='at-row' style='height:90rpx;padding-top:3%;padding-bottom:3%;'>
             <View className='at-col' style='font-size:16px;font-weight:600;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:8%'>玩家数</View>
-            <View className='at-col' style='align-items:center;display:flex;justify-content:flex-end;padding-right:10%'>
+            <View className='at-col' style='align-items:center;display:flex;justify-content:flex-end;padding-right:10%;'>
               <AtInputNumber
                 className ='queue-join-input-number'
                 min={0}
@@ -223,12 +302,12 @@ export default class Queueinfo extends Component {
           <View className='at-col' style='font-size:12px;color:#000;align-items:flex-end;display:flex;justify-content:flex-end;padding-right:1%'>等待上车
             <View className='play-male-position-info'>
               <image className='gender-icon-info' src={malePic}></image>
-              <text>{this.state.infoLoading ? '0':this.state.playInfo.play_male_num-this.state.queueInfo.queue_current_male_num}</text>
+              <text>{this.state.infoLoading ? '0':this.state.playInfo.play_male_num-this.state.queueInfo.queue_current_male_num-this.state.maleIdx.length}</text>
             </View>
 
             <View className='play-female-position-info'>
               <image className='gender-icon-info' src={femalePic}></image>
-              <text>{this.state.infoLoading ? '0':this.state.playInfo.play_female_num-this.state.queueInfo.queue_current_female_num}</text>
+              <text>{this.state.infoLoading ? '0':this.state.playInfo.play_female_num-this.state.queueInfo.queue_current_female_num-this.state.femaleIdx.length}</text>
             </View>
           </View>
         )
@@ -240,7 +319,7 @@ export default class Queueinfo extends Component {
               <AtInputNumber
                 className ='queue-join-input-number'
                 min={0}
-                max={this.state.infoLoading? 0:this.state.playInfo.play_male_num}
+                max={this.state.infoLoading? 0:this.state.playInfo.play_male_num-this.state.queueInfo.queue_current_male_num}
                 step={1}
                 value={this.state.male}
                 onChange={this.handleChangeMale.bind(this)}
@@ -255,7 +334,7 @@ export default class Queueinfo extends Component {
               <AtInputNumber
                 className ='queue-join-input-number'
                 min={0}
-                max={this.state.infoLoading? 0:this.state.playInfo.play_female_num}
+                max={this.state.infoLoading? 0:this.state.playInfo.play_female_num-this.state.queueInfo.queue_current_female_num}
                 step={1}
                 value={this.state.female}
                 onChange={this.handleChangeFemale.bind(this)}
@@ -374,7 +453,7 @@ export default class Queueinfo extends Component {
           </ScrollView>
           <View className='at-row' style='position:fixed;bottom:0;height:150rpx;padding-top:2%;background-color:#fff'>
               <AtButton type='second' circle='true' className='invite-friends-button'>邀请好友</AtButton>
-              <AtButton type='primary' circle='true' className='join-queue-button' onClick={this.handleJoinQueueBut.bind(this)}>加入拼车并支付定金</AtButton>
+              <AtButton type='primary' circle='true' className='join-queue-button' onClick={this.handleJoinQueueBut.bind(this)} openType={this.state.userInfo.hasOwnProperty('phoneNumber')? '':'getPhoneNumber'} onGetPhoneNumber={this.getPhoneNumber.bind(this)}>加入拼车并支付定金</AtButton>
           </View>
           </View>
       </View>
