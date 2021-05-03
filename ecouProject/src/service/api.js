@@ -41,3 +41,18 @@ export const test_join_queue = (player_data) => {
     let url = '/test/joinQueue'
     return request.post(url, player_data, 'application/json')
 }
+
+export const test_get_history_queues = (user_data) => {
+    let url = '/test/queueHistory'
+    return request.post(url, user_data, 'application/json')
+}
+
+export const test_get_mine_history_queues = (user_data) => {
+    let url = '/test/mineQueueHistory'
+    return request.post(url, user_data, 'application/json')
+}
+
+export const test_create_queue = (form_data) => {
+    let url = '/test/createQueue'
+    return request.post(url, form_data, 'application/json')
+}

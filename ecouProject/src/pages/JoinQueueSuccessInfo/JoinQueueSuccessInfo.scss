@@ -1,0 +1,26 @@
+@import '~taro-ui/dist/style/variables/default.scss';
+@import "~taro-ui/dist/style/components/flex.scss";
+@import "~taro-ui/dist/style/components/icon.scss";
+@import "~taro-ui/dist/style/components/button.scss";
+.share-button {
+    align-items: center;
+    font-size: 30px;
+    width: 50vw;
+    border: 0PX none;
+    background-color: #FCA62F;
+    &.at-button--disabled {
+        background-color: #A5A5A5;
+    }
+}
+
+.comfirm-button {
+    align-items: center;
+    width: 50vw;
+    font-size: 30px;
+    color: #FCA62F;
+    border: 2PX solid #FCA62F;
+    margin-top: 3%;
+    &.at-button--disabled {
+        background-color: #A5A5A5;
+    }
+}

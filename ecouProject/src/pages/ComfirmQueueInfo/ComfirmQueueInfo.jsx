@@ -12,7 +12,7 @@ import telpic from '../../img/tel_icon.png'
 import mappic from '../../img/map_icon.png'
 import dayjs from 'dayjs';
 
-import {test_join_queue} from '../../service/api'
+import {test_join_queue, test_create_queue} from '../../service/api'
 import {base} from '../../service/config'
 
 export default class Comfirmqueueinfo extends Component {
@@ -27,6 +27,7 @@ export default class Comfirmqueueinfo extends Component {
       storeInfo:{},
       playerPhoneNum:"",
       comment:"",
+      isCreateQueue:false,
       infoLoading: true
     }
   }
@@ -41,11 +42,21 @@ export default class Comfirmqueueinfo extends Component {
     var pages = getCurrentPages();
     let currentPage = pages[pages.length-1];
     let pages_option = currentPage.options;
-    this.state.queueInfo = Taro.getStorageSync(`queue_id_${pages_option.queueId}`);
-    this.state.playInfo = Taro.getStorageSync(`play_id_${this.state.queueInfo.play_id}`);
-    this.state.userInfo = Taro.getStorageSync(`user_info`);
-    this.state.newPlayerInfo = Taro.getStorageSync(`queue_id_${pages_option.queueId}_newPlayers`);
-    this.state.storeInfo = Taro.getStorageSync(`store_info`);
+    if(pages_option.queueId){
+      this.state.queueInfo = Taro.getStorageSync(`queue_id_${pages_option.queueId}`);
+      this.state.playInfo = Taro.getStorageSync(`play_id_${this.state.queueInfo.play_id}`);
+      this.state.userInfo = Taro.getStorageSync(`user_info`);
+      this.state.newPlayerInfo = Taro.getStorageSync(`queue_id_${pages_option.queueId}_newPlayers`);
+      this.state.storeInfo = Taro.getStorageSync(`store_info`);
+    } else {
+      this.state.queueInfo = Taro.getStorageSync(`queue_id_0`);
+      this.state.playInfo = Taro.getStorageSync(`play_id_${this.state.queueInfo.play_id}`);
+      this.state.userInfo = Taro.getStorageSync(`user_info`);
+      this.state.newPlayerInfo = Taro.getStorageSync(`queue_id_0_newPlayers`);
+      this.state.storeInfo = Taro.getStorageSync(`store_info`);
+      this.state.isCreateQueue = true;
+    }
+
     this.setState({
       infoLoading: false
     })
@@ -77,35 +88,57 @@ export default class Comfirmqueueinfo extends Component {
         this.state.playerPhoneNum = this.state.userInfo.phoneNumber
       }
     } else {
-      let formData = {
-        player_info: this.state.newPlayerInfo,
-        player_tel: this.state.playerPhoneNum,
-        player_comment: this.state.comment,
-        queue_id: this.state.queueInfo.queue_id,
-        user_id: this.state.userInfo.user_id,
-        sessionId: this.state.userInfo.sessionId,
-        watermark:{
-          appId: wx.getAccountInfoSync().miniProgram.appId,
-          token: (dayjs().unix() + 1000 ) * 2
+      if (this.state.isCreateQueue == true) {
+        console.log(this.state)
+        let formData ={
+          player_info: this.state.newPlayerInfo,
+          player_tel: this.state.playerPhoneNum,
+          player_comment: this.state.comment,
+          queue_info: this.state.queueInfo,
+          user_id: this.state.userInfo.user_id,
+          sessionId: this.state.userInfo.sessionId,
+          watermark:{
+            appId: wx.getAccountInfoSync().miniProgram.appId,
+            token: (dayjs().unix() + 1000 ) * 2
+          }
         }
+        console.log(formData);
+        let _this = this;
+        test_create_queue(formData).then(function(res){
+          console.log(res);
+          if (res.data.data.errcode == 0){
+            Taro.navigateTo({url: `../JoinQueueSuccessInfo/JoinQueueSuccessInfo?queueId=0`});
+          }
+        })
+      } else {
+        let formData = {
+          player_info: this.state.newPlayerInfo,
+          player_tel: this.state.playerPhoneNum,
+          player_comment: this.state.comment,
+          queue_id: this.state.queueInfo.queue_id,
+          user_id: this.state.userInfo.user_id,
+          sessionId: this.state.userInfo.sessionId,
+          watermark:{
+            appId: wx.getAccountInfoSync().miniProgram.appId,
+            token: (dayjs().unix() + 1000 ) * 2
+          }
+        }
+        console.log(formData)
+        let _this = this;
+        test_join_queue(formData).then(function(res){
+          console.log(res)
+          if (res.data.data.errcode == 1){
+            wx.showToast({
+              title:"请勿重复加入车队",
+              icon:"none",
+              duration: 1000,
+              mask: false
+            });
+          } else if (res.data.data.errcode == 0){
+            Taro.navigateTo({url: `../JoinQueueSuccessInfo/JoinQueueSuccessInfo?queueId=${_this.state.queueInfo.queue_id}`});
+          }
+        })
       }
-      console.log(formData)
-      let _this = this;
-      test_join_queue(formData).then(function(res){
-        console.log(res)
-        if (res.data.data.errcode == 1){
-          wx.showToast({
-            title:"请勿重复加入车队",
-            icon:"none",
-            duration: 1000,
-            mask: false
-          });
-        } else if (res.data.data.errcode == 0){
-          Taro.removeStorage({key: `queue_id_${_this.state.queueInfo.queue_id}_newPlayers`});
-          Taro.removeStorage({key: `queue_id_${_this.state.queueInfo.queue_id}`});
-          Taro.navigateBack({ delta: 15 });
-        }
-      })
     }
 
     
@@ -250,7 +283,7 @@ export default class Comfirmqueueinfo extends Component {
                     {play_labels_info}
                 </View>
                 <View className='at-col' >
-                  <View style='font-size:16px;font-weight:550;color:#000;padding-top:13%;padding-left:4%;'>{this.state.infoLoading? "加载中":this.state.queueInfo.queue_end_time}</View>
+                  <View style='font-size:16px;font-weight:550;color:#000;padding-top:13%;padding-left:4%;'>{this.state.infoLoading? "加载中":this.state.isCreateQueue? this.state.queueInfo.queue_end_time.slice(0,10)+" "+this.state.queueInfo.queue_end_time.slice(11):this.state.queueInfo.queue_end_time}</View>
                   <View style='font-size:12px;font-weight:550;color:#00000099;padding-left:4%;'>游戏时长约{this.state.infoLoading?0:this.state.playInfo.play_duration}小时（以实际游戏时间为准）</View>
                 </View>
                 <View style='width:650rpx;height:3px;border:0px solid #97979722;border-bottom-width:2px;margin-left:30rpx;padding-top:1%;padding-bottom:1%;'></View>

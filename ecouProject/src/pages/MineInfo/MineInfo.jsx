@@ -19,7 +19,7 @@ import first_icon from '../../img/queueList.png'
 import second_icon from '../../img/createQueue.png'
 import third_icon from '../../img/mineInfo.png'
 
-import {test_wechat_login} from '../../service/api'
+import {test_wechat_login, test_get_mine_history_queues} from '../../service/api'
 import {base} from '../../service/config'
 
 export default class Mineinfo extends Component {
@@ -31,7 +31,9 @@ export default class Mineinfo extends Component {
       currentTabBar: 2,
       clickWhat: 0, //0 is tab, 1 is but
       userInfo: {},
-      isLogin: false
+      mineQueueInfo: {},
+      isLogin: false,
+      infoLoading: true
     }
   }
 
@@ -39,6 +41,26 @@ export default class Mineinfo extends Component {
     this.state.userInfo = Taro.getStorageSync(`user_info`)
     if (this.state.userInfo) {
       this.state.isLogin = true
+    }
+  }
+
+  async componentDidShow() {
+    if (this.state.userInfo) {
+      let _this = this;
+      let confirmData = {
+          user_id: this.state.userInfo.user_id,
+          sessionId: this.state.userInfo.sessionId,
+          watermark: {
+              appId: wx.getAccountInfoSync().miniProgram.appId,
+              token: (dayjs().unix() + 1000) * 2
+          }
+      }
+      test_get_mine_history_queues(confirmData).then(function(res) {
+          _this.setState({
+            mineQueueInfo: res.data.data,
+            infoLoading: false
+          })
+      })
     }
   }
 
@@ -66,11 +88,17 @@ export default class Mineinfo extends Component {
     Taro.navigateBack()
   }
 
-  handleTabClick(){
+  handleTabClick(item_idx, can_inv){
     if(this.state.clickWhat==1){
       this.state.clickWhat=0;
     }else{
-      Taro.navigateTo({url: '../QueueHistoryInfo/QueueHistoryInfo'})
+      let queue_info = this.state.mineQueueInfo.queueList[item_idx]
+      let store_info = this.state.mineQueueInfo.storeList[item_idx]
+      let play_info = this.state.mineQueueInfo.playList[item_idx]
+      Taro.setStorage({key:`queue_id_${queue_info.queue_id}`, data:queue_info})
+      Taro.setStorage({key:`store_id_${store_info.store_id}`, data:store_info})
+      Taro.setStorage({key:`play_id_${play_info.play_id}`, data:play_info})
+      Taro.navigateTo({url: `../QueueHistoryInfo/QueueHistoryInfo?queueId=${queue_info.queue_id}&canInv=${can_inv}`})
     }
   }
 
@@ -189,6 +217,7 @@ export default class Mineinfo extends Component {
     }
 
     let login_tab = [];
+    let finish_tab = [];
     if (this.state.isLogin == false) {
       login_tab.push(
         <View className='at-row queue-tab-info'>
@@ -199,7 +228,110 @@ export default class Mineinfo extends Component {
         </View>
       )
     }else{
-      login_tab = [];
+      if (this.state.infoLoading == false){
+        console.log(this.state.mineQueueInfo.queueList)
+        this.state.mineQueueInfo.queueList.map((queueItem, Idx) => {
+          if(dayjs(queueItem.queue_end_time).isAfter(dayjs())) {
+            let tempGenderDisplay = [];
+            if (this.state.mineQueueInfo.playList[Idx].play_male_num == 999 | this.state.mineQueueInfo.playList[Idx].play_female_num == 999)
+            {
+              tempGenderDisplay = [];
+            } else{
+              tempGenderDisplay.push(
+                <View className='play-male-position-info'>
+                  <image className='gender-icon-info' src={malePic}></image>
+                  <text>{queueItem.queue_current_male_num}/{this.state.mineQueueInfo.playList[Idx].play_male_num}</text>
+                </View>
+              )
+              tempGenderDisplay.push(
+                <View className='play-female-position-info'>
+                  <image className='gender-icon-info' src={femalePic}></image>
+                  <text>{queueItem.queue_current_female_num}/{this.state.mineQueueInfo.playList[Idx].play_female_num}</text>
+                </View>
+              )
+            }
+
+            login_tab.push(
+              <View className='at-row queue-tab-info' onClick={this.handleTabClick.bind(this, Idx, true)}>
+                {/*  每个tab上信息显示 */}
+                <View className='at-row play-pic-position-info' style='width:21vw'>
+                  <image className='play-pic-info' src={base+this.state.mineQueueInfo.playList[Idx].play_pic}>
+                  <text className='play-pic-label-info'>{this.state.mineQueueInfo.playList[Idx].play_labels[0]}</text>
+                  </image>
+                </View>
+                <View className='at-col play-intro-info'>
+                  <View className='at-col play-name-position-info'>{this.state.mineQueueInfo.playList[Idx].play_name}</View>
+                  <View className='at-row'>
+                    <View className='at-col'>
+                      <View className='at-row play-time-position-info'><text decode="{{true}}">{queueItem.queue_end_time.slice(0,10)+" "+queueItem.queue_end_time.slice(11,-3)}</text></View>
+                      <View className='at-row play-headcount-position-info'>
+                        <View className='play-headcount-info'><text decode="{{true}}">人数：{queueItem.queue_current_num}/{this.state.mineQueueInfo.playList[Idx].play_headcount}</text></View>
+                        {tempGenderDisplay}
+
+                      </View>
+                    </View>
+                    <View className='at-row' style='width:20vw'>
+                      {/* Button */}
+                      <AtButton type='primary' circle='true' className='join-button' onClick={this.handelInviteBut.bind(this, 1)}>邀请好友</AtButton>
+                    </View>
+                  </View>
+                  <View className='at-col play-store-position-info'>
+                    <image src={store_icon} style='width:4vw;height:4vw;'></image>
+                    <text style='margin-left:10rpx;'>{this.state.mineQueueInfo.storeList[Idx].store_name}</text>
+                  </View>
+                </View>
+              </View>
+            )
+          } else {
+            let tempGenderDisplay = [];
+            if (this.state.mineQueueInfo.playList[Idx].play_male_num == 999 | this.state.mineQueueInfo.playList[Idx].play_female_num == 999)
+            {
+              tempGenderDisplay = [];
+            } else{
+              tempGenderDisplay.push(
+                <View className='play-male-position-info'>
+                  <image className='gender-icon-info' src={malePic}></image>
+                  <text>{queueItem.queue_current_male_num}/{this.state.mineQueueInfo.playList[Idx].play_male_num}</text>
+                </View>
+              )
+              tempGenderDisplay.push(
+                <View className='play-female-position-info'>
+                  <image className='gender-icon-info' src={femalePic}></image>
+                  <text>{queueItem.queue_current_female_num}/{this.state.mineQueueInfo.playList[Idx].play_female_num}</text>
+                </View>
+              )
+            }
+
+            finish_tab.push(
+              <View className='at-row queue-tab-info' onClick={this.handleTabClick.bind(this, Idx, false)}>
+                {/*  每个tab上信息显示 */}
+                <View className='at-row play-pic-position-info' style='width:21vw'>
+                  <image className='play-pic-info' src={base+this.state.mineQueueInfo.playList[Idx].play_pic}>
+                  <text className='play-pic-label-info'>{this.state.mineQueueInfo.playList[Idx].play_labels[0]}</text>
+                  </image>
+                </View>
+                <View className='at-col play-intro-info'>
+                  <View className='at-col play-name-position-info'>{this.state.mineQueueInfo.playList[Idx].play_name}</View>
+                  <View className='at-row'>
+                    <View className='at-col'>
+                      <View className='at-row play-time-position-info'><text decode="{{true}}">{queueItem.queue_end_time.slice(0,10)+" "+queueItem.queue_end_time.slice(11,-3)}</text></View>
+                      <View className='at-row play-headcount-position-info'>
+                        <View className='play-headcount-info'><text decode="{{true}}">人数：{queueItem.queue_current_num}/{this.state.mineQueueInfo.playList[Idx].play_headcount}</text></View>
+                        {tempGenderDisplay}
+
+                      </View>
+                    </View>
+                  </View>
+                  <View className='at-col play-store-position-info'>
+                    <image src={store_icon} style='width:4vw;height:4vw;'></image>
+                    <text style='margin-left:10rpx;'>{this.state.mineQueueInfo.storeList[Idx].store_name}</text>
+                  </View>
+                </View>
+              </View>
+            )
+          }
+        })
+      }
     }
 
     console.log(this.state.userInfo)
@@ -251,44 +383,6 @@ export default class Mineinfo extends Component {
               >
               {login_tab}
 
-              <View className='at-row queue-tab-info' onClick={this.handleTabClick.bind(this, 0)}>
-                {/*  每个tab上信息显示 */}
-                <View className='at-row play-pic-position-info' style='width:21vw'>
-                  <image className='play-pic-info' src={play_pic}>
-                  <text className='play-pic-label-info'>本格</text>
-                  </image>
-                </View>
-                <View className='at-col play-intro-info'>
-                  <View className='at-col play-name-position-info'>木兮僧之戏</View>
-                  <View className='at-row'>
-                    <View className='at-col'>
-                      <View className='at-row play-time-position-info'><text decode="{{true}}">04月03日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13:00</text></View>
-                      <View className='at-row play-headcount-position-info'>
-                        <View className='play-headcount-info'><text decode="{{true}}">人数：7/10</text></View>
-                        <View className='play-male-position-info'>
-                          <image className='gender-icon-info' src={malePic}></image>
-                          <text>4/5</text>
-                        </View>
-
-                        <View className='play-female-position-info'>
-                          <image className='gender-icon-info' src={femalePic}></image>
-                          <text>4/5</text>
-                        </View>
-
-                      </View>
-                    </View>
-                    <View className='at-row' style='width:20vw'>
-                      {/* Button */}
-                      <AtButton type='primary' circle='true' className='join-button' onClick={this.handelInviteBut.bind(this, 1)}>邀请好友</AtButton>
-                    </View>
-                  </View>
-                  <View className='at-col play-store-position-info'>
-                    <image src={store_icon} style='width:4vw;height:4vw;'></image>
-                    <text style='margin-left:10rpx;'>惊剧馆·剧本杀·狼人杀</text>
-                  </View>
-                </View>
-              </View>
-
             </ScrollView>
             </AtTabsPane>
 
@@ -305,39 +399,7 @@ export default class Mineinfo extends Component {
               onScrollToUpper={this.onScrollToUpper.bind(this)} // 使用箭头函数的时候 可以这样写 `onScrollToUpper={this.onScrollToUpper}`
               onScroll={this.onScroll}
               >
-              <View className='at-row queue-tab-info' onClick={this.handleTabClick.bind(this, 0)}>
-                {/*  每个tab上信息显示 */}
-                <View className='at-row play-pic-position-info' style='width:21vw'>
-                  <image className='play-pic-info' src={play_pic}>
-                  <text className='play-pic-label-info'>本格</text>
-                  </image>
-                </View>
-                <View className='at-col play-intro-info'>
-                  <View className='at-col play-name-position-info'>木兮僧之戏</View>
-                  <View className='at-row'>
-                    <View className='at-col'>
-                      <View className='at-row play-time-position-info'><text decode="{{true}}">04月03日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13:00</text></View>
-                      <View className='at-row play-headcount-position-info'>
-                        <View className='play-headcount-info'><text decode="{{true}}">人数：7/10</text></View>
-                        <View className='play-male-position-info'>
-                          <image className='gender-icon-info' src={malePic}></image>
-                          <text>4/5</text>
-                        </View>
-
-                        <View className='play-female-position-info'>
-                          <image className='gender-icon-info' src={femalePic}></image>
-                          <text>4/5</text>
-                        </View>
-
-                      </View>
-                    </View>
-                  </View>
-                  <View className='at-col play-store-position-info'>
-                    <image src={store_icon} style='width:4vw;height:4vw;'></image>
-                    <text style='margin-left:10rpx;'>惊剧馆·剧本杀·狼人杀</text>
-                  </View>
-                </View>
-              </View>
+              {finish_tab}
               <View className='at-col' style='height:10rpx;'></View>
             </ScrollView>
             </AtTabsPane>

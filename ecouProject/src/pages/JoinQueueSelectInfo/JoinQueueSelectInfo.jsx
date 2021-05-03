@@ -69,7 +69,7 @@ export default class Joinqueueselectinfo extends Component {
 
   onActionClick () {
     let _this = this;
-    test_search_plays(7,this.state.value).then(res => {
+    test_search_plays(1,this.state.value).then(res => {
       _this.setState({
         plays_num: res.data.data.total_play_num,
         plays_list: res.data.data.plays_list
@@ -108,6 +108,25 @@ export default class Joinqueueselectinfo extends Component {
     
 
     let play_tab_list = this.state.plays_list.map((item, i)=>{
+
+      let maleFemaleDisplay = [];
+      if (item.play_male_num == 999 | item.play_female_num == 999){
+        maleFemaleDisplay = [];
+      } else {
+        maleFemaleDisplay.push(
+          <View className='play-male-position-info'>
+            <image className='gender-icon-info' src={male_icon}></image>
+            <text>{item.play_male_num}</text>
+          </View>
+        )
+        maleFemaleDisplay.push(
+          <View className='play-female-position-info'>
+            <image className='gender-icon-info' src={female_icon}></image>
+            <text>{item.play_female_num}</text>
+          </View>
+        )
+      }
+
       Taro.setStorage({key:`play_id_${item.play_id}`, data:item});
       let main_label = "  ";
       let play_labels_list = item.play_labels.map((label_item, item_idx)=>{
@@ -138,16 +157,7 @@ export default class Joinqueueselectinfo extends Component {
               </View>
               <View className='at-row play-headcount-position-info' /* 这一部分有三列 */>
                 <View className='play-headcount-info'><text decode="{{true}}">{item.play_headcount}人本</text></View>
-                <View className='play-male-position-info'>
-                  <image className='gender-icon-info' src={male_icon}></image>
-                  <text>{item.play_male_num}</text>
-                </View>
-
-                <View className='play-female-position-info'>
-                  <image className='gender-icon-info' src={female_icon}></image>
-                  <text>{item.play_female_num}</text>
-                </View>
-
+                {maleFemaleDisplay}
               </View>
             </View>
             <View className='at-row' style='width:20vw' /*第二列是用来放按钮 */>
