@@ -21,13 +21,15 @@ export default class Joinqueueselectinfo extends Component {
       value: '',
       tagActiveNum: 0,
       plays_num: 0,
+      store_info: {},
       plays_list: []
     }
   }
 
   async componentDidMount () {
+    this.state.store_info = Taro.getStorageSync('store_info');
     let _this = this;
-    await test_search_plays(1,this.state.value).then(res => {
+    await test_search_plays(_this.state.store_info.store_id,this.state.value).then(res => {
       _this.setState({
         plays_num: res.data.data.total_play_num,
         plays_list: res.data.data.plays_list
@@ -69,7 +71,7 @@ export default class Joinqueueselectinfo extends Component {
 
   onActionClick () {
     let _this = this;
-    test_search_plays(1,this.state.value).then(res => {
+    test_search_plays(this.state.store_info.store_id,this.state.value).then(res => {
       _this.setState({
         plays_num: res.data.data.total_play_num,
         plays_list: res.data.data.plays_list

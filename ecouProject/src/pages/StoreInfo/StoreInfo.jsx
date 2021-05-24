@@ -1,7 +1,7 @@
 import Taro, { getApp } from '@tarojs/taro'
 import { Component } from 'react'
 import { View, ScrollView } from '@tarojs/components'
-import { AtTabBar, AtSearchBar, AtAvatar, AtTabs, AtTabsPane, AtButton } from 'taro-ui'
+import { AtTabBar, AtSearchBar, AtAvatar, AtTabs, AtTabsPane, AtButton, AtInput } from 'taro-ui'
 import classNames from 'classnames';
 
 import dayjs from 'dayjs'
@@ -33,7 +33,7 @@ class StoreInfo extends Component {
             current: 0,
             value: '',
             currentTabBar: 0,
-            storeId: 4,
+            storeId: 8,
             storeInfo: {},
             storePic: store_pic,
             queueInfo: {},
@@ -42,12 +42,13 @@ class StoreInfo extends Component {
             QueueInfoLoading: true
         }
     }
-    async componentWillMount() {
+    componentWillMount() {
+      Taro.clearStorage()
         var pages = getCurrentPages();
-        let storeId = 1;
+        let storeId = this.state.storeId;
         console.log(pages);
         let _this = this;
-        await test_store_info(storeId).then(function(res) {
+        test_store_info(storeId).then(function(res) {
             res.data.data['store_id'] = storeId;
             _this.setState({
                 storeInfo: res.data,
@@ -60,7 +61,7 @@ class StoreInfo extends Component {
 
     async componentDidShow() {
         var pages = getCurrentPages();
-        let storeId = 1;
+        let storeId = this.state.storeId;
         console.log(pages);
         let _this = this;
         let userInfo = Taro.getStorageSync(`user_info`);
@@ -81,7 +82,7 @@ class StoreInfo extends Component {
                 console.log(res.data)
             })
         }
-        await test_queue_info(storeId).then(function(res) {
+        test_queue_info(storeId).then(function(res) {
             _this.setState({
                 queueInfo: res.data,
                 QueueInfoLoading: false
@@ -166,6 +167,53 @@ class StoreInfo extends Component {
         } else if (value == 2) {
             Taro.navigateTo({ url: '../MineInfo/MineInfo' })
         }
+    }
+
+    storeIdInput(value) {
+      this.state.storeId = value;
+    }
+
+    enterStore() {
+      this.setState({
+        storeId: this.state.storeId
+      })
+      let storeId = this.state.storeId;
+      let _this = this;
+      test_store_info(storeId).then(function(res) {
+          res.data.data['store_id'] = storeId;
+          _this.setState({
+              storeInfo: res.data,
+              storePic: base + res.data.data.store_logo,
+              storeInfoLoading: false
+          });
+          Taro.setStorage({ key: `store_info`, data: res.data.data });
+      })
+
+      let userInfo = Taro.getStorageSync(`user_info`);
+      if (userInfo) {
+          let confirmData = {
+              store_id: storeId,
+              user_id: userInfo.user_id,
+              sessionId: userInfo.sessionId,
+              watermark: {
+                  appId: wx.getAccountInfoSync().miniProgram.appId,
+                  token: (dayjs().unix() + 1000) * 2
+              }
+          }
+          test_get_history_queues(confirmData).then(function(res) {
+              _this.setState({
+                  queueList: res.data.data.queueList
+              })
+              console.log(res.data)
+          })
+      }
+      test_queue_info(storeId).then(function(res) {
+          _this.setState({
+              queueInfo: res.data,
+              QueueInfoLoading: false
+          })
+      })
+      console.log(this.state.queueInfo)
     }
 
     render () {
@@ -332,164 +380,186 @@ class StoreInfo extends Component {
           }) 
         }
     
-        
-    
-        return (
-          <View className='store-info-page' /* 这个标签主要是用来放background*/>
-            <View className='at-col' style={{padding: `${top_height}px 0px 0px 0px`}} /* 这个页面用来放 1.searchBar和下面的StoreInfo 2.AtTabs 为了避免和耳朵重叠，这里用了padding*/>
-    
-              <View className='at-col' style='height:400rpx' /* 这里是*/>
-    
-                <AtSearchBar
-                  showActionButton
-                  value={this.state.value}
-                  onChange={this.onChange.bind(this)}
-                  onActionClick={this.onActionClick.bind(this)}
+        if (this.state.storeId == 8) {
+
+          return (
+            <View className='store-info-page' /* 这个标签主要是用来放background*/>
+              <View className='at-col' style={{padding: `${top_height}px 0px 0px 0px`}} /* 这个页面用来放 1.searchBar和下面的StoreInfo 2.AtTabs 为了避免和耳朵重叠，这里用了padding*/>
+                <AtInput
+                  name='store_id'
+                  title='店铺ID'
+                  type='number'
+                  placeholderStyle='font-size:13px;'
+                  placeholder='输入店铺id'
+                  value={this.state.storeId}
+                  onChange={this.storeIdInput.bind(this)}
+                  className='storeInfo-input-css'
+                  required
                 />
-    
-                <View className='at-row store-info-background-img' /* 这里是StoreInfo背景那个不规则图形*/>
-                  <View className='at-row store-pic-position-info' style={{width: `${system_width}px`}} /* 这里是用来规划image放置的位置 */> 
-                    <AtAvatar className='store-pic-info' image={this.state.storePic}></AtAvatar>
-                  </View>
-                  <View className='at-col' /*这里写的是StoreInfo 文字部分*/> 
-                    <View className='at-col store-name-position-info'>
-                      {this.state.storeInfoLoading? `加载中`:this.state.storeInfo.data.store_name}
-                    </View>
-                    <View className='at-col store-auth-position-info'>
-                      <image className='store-auth-info' src={auth_pic}></image>
-                    </View>
-                    <View className='at-col store-clock-position-info'>
-                      <image className='store-clock-pic-info' src={clock_pic}></image>
-                      <text style='padding-left:2%'> {this.state.storeInfoLoading? `加载中`:this.state.storeInfo.data.store_info} </text>
-                    </View>
-                    <View className='at-col store-address-position-info'>
-                      <image className='store-address-pic-info' src={position_icon}></image>
-                      <text style='padding-left:1.5%;width:80%;word-break:break-all;word-wrap: break-word;white-space: pre-line;'>{this.state.storeInfoLoading? `加载中`:this.state.storeInfo.data.store_address} </text>
-                    </View>
-                  </View>
-                </View>
-    
+                <AtButton type='primary' circle='true' className='join-button' onClick={this.enterStore.bind(this)}>进入店铺</AtButton>
               </View>
-    
-              <View className='at-row' style='background-color:#ffffff'>
-                <AtTabs /* TODO: 这部分需要重构，红点没实现，列表不同日期显示不同灰度也没实现 */
-                  current={this.state.current}
-                  scroll
-                  tabList={tabInfoList}
-                  onClick={this.handleClick.bind(this)}>
-                  {tabsPaneInfo}
-                  <AtTabsPane current={this.state.current} index={99}>
-                    <ScrollView
-                      className='scrollview'
-                      scrollY
-                      scrollWithAnimation
-                      scrollTop={scrollTop}
-                      style={scrollStyle}
-                      lowerThreshold={Threshold}
-                      upperThreshold={Threshold}
-                      onScrollToUpper={this.onScrollToUpper.bind(this)} // 使用箭头函数的时候 可以这样写 `onScrollToUpper={this.onScrollToUpper}`
-                      onScroll={this.onScroll}
-                    >
-                      <View className='at-row queue-tab-info'>
-                        {/*  每个tab上信息显示 */}
-                        <View className='at-row play-pic-position-info' style='width:21vw' /* 这里写的是 每个tab上剧本图片的位置*/>
-                          <image className='play-pic-info' src={play_pic}>
-                          <text className='play-pic-label-info'>本格</text>
-                          </image>
-                        </View>
-                        <View className='at-col play-intro-info' /*这里的信息是每个tab上 剧本的一些文字信息 */>
-                          <View className='at-col play-name-position-info'>木兮僧之戏</View>
-                          <View className='at-row' /* =- 这一部分是这样，两列，第一列有两行文字，第二列用来放按钮 */>
-                            <View className='at-col' /* 第一列 有两行*/>
-                              <View className='at-row play-time-position-info'><text decode="{{true}}">04月03日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13:00</text></View>
-                              <View className='at-row play-headcount-position-info' /* 这一部分有三列 */>
-                                <View className='play-headcount-info'><text decode="{{true}}">人数：7/10</text></View>
-                                <View className='play-male-position-info'>
-                                  <image className='gender-icon-info' src={male_icon}></image>
-                                  <text>4/5</text>
-                                </View>
-    
-                                <View className='play-female-position-info'>
-                                  <image className='gender-icon-info' src={female_icon}></image>
-                                  <text>4/5</text>
-                                </View>
-    
-                              </View>
-                            </View>
-                            <View className='at-row' style='width:20vw' /*第二列是用来放按钮 */>
-                              {/* Button  激活与不激活 具体看taroui中的文档*/}
-                              <AtButton type='primary' circle='true' className='join-button' onClick={this.handleButtonClick.bind(this, 'queueID')}>我要上车</AtButton>
-                            </View>
-                          </View>
-                          <View className='at-col play-antigender-position-info'>
-                            <text className='play-antigender-info'>可反串</text>
-                            <text className='play-label-info'>本格</text>
-                            <text className='play-label-info'>现代</text>
-                          </View>
-                        </View>
-    
-                      </View>
-                      <View className='at-row queue-tab-info'>
-                        {/*  每个tab上信息显示 */}
-                        <View className='at-row play-pic-position-info' style='width:21vw'>
-                          <image className='play-pic-info' src={play_pic}>
-                          <text className='play-pic-label-info'>本格</text>
-                          </image>
-                        </View>
-                        <View className='at-col play-intro-info'>
-                          <View className='at-col play-name-position-info'>木兮僧之戏</View>
-                          <View className='at-row'>
-                            <View className='at-col'>
-                              <View className='at-row play-time-position-info'><text decode="{{true}}">04月03日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13:00</text></View>
-                              <View className='at-row play-headcount-position-info'>
-                                <View className='play-headcount-info'><text decode="{{true}}">人数：7/10</text></View>
-                                <View className='play-male-position-info'>
-                                  <image className='gender-icon-info' src={male_icon}></image>
-                                  <text>4/5</text>
-                                </View>
-    
-                                <View className='play-female-position-info'>
-                                  <image className='gender-icon-info' src={female_icon}></image>
-                                  <text>4/5</text>
-                                </View>
-    
-                              </View>
-                            </View>
-                            <View className='at-row' style='width:20vw'>
-                              {/* Button */}
-                              <AtButton type='primary' circle='true' disabled='true' className='join-button' >已发车</AtButton>
-                            </View>
-                          </View>
-                          <View className='at-col play-antigender-position-info'>
-                            <text className='play-antigender-info'>可反串</text>
-                            <text className='play-label-info'>本格</text>
-                            <text className='play-label-info'>现代</text>
-                          </View>
-                        </View>
-    
-                      </View>
-                      <View className='at-row queue-tab-info'></View>
-                      <View className='at-row queue-tab-info'></View>
-                      <View className='at-row queue-tab-info'></View>
-                      <View className='at-row tab-blank'></View> {/*切记，每个AtTabsPane最下面要加一小条空白，否则阴影部分显示不全，会很难看 */}
-                    </ScrollView>
-                  </AtTabsPane>
-                </AtTabs>
-              </View>
-              <AtTabBar
-                  className='tab-bar-info'
-                  fixed
-                  tabList={[
-                    { title: '拼车信息',image:first_icon},
-                    { title:'', image:second_icon},
-                    { title: '我的',image:third_icon}
-                  ]}
-                  onClick={this.handleTabBarClick.bind(this)}
-                  current={this.state.currentTabBar}
-                />
             </View>
-          </View>
-        )
+          )
+
+        } else {
+    
+          return (
+            <View className='store-info-page' /* 这个标签主要是用来放background*/>
+              <View className='at-col' style={{padding: `${top_height}px 0px 0px 0px`}} /* 这个页面用来放 1.searchBar和下面的StoreInfo 2.AtTabs 为了避免和耳朵重叠，这里用了padding*/>
+      
+                <View className='at-col' style='height:400rpx' /* 这里是*/>
+      
+                  <AtSearchBar
+                    showActionButton
+                    value={this.state.value}
+                    onChange={this.onChange.bind(this)}
+                    onActionClick={this.onActionClick.bind(this)}
+                  />
+      
+                  <View className='at-row store-info-background-img' /* 这里是StoreInfo背景那个不规则图形*/>
+                    <View className='at-row store-pic-position-info' style={{width: `${system_width}px`}} /* 这里是用来规划image放置的位置 */> 
+                      <AtAvatar className='store-pic-info' image={this.state.storePic}></AtAvatar>
+                    </View>
+                    <View className='at-col' /*这里写的是StoreInfo 文字部分*/> 
+                      <View className='at-col store-name-position-info'>
+                        {this.state.storeInfoLoading? `加载中`:this.state.storeInfo.data.store_name}
+                      </View>
+                      <View className='at-col store-auth-position-info'>
+                        <image className='store-auth-info' src={auth_pic}></image>
+                      </View>
+                      <View className='at-col store-clock-position-info'>
+                        <image className='store-clock-pic-info' src={clock_pic}></image>
+                        <text style='padding-left:2%'> {this.state.storeInfoLoading? `加载中`:this.state.storeInfo.data.store_info} </text>
+                      </View>
+                      <View className='at-col store-address-position-info'>
+                        <image className='store-address-pic-info' src={position_icon}></image>
+                        <text style='padding-left:1.5%;width:80%;word-break:break-all;word-wrap: break-word;white-space: pre-line;'>{this.state.storeInfoLoading? `加载中`:this.state.storeInfo.data.store_address} </text>
+                      </View>
+                    </View>
+                  </View>
+      
+                </View>
+      
+                <View className='at-row' style='background-color:#ffffff'>
+                  <AtTabs /* TODO: 这部分需要重构，红点没实现，列表不同日期显示不同灰度也没实现 */
+                    current={this.state.current}
+                    scroll
+                    tabList={tabInfoList}
+                    onClick={this.handleClick.bind(this)}>
+                    {tabsPaneInfo}
+                    <AtTabsPane current={this.state.current} index={99}>
+                      <ScrollView
+                        className='scrollview'
+                        scrollY
+                        scrollWithAnimation
+                        scrollTop={scrollTop}
+                        style={scrollStyle}
+                        lowerThreshold={Threshold}
+                        upperThreshold={Threshold}
+                        onScrollToUpper={this.onScrollToUpper.bind(this)} // 使用箭头函数的时候 可以这样写 `onScrollToUpper={this.onScrollToUpper}`
+                        onScroll={this.onScroll}
+                      >
+                        <View className='at-row queue-tab-info'>
+                          {/*  每个tab上信息显示 */}
+                          <View className='at-row play-pic-position-info' style='width:21vw' /* 这里写的是 每个tab上剧本图片的位置*/>
+                            <image className='play-pic-info' src={play_pic}>
+                            <text className='play-pic-label-info'>本格</text>
+                            </image>
+                          </View>
+                          <View className='at-col play-intro-info' /*这里的信息是每个tab上 剧本的一些文字信息 */>
+                            <View className='at-col play-name-position-info'>木兮僧之戏</View>
+                            <View className='at-row' /* =- 这一部分是这样，两列，第一列有两行文字，第二列用来放按钮 */>
+                              <View className='at-col' /* 第一列 有两行*/>
+                                <View className='at-row play-time-position-info'><text decode="{{true}}">04月03日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13:00</text></View>
+                                <View className='at-row play-headcount-position-info' /* 这一部分有三列 */>
+                                  <View className='play-headcount-info'><text decode="{{true}}">人数：7/10</text></View>
+                                  <View className='play-male-position-info'>
+                                    <image className='gender-icon-info' src={male_icon}></image>
+                                    <text>4/5</text>
+                                  </View>
+      
+                                  <View className='play-female-position-info'>
+                                    <image className='gender-icon-info' src={female_icon}></image>
+                                    <text>4/5</text>
+                                  </View>
+      
+                                </View>
+                              </View>
+                              <View className='at-row' style='width:20vw' /*第二列是用来放按钮 */>
+                                {/* Button  激活与不激活 具体看taroui中的文档*/}
+                                <AtButton type='primary' circle='true' className='join-button' onClick={this.handleButtonClick.bind(this, 'queueID')}>我要上车</AtButton>
+                              </View>
+                            </View>
+                            <View className='at-col play-antigender-position-info'>
+                              <text className='play-antigender-info'>可反串</text>
+                              <text className='play-label-info'>本格</text>
+                              <text className='play-label-info'>现代</text>
+                            </View>
+                          </View>
+      
+                        </View>
+                        <View className='at-row queue-tab-info'>
+                          {/*  每个tab上信息显示 */}
+                          <View className='at-row play-pic-position-info' style='width:21vw'>
+                            <image className='play-pic-info' src={play_pic}>
+                            <text className='play-pic-label-info'>本格</text>
+                            </image>
+                          </View>
+                          <View className='at-col play-intro-info'>
+                            <View className='at-col play-name-position-info'>木兮僧之戏</View>
+                            <View className='at-row'>
+                              <View className='at-col'>
+                                <View className='at-row play-time-position-info'><text decode="{{true}}">04月03日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13:00</text></View>
+                                <View className='at-row play-headcount-position-info'>
+                                  <View className='play-headcount-info'><text decode="{{true}}">人数：7/10</text></View>
+                                  <View className='play-male-position-info'>
+                                    <image className='gender-icon-info' src={male_icon}></image>
+                                    <text>4/5</text>
+                                  </View>
+      
+                                  <View className='play-female-position-info'>
+                                    <image className='gender-icon-info' src={female_icon}></image>
+                                    <text>4/5</text>
+                                  </View>
+      
+                                </View>
+                              </View>
+                              <View className='at-row' style='width:20vw'>
+                                {/* Button */}
+                                <AtButton type='primary' circle='true' disabled='true' className='join-button' >已发车</AtButton>
+                              </View>
+                            </View>
+                            <View className='at-col play-antigender-position-info'>
+                              <text className='play-antigender-info'>可反串</text>
+                              <text className='play-label-info'>本格</text>
+                              <text className='play-label-info'>现代</text>
+                            </View>
+                          </View>
+      
+                        </View>
+                        <View className='at-row queue-tab-info'></View>
+                        <View className='at-row queue-tab-info'></View>
+                        <View className='at-row queue-tab-info'></View>
+                        <View className='at-row tab-blank'></View> {/*切记，每个AtTabsPane最下面要加一小条空白，否则阴影部分显示不全，会很难看 */}
+                      </ScrollView>
+                    </AtTabsPane>
+                  </AtTabs>
+                </View>
+                <AtTabBar
+                    className='tab-bar-info'
+                    fixed
+                    tabList={[
+                      { title: '拼车信息',image:first_icon},
+                      { title:'', image:second_icon},
+                      { title: '我的',image:third_icon}
+                    ]}
+                    onClick={this.handleTabBarClick.bind(this)}
+                    current={this.state.currentTabBar}
+                  />
+              </View>
+            </View>
+          )
+        }
       }
     }
     

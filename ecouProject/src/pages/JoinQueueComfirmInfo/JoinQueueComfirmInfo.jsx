@@ -285,6 +285,7 @@ export default class Joinqueuecomfirminfo extends Component {
         },
         fail () {
           //请重新登录
+          console.log('login out')
         }
       })
       console.log(`是否成功调用${e.detail.errMsg}`);
