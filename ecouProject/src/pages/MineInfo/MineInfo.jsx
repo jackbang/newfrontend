@@ -310,7 +310,7 @@ export default class Mineinfo extends Component {
     const scrollTop = 0
     const Threshold = 20
     var scrollStyle = {
-      height: `${windowHeight_rpx - top_height_rpx - 400 - 200 - 180}rpx`
+      height: `${windowHeight_rpx - top_height_rpx - 400 - 200 - 170}rpx`
     }
 
     let login_tab = [];
@@ -420,7 +420,9 @@ export default class Mineinfo extends Component {
                   </image>
                 </View>
                 <View className='at-col play-intro-info'>
-                  <View className='at-col play-name-position-info'>{this.state.mineQueueInfo.playList[Idx].play_name}</View>
+                  <View className='at-col play-name-position-info'>
+                    <text style='text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>{this.state.mineQueueInfo.playList[Idx].play_name}</text>
+                  </View>
                   <View className='at-row'>
                     <View className='at-col'>
                       <View className='at-row play-time-position-info'><text decode="{{true}}">{queueItem.queue_end_time.slice(0,10)+" "+queueItem.queue_end_time.slice(11,-3)}</text></View>
@@ -433,7 +435,7 @@ export default class Mineinfo extends Component {
                   </View>
                   <View className='at-col play-store-position-info'>
                     <image src={store_icon} style='width:4vw;height:4vw;'></image>
-                    <text style='margin-left:10rpx;'>{this.state.mineQueueInfo.storeList[Idx].store_name}</text>
+                    <text style='width:400rpx;margin-left:10rpx;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>{this.state.mineQueueInfo.storeList[Idx].store_name}</text>
                   </View>
                 </View>
               </View>
@@ -509,7 +511,7 @@ export default class Mineinfo extends Component {
               onScroll={this.onScroll}
               >
               {login_tab}
-
+              <View className='at-col' style='height:10rpx;'></View>
             </ScrollView>
             </AtTabsPane>
 
