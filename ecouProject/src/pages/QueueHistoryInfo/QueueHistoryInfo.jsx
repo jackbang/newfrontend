@@ -10,11 +10,12 @@ import playpic from '../../img/play_pic.jpg'
 import scoreActive from '../../img/scoreActive.png'
 import scoreDeactive from '../../img/scoreDeactive.png'
 import memberPic from '../../img/member.png'
-import emptyPic from '../../img/empty.png'
+import emptyPic from '../../img/empty.svg'
 import femalePic from '../../img/female.png'
 import malePic from '../../img/male.png'
-import telpic from '../../img/tel_icon.png'
-import mappic from '../../img/map_icon.png'
+
+import telpic from '../../img/telIcon.svg'
+import mappic from '../../img/map_icon.svg'
 
 import {test_queue_players_info} from '../../service/api'
 import {base} from '../../service/config'
@@ -104,6 +105,25 @@ export default class Queueinfo extends Component {
     })
   }
 
+  makePhoneCall() {
+    console.log('call the store')
+    wx.makePhoneCall({
+      phoneNumber: this.state.storeInfo.store_tel //仅为示例，并非真实的电话号码
+    })
+  }
+
+  openLocation() {
+    var latitude = this.state.storeInfo.store_latitude;
+    var longitude = this.state.storeInfo.store_longitude;
+    var name = this.state.storeInfo.store_name;
+    wx.openLocation({
+      latitude,
+      longitude,
+      name,
+      scale: 15
+    })
+  }
+
   render () {
 
     var top_height = wx.getSystemInfoSync().statusBarHeight;
@@ -127,6 +147,7 @@ export default class Queueinfo extends Component {
     let male_female_display = [];
     let play_info_male_female_display = [];
     let invButDisplay = [];
+    let score_list = [];
     if (this.state.infoLoading == false){
       play_labels_info = this.state.playInfo.play_labels.map((label_item, label_idx)=>{
         return(
@@ -198,6 +219,18 @@ export default class Queueinfo extends Component {
           height: `${windowHeight_rpx-top_height_rpx-90}rpx`
         }
       }
+
+      for (let index = 0; index < 5; index++) {
+        if(index < this.state.playInfo.play_score){
+          score_list.push(
+            <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
+          )
+        } else {
+          score_list.push(
+            <image src={scoreDeactive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
+          )
+        }
+      }
     }
     return (
       <View className='at-col Queueinfo' style='position:relative'>
@@ -228,14 +261,12 @@ export default class Queueinfo extends Component {
                     </image>
                 </View>
                 <View className='at-col' /*这里写的是StoreInfo 文字部分*/> 
-                  <View className='play-name-position-info'>{this.state.infoLoading? "加载中": this.state.playInfo.play_name}</View>
+                  <View className='play-name-position-info'>
+                    <text style='text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>{this.state.infoLoading? "加载中": this.state.playInfo.play_name}</text>
+                  </View>
                   <View className='play-score-position-info'>难度
                     <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%'>
-                      <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
-                      <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-3px;'></image>
-                      <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-6px;'></image>
-                      <image src={scoreDeactive} className='play-score-pic-info' style='position:relative;left:-9px;'></image>
-                      <image src={scoreDeactive} className='play-score-pic-info' style='position:relative;left:-12px;'></image>
+                      {score_list}
                     </View>
                   </View>
                   <View className='play-headcount-position-info'>{this.state.infoLoading? 0: this.state.playInfo.play_headcount}人本
@@ -257,7 +288,7 @@ export default class Queueinfo extends Component {
                     </View>
                   </View>
                   <View className='at-row' style='padding-left:2%;'>
-                    <text className={this.state.isHide? 'play-intro-info play-intro-hide' : 'play-intro-info'}>{this.state.infoLoading? null: this.state.playInfo.play_intro}</text>
+                    <text className={this.state.isHide? 'play-intro-info play-intro-hide' : 'play-intro-info'}>{this.state.infoLoading? null: this.state.playInfo.play_intro.split('/n').join('\n')}</text>
                   </View>
                 </View>
               </View>
@@ -268,13 +299,13 @@ export default class Queueinfo extends Component {
                   <View className='at-row'>
                     <View className='at-col'>
                       <View className='at-row queue-start-time-info' >开局时间</View>
-                      <View className='at-row' style='font-size:14px;color:#000;height:70%;align-items:center;display:flex;justify-content:flex-start;padding-left:10%;'>{this.state.infoLoading? "加载中": this.state.canInv=="null"?  this.state.queueInfo.queue_end_time:this.state.queueInfo.queue_end_time.slice(0,10)+" "+this.state.queueInfo.queue_end_time.slice(11,-3)}</View>
+                      <View className='at-row' style='font-size:14px;font-weight:550;color:#000;height:70%;align-items:center;display:flex;justify-content:flex-start;padding-left:10%;'>{this.state.infoLoading? "加载中": this.state.canInv=="null"?  this.state.queueInfo.queue_end_time:this.state.queueInfo.queue_end_time.slice(0,10)+" "+this.state.queueInfo.queue_end_time.slice(11,-3)}</View>
                     </View>
                   </View>
                   <View className='at-row'>
                     <View className='at-col'>
                       <View className='at-row queue-antigender-info'>是否接受反串</View>
-                      <View className='at-row' style='font-size:14px;color:#000;height:70%;align-items:center;display:flex;justify-content:flex-start;padding-left:10%;'>{this.state.infoLoading? "加载中": this.state.queueInfo.queue_antigender? "接受":"不接受"}反串</View>
+                      <View className='at-row' style='font-size:14px;font-weight:550;color:#000;height:70%;align-items:center;display:flex;justify-content:flex-start;padding-left:10%;'>{this.state.infoLoading? "加载中": this.state.queueInfo.queue_antigender? "接受":"不接受"}反串</View>
                     </View>
                   </View>
                 </View>
@@ -282,17 +313,17 @@ export default class Queueinfo extends Component {
                 <View className='at-col queue-join-tab-info' style='padding-top:2%'>
                   {/*这部分是加入车队的tab */}
                   <View className='at-row' style='padding-bottom:3%;'>
-                    <View className='at-col'>
-                      <View style='font-size:16px;font-weight:550;color:#000;padding-top:3%;padding-left:5%;'>{this.state.infoLoading? "加载中": this.state.storeInfo.store_name}</View>
-                      <View style='font-size:12px;font-weight:550;color:#00000099;padding-left:5%;'>
-                        <text style='width:85%;font-size:12px;font-weight:550;color:#00000099;width:80%;word-break:break-all;word-wrap:break-word;white-space:pre-line;'>
-                         {this.state.infoLoading? "加载中": this.state.storeInfo.store_address}
-                        </text>
-                      </View>
+                    <View style='width:500rpx;display:flex;flex-direction:column;'>
+                      <text style='font-size:16px;font-weight:550;color:#000;padding-top:3%;padding-left:5%;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>   
+                        {this.state.infoLoading?"":this.state.storeInfo.store_name}
+                      </text>
+                      <text style='padding-left:5%;font-size:12px;font-weight:550;color:#00000099;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>
+                        {this.state.infoLoading?"":this.state.storeInfo.store_address}
+                      </text>
                     </View>
-                    <image src={telpic} mode='heightFix' style='height:24px;padding-top:4.5%;padding-right:3%;'></image>
+                    <image src={telpic} mode='heightFix' style='height:25px;padding-top:4.5%;padding-right:3%;' onClick={this.makePhoneCall.bind(this)}></image>
                     <View style='height:30px;border:0px solid #97979722;border-left-width:2px;margin-top:4%;'></View>
-                    <image src={mappic} mode='heightFix' style='height:30px;padding-top:4%;padding-left:3%;padding-right:5%;'></image>
+                    <image src={mappic} mode='heightFix' style='height:25px;padding-top:4%;padding-left:3%;padding-right:5%;' onClick={this.openLocation.bind(this)}></image>
                   </View>
                 </View>
 

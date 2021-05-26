@@ -8,6 +8,7 @@ export default {
         'pages/QueueHistoryInfo/QueueHistoryInfo',
         'pages/MineInfo/MineInfo',
         'pages/JoinQueueSuccessInfo/JoinQueueSuccessInfo',
+        'pages/playSearchPage/playSearchPage',
         'pages/index/index'
     ],
     window: {

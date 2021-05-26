@@ -10,7 +10,7 @@ import playpic from '../../img/play_pic.jpg'
 import scoreActive from '../../img/scoreActive.png'
 import scoreDeactive from '../../img/scoreDeactive.png'
 import memberPic from '../../img/member.png'
-import emptyPic from '../../img/empty.png'
+import emptyPic from '../../img/empty.svg'
 import femalePic from '../../img/female.png'
 import malePic from '../../img/male.png'
 
@@ -230,11 +230,14 @@ export default class Queueinfo extends Component {
     let select_player_tab_info=[];
     let male_female_display = [];
     let play_info_male_female_display = [];
+    let score_list = [];
     if (this.state.infoLoading==false){
       play_labels_info = this.state.playInfo.play_labels.map((label_item, label_idx)=>{
-        return(
-          <text className='play-label-info'>{label_item}</text>
-        )
+        if(label_idx<5){
+          return(
+            <text className='play-label-info'>{label_item}</text>
+          )
+        }
       })
 
       console.log(this.state.playerInfo)
@@ -243,27 +246,27 @@ export default class Queueinfo extends Component {
       for (let player_index = 0; player_index < this.state.playInfo.play_headcount; player_index++) {
         if (player_index < this.state.playerInfo.length) {
           this.players_info.push(
-            <View className='at-row' style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative'>
+            <View style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative;display:flex;flex-direction:column;align-items:center;'>
               <image src={this.state.playerInfo[player_index].player_pic} style='height:15vw;width:15vw;border-radius:100%;background-color:gray;'></image>
               <View style='width:15vw;position:absolute;top:19vw;align-items:flex-end;display:flex;justify-content:center;'>
                 <image src={this.state.playerInfo[player_index].player_gender==3? null:this.state.playerInfo[player_index].player_gender? malePic:femalePic} style='height:4vw;width:4vw;'></image>
-                <text style='width:12vw;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;'>{this.state.playerInfo[player_index].player_name}</text>
+                <text style='width:15vw;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;'>{this.state.playerInfo[player_index].player_name}</text>
               </View>
             </View>
           )
         } else if (player_index < this.state.playerInfo.length + this.state.newPlayerInfo.length) {
           this.players_info.push(
-            <View className='at-row' style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative'>
+            <View style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative;display:flex;flex-direction:column;align-items:center;'>
               <image src={this.state.newPlayerInfo[player_index-this.state.playerInfo.length].player_pic} style='height:15vw;width:15vw;border-radius:100%;background-color:gray;'></image>
               <View style='width:15vw;position:absolute;top:19vw;align-items:flex-end;display:flex;justify-content:center;'>
                 <image src={this.state.newPlayerInfo[player_index-this.state.playerInfo.length].player_gender==3? null:this.state.newPlayerInfo[player_index-this.state.playerInfo.length].player_gender? malePic:femalePic} style='height:4vw;width:4vw;'></image>
-                <text style='width:12vw;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;'>{this.state.newPlayerInfo[player_index-this.state.playerInfo.length].player_name}</text>
+                <text style='width:15vw;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;'>{this.state.newPlayerInfo[player_index-this.state.playerInfo.length].player_name}</text>
               </View>
             </View>
           )
         } else {
           this.players_info.push(
-            <View className='at-row' style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative'>
+            <View style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative;display:flex;flex-direction:column;align-items:center;'>
               <image src={emptyPic} style='height:15vw;width:15vw;border-radius:100%;background-color:gray;'></image>
               <View style='width:15vw;position:absolute;top:19vw;align-items:flex-end;display:flex;justify-content:center;'>
                 <text style='font-size:12px'>等待加入</text>
@@ -294,7 +297,7 @@ export default class Queueinfo extends Component {
       } else {
         play_info_male_female_display.push(
           <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%;'>
-            <text style='background-color:#c0c0c0;color:rgb(80, 80, 80);padding: 0% 10%;border-radius:3px;'>{this.state.infoLoading ? `0`:this.state.playInfo.play_male_num}男{this.state.infoLoading ? `0`:this.state.playInfo.play_female_num}女</text>
+            <text style='background-color:#c0c0c0;color:rgb(80, 80, 80);padding: 0 10rpx;border-radius:3px;'>{this.state.infoLoading ? `0`:this.state.playInfo.play_male_num}男{this.state.infoLoading ? `0`:this.state.playInfo.play_female_num}女</text>
           </View>
         )
 
@@ -343,6 +346,20 @@ export default class Queueinfo extends Component {
           </View>
         )
       }
+
+      for (let index = 0; index < 5; index++) {
+        if(index < this.state.playInfo.play_score){
+          score_list.push(
+            <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
+          )
+        } else {
+          score_list.push(
+            <image src={scoreDeactive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
+          )
+        }
+      }
+
+
     }
 
     
@@ -378,14 +395,12 @@ export default class Queueinfo extends Component {
                     </image>
                 </View>
                 <View className='at-col' /*这里写的是StoreInfo 文字部分*/> 
-                  <View className='play-name-position-info'>{this.state.infoLoading ? `加载中`:this.state.playInfo.play_name}</View>
+                  <View className='play-name-position-info'>
+                    <text style='text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>{this.state.infoLoading ? ``:this.state.playInfo.play_name}</text>
+                  </View>
                   <View className='play-score-position-info'>难度
                     <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%'>
-                      <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
-                      <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-3px;'></image>
-                      <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-6px;'></image>
-                      <image src={scoreDeactive} className='play-score-pic-info' style='position:relative;left:-9px;'></image>
-                      <image src={scoreDeactive} className='play-score-pic-info' style='position:relative;left:-12px;'></image>
+                      {score_list}
                     </View>
                   </View>
                   <View className='play-headcount-position-info'>{this.state.infoLoading ? `0`:this.state.playInfo.play_headcount}人本
@@ -407,7 +422,7 @@ export default class Queueinfo extends Component {
                     </View>
                   </View>
                   <View className='at-row' style='padding-left:2%;'>
-                    <text className={this.state.isHide? 'play-intro-info play-intro-hide' : 'play-intro-info'}>{this.state.infoLoading ? `...`:this.state.playInfo.play_intro}</text>
+                    <text className={this.state.isHide? 'play-intro-info play-intro-hide' : 'play-intro-info'}>{this.state.infoLoading ? `...`:this.state.playInfo.play_intro.split('/n').join('\n')}</text>
                   </View>
                 </View>
               </View>
@@ -418,20 +433,20 @@ export default class Queueinfo extends Component {
                   <View className='at-row'>
                     <View className='at-col'>
                       <View className='at-row queue-start-time-info' >开局时间</View>
-                      <View className='at-row' style='font-size:14px;color:#000;height:70%;align-items:center;display:flex;justify-content:flex-start;padding-left:10%;'>{this.state.infoLoading ? `0`:this.state.queueInfo.queue_end_time}</View>
+                      <View className='at-row' style='font-size:14px;font-weight:550;color:#000;height:70%;align-items:center;display:flex;justify-content:flex-start;padding-left:10%;'>{this.state.infoLoading ? `0`:this.state.queueInfo.queue_end_time}</View>
                     </View>
                   </View>
                   <View className='at-row'>
                     <View className='at-col'>
                       <View className='at-row queue-antigender-info'>是否接受反串</View>
-                      <View className='at-row' style='font-size:14px;color:#000;height:70%;align-items:center;display:flex;justify-content:flex-start;padding-left:10%;'>{this.state.infoLoading ? `0`: this.state.queueInfo.queue_antigender? `接受`:`不接受`}反串</View>
+                      <View className='at-row' style='font-size:14px;font-weight:550;color:#000;height:70%;align-items:center;display:flex;justify-content:flex-start;padding-left:10%;'>{this.state.infoLoading ? `0`: this.state.queueInfo.queue_antigender? `接受`:`不接受`}反串</View>
                     </View>
                   </View>
                 </View>
 
-                <View className='at-col queue-join-tab-info' style='padding-top:2%;'>
+                <View className='at-col queue-join-tab-info' style='padding-top:2%;padding-bottom:10rpx;'>
                   {/*这部分是加入车队的tab */}
-                  <View className='at-row' style='height:50rpx;border:0px solid #979797;border-bottom-width:1px;width:90%;margin-left:5%'>
+                  <View className='at-row' style='height:50rpx;border:0px solid #97979750;border-bottom-width:1px;width:90%;margin-left:5%;margin-bottom:20rpx;'>
                     <View className='at-col' style='font-size:16px;font-weight:600;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:0%'>加入车队</View>
                     <View className='at-col' style='font-size:12px;color:#000;align-items:flex-end;display:flex;justify-content:flex-end;padding-right:5%'>定价0元/人</View>
                   </View>
@@ -440,7 +455,7 @@ export default class Queueinfo extends Component {
 
                 <View className='at-row at-row--wrap queue-member-tab-info' style='padding-top:2%;padding-bottom:4%;'>
                   {/* 车队成员列表 */}
-                  <View className='at-row' style='height:50rpx;border:0px solid #979797;border-bottom-width:1px;width:90%;margin-left:5%'>
+                  <View className='at-row' style='height:50rpx;border:0px solid #97979750;border-bottom-width:1px;width:90%;margin-left:5%'>
                     <View className='at-col' style='font-size:16px;font-weight:600;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:0%'>车队成员</View>
                     {male_female_display}
                   </View>

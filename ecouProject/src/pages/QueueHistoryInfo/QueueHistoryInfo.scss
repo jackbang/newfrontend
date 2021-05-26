@@ -14,7 +14,7 @@
 
 .queue-info-page{
     size: 100%;
-    filter: blur(20px) brightness(70%);
+    filter: blur(20px) brightness(50%);
             
 }
 
@@ -49,6 +49,7 @@
 
 .play-name-position-info{
     height:40px;
+    width:400rpx;
     font-size: 40px;
     color:#fff;
     display:flex;
@@ -158,7 +159,7 @@
     display:flex;
     justify-content:flex-start;
     padding-left:10%;
-    border: 0px solid #828282;
+    border: 0px solid #82828250;
     border-left-width: 2px;
 }
 

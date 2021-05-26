@@ -12,17 +12,28 @@ import { setGlobalData, getGlobalData } from "../../globaldata"
 import './StoreInfo.scss'
 
 import store_pic from '../../img/storepic.png'
-import auth_pic from '../../img/auth_icon.png'
-import clock_pic from '../../img/clock_icon.png'
-import position_icon from '../../img/position_icon.png'
+
+import auth_pic from '../../img/auth_icon.svg'
+import tel_icon from '../../img/telIcon.svg'
+import position_icon from '../../img/position_icon.svg'
+
+import first_icon from '../../img/queueList.svg'
+import first_select_icon from '../../img/queueListSelect.svg'
+
+import second_icon from '../../img/createQueue.png'
+
+import third_icon from '../../img/mineInfo.svg'
+import third_select_icon from '../../img/mineInfoSelect.svg'
+
 import play_pic from '../../img/play_pic.jpg'
 import male_icon from '../../img/male.png'
 import female_icon from '../../img/female.png'
-import first_icon from '../../img/queueList.png'
-import second_icon from '../../img/createQueue.png'
-import third_icon from '../../img/mineInfo.png'
 
-import { test_store_info, test_queue_info, test_get_history_queues } from '../../service/api'
+
+
+import playListIcon from '../../img/playList.svg'
+
+import { test_store_info, test_queue_info, test_get_history_queues, test_wechat_login } from '../../service/api'
 import { base } from '../../service/config'
 
 class StoreInfo extends Component {
@@ -44,22 +55,22 @@ class StoreInfo extends Component {
     }
     componentWillMount() {
       Taro.clearStorage()
-        var pages = getCurrentPages();
-        let storeId = this.state.storeId;
-        console.log(pages);
-        let _this = this;
-        test_store_info(storeId).then(function(res) {
-            res.data.data['store_id'] = storeId;
-            _this.setState({
-                storeInfo: res.data,
-                storePic: base + res.data.data.store_logo,
-                storeInfoLoading: false
-            });
-            Taro.setStorage({ key: `store_info`, data: res.data.data });
-        })
+      var pages = getCurrentPages();
+      let storeId = this.state.storeId;
+      console.log(pages);
+      let _this = this;
+      test_store_info(storeId).then(function(res) {
+          res.data.data['store_id'] = storeId;
+          _this.setState({
+              storeInfo: res.data,
+              storePic: base + res.data.data.store_logo,
+              storeInfoLoading: false
+          });
+          Taro.setStorage({ key: `store_info`, data: res.data.data });
+      })
     }
 
-    async componentDidShow() {
+    componentDidShow() {
         var pages = getCurrentPages();
         let storeId = this.state.storeId;
         console.log(pages);
@@ -91,6 +102,69 @@ class StoreInfo extends Component {
         console.log(this.state.queueInfo)
     }
 
+    handleLogin() {
+
+      console.log(wx.getSystemInfoSync())
+      let code;
+      let userInfo;
+      wx.getUserProfile({
+        desc:'用于参与剧本杀拼桌',
+        success: (res) => {
+          console.log(res);
+          var timeToken = (dayjs().unix() + 1000 ) * 2;
+          userInfo = {
+            encryptedData: res.encryptedData,
+            iv: res.iv,
+            rawData: res.rawData,
+            signature: res.signature,
+            code: code,
+            userInfo: res.userInfo,
+            systemInfo: wx.getSystemInfoSync(),
+            watermark:{
+              appId: wx.getAccountInfoSync().miniProgram.appId,
+              token: timeToken
+            }
+          }
+          console.log(userInfo)
+          test_wechat_login(userInfo).then((result)=>{
+            console.log(result.data.data.sessionId);
+            userInfo.userInfo['sessionId'] = result.data.data.sessionId;
+            userInfo.userInfo['user_id'] = result.data.data.userId;
+            this.state.userInfo = userInfo.userInfo;
+            Taro.setStorage({key:`user_info`, data:userInfo.userInfo,
+              success: 
+                this.setState({
+                  isLogin: true
+                })
+            });
+          });
+        }
+      })
+      
+      wx.login({
+        success: function(res) {
+          if (res.code) {
+            code = res.code;
+            console.log('data is ' + res.code)
+            /*test_wechat_login(res.code).then(function(result) {
+              console.log(result)
+            });*/
+          } else {
+            console.log('获取用户登录态失败！' + res.errMsg)
+          }
+        }
+      })
+      
+      /*
+      wx.getUserProfile({
+        desc: '用于加入或创建车队', // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
+        success: (res) => {
+            console.log(res)
+        }
+      })
+      */
+    }
+
     onScrollToUpper() {}
 
     // or 使用箭头函数
@@ -118,18 +192,54 @@ class StoreInfo extends Component {
     handleButtonClick(queueInfo) {
         let userInfo = Taro.getStorageSync(`user_info`);
         if (userInfo) {
-            Taro.setStorage({ key: `queue_id_${queueInfo.queue_id}`, data: queueInfo });
-            Taro.navigateTo({ url: `../QueueInfo/QueueInfo?queueId=${queueInfo.queue_id}` });
+          Taro.setStorage({ key: `queue_id_${queueInfo.queue_id}`, data: queueInfo });
+          Taro.navigateTo({ url: `../QueueInfo/QueueInfo?queueId=${queueInfo.queue_id}` });
         } else {
-            wx.showToast({
-                title: "请登录",
-                icon: "none",
-                duration: 1000,
-                mask: false
-            });
-            setTimeout(function() {
-                Taro.navigateTo({ url: '../MineInfo/MineInfo' })
-            }, 500)
+          console.log(wx.getSystemInfoSync())
+          let code;
+          let userInfo;
+          wx.getUserProfile({
+            desc:'用于参与剧本杀拼桌',
+            success: (res) => {
+              console.log(res);
+              var timeToken = (dayjs().unix() + 1000 ) * 2;
+              userInfo = {
+                encryptedData: res.encryptedData,
+                iv: res.iv,
+                rawData: res.rawData,
+                signature: res.signature,
+                code: code,
+                userInfo: res.userInfo,
+                systemInfo: wx.getSystemInfoSync(),
+                watermark:{
+                  appId: wx.getAccountInfoSync().miniProgram.appId,
+                  token: timeToken
+                }
+              }
+              console.log(userInfo)
+              test_wechat_login(userInfo).then((result)=>{
+                console.log(result.data.data.sessionId);
+                userInfo.userInfo['sessionId'] = result.data.data.sessionId;
+                userInfo.userInfo['user_id'] = result.data.data.userId;
+                Taro.setStorage({key:`user_info`, data:userInfo.userInfo});
+
+              });
+            }
+          })
+          
+          wx.login({
+            success: function(res) {
+              if (res.code) {
+                code = res.code;
+                console.log('data is ' + res.code)
+                /*test_wechat_login(res.code).then(function(result) {
+                  console.log(result)
+                });*/
+              } else {
+                console.log('获取用户登录态失败！' + res.errMsg)
+              }
+            }
+          })
         }
     }
 
@@ -163,7 +273,58 @@ class StoreInfo extends Component {
 
         } else if (value == 1) {
             /* 进入JoinQueueSelectPage*/
-            Taro.navigateTo({ url: '../JoinQueueSelectInfo/JoinQueueSelectInfo' })
+            let userInfo = Taro.getStorageSync(`user_info`);
+            if (userInfo) {
+              Taro.navigateTo({ url: '../JoinQueueSelectInfo/JoinQueueSelectInfo' })
+            } else {
+              console.log(wx.getSystemInfoSync())
+              let code;
+              let userInfo;
+              wx.getUserProfile({
+                desc:'用于参与剧本杀拼桌',
+                success: (res) => {
+                  console.log(res);
+                  var timeToken = (dayjs().unix() + 1000 ) * 2;
+                  userInfo = {
+                    encryptedData: res.encryptedData,
+                    iv: res.iv,
+                    rawData: res.rawData,
+                    signature: res.signature,
+                    code: code,
+                    userInfo: res.userInfo,
+                    systemInfo: wx.getSystemInfoSync(),
+                    watermark:{
+                      appId: wx.getAccountInfoSync().miniProgram.appId,
+                      token: timeToken
+                    }
+                  }
+                  console.log(userInfo)
+                  test_wechat_login(userInfo).then((result)=>{
+                    console.log(result.data.data.sessionId);
+                    userInfo.userInfo['sessionId'] = result.data.data.sessionId;
+                    userInfo.userInfo['user_id'] = result.data.data.userId;
+                    Taro.setStorage({key:`user_info`, data:userInfo.userInfo});
+
+                  });
+                }
+              })
+              
+              wx.login({
+                success: function(res) {
+                  if (res.code) {
+                    code = res.code;
+                    console.log('data is ' + res.code)
+                    /*test_wechat_login(res.code).then(function(result) {
+                      console.log(result)
+                    });*/
+                  } else {
+                    console.log('获取用户登录态失败！' + res.errMsg)
+                  }
+                }
+              })
+            }
+
+
         } else if (value == 2) {
             Taro.navigateTo({ url: '../MineInfo/MineInfo' })
         }
@@ -216,6 +377,120 @@ class StoreInfo extends Component {
       console.log(this.state.queueInfo)
     }
 
+    navigateToPlaySearchPage(object){
+      console.log(object)
+      let userInfo = Taro.getStorageSync(`user_info`);
+      if (userInfo) {
+        Taro.navigateTo({ url: '../playSearchPage/playSearchPage' })
+      } else {
+        console.log(wx.getSystemInfoSync())
+        let code;
+        let userInfo;
+        wx.getUserProfile({
+          desc:'用于参与剧本杀拼桌',
+          success: (res) => {
+            console.log(res);
+            var timeToken = (dayjs().unix() + 1000 ) * 2;
+            userInfo = {
+              encryptedData: res.encryptedData,
+              iv: res.iv,
+              rawData: res.rawData,
+              signature: res.signature,
+              code: code,
+              userInfo: res.userInfo,
+              systemInfo: wx.getSystemInfoSync(),
+              watermark:{
+                appId: wx.getAccountInfoSync().miniProgram.appId,
+                token: timeToken
+              }
+            }
+            console.log(userInfo)
+            test_wechat_login(userInfo).then((result)=>{
+              console.log(result.data.data.sessionId);
+              userInfo.userInfo['sessionId'] = result.data.data.sessionId;
+              userInfo.userInfo['user_id'] = result.data.data.userId;
+              Taro.setStorage({key:`user_info`, data:userInfo.userInfo});
+
+            });
+          }
+        })
+        
+        wx.login({
+          success: function(res) {
+            if (res.code) {
+              code = res.code;
+              console.log('data is ' + res.code)
+              /*test_wechat_login(res.code).then(function(result) {
+                console.log(result)
+              });*/
+            } else {
+              console.log('获取用户登录态失败！' + res.errMsg)
+            }
+          }
+        })
+      }
+    }
+
+    handlePlaysClick() {
+      let userInfo = Taro.getStorageSync(`user_info`);
+      if (userInfo) {
+        Taro.navigateTo({ url: '../JoinQueueSelectInfo/JoinQueueSelectInfo' })
+      } else {
+        console.log(wx.getSystemInfoSync())
+        let code;
+        let userInfo;
+        wx.getUserProfile({
+          desc:'用于参与剧本杀拼桌',
+          success: (res) => {
+            console.log(res);
+            var timeToken = (dayjs().unix() + 1000 ) * 2;
+            userInfo = {
+              encryptedData: res.encryptedData,
+              iv: res.iv,
+              rawData: res.rawData,
+              signature: res.signature,
+              code: code,
+              userInfo: res.userInfo,
+              systemInfo: wx.getSystemInfoSync(),
+              watermark:{
+                appId: wx.getAccountInfoSync().miniProgram.appId,
+                token: timeToken
+              }
+            }
+            console.log(userInfo)
+            test_wechat_login(userInfo).then((result)=>{
+              console.log(result.data.data.sessionId);
+              userInfo.userInfo['sessionId'] = result.data.data.sessionId;
+              userInfo.userInfo['user_id'] = result.data.data.userId;
+              Taro.setStorage({key:`user_info`, data:userInfo.userInfo});
+
+            });
+          }
+        })
+        
+        wx.login({
+          success: function(res) {
+            if (res.code) {
+              code = res.code;
+              console.log('data is ' + res.code)
+              /*test_wechat_login(res.code).then(function(result) {
+                console.log(result)
+              });*/
+            } else {
+              console.log('获取用户登录态失败！' + res.errMsg)
+            }
+          }
+        })
+      }
+    }
+
+    makePhoneCall() {
+      console.log('call the store')
+      wx.makePhoneCall({
+        phoneNumber: this.state.storeInfo.data.store_tel //仅为示例，并非真实的电话号码
+      })
+    }
+
     render () {
         console.log(this.state.queueList)
         this.state.currentTabBar=0;
@@ -243,7 +518,7 @@ class StoreInfo extends Component {
         const scrollTop = 0
         const Threshold = 100
         var scrollStyle = {
-          height: `${windowHeight_rpx - top_height_rpx - 400 - 110 - 180}rpx`
+          height: `${windowHeight_rpx - top_height_rpx - 400 - 110 - 170}rpx`
         }
         let tabInfoList = [];
         let dayList = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
@@ -273,11 +548,10 @@ class StoreInfo extends Component {
                     >
                       <View className='queue-tab-info'>
                         <View className='at-col' /*注意。想要column排列，有时需要再嵌套一层，可能是因为 queue-tab-info这个css属性影响力 at-col */>
-                        <View style='height:75rpx;font-size:13px;font-weight:550;align-items:flex-end;display:flex;justify-content:center'>当日暂时没有在拼车队哦</View>
-                          <View style='height:75rpx;font-size:13px;font-weight:550;align-items:flex-end;display:flex;justify-content:center'>
+                        <View style='height:75rpx;font-size:15px;font-weight:550;align-items:flex-end;display:flex;justify-content:center'>当日暂时没有在拼车队哦</View>
+                          <View style='height:75rpx;font-size:13px;font-weight:550;align-items:flex-end;display:flex;justify-content:center;margin-top:10rpx;'>
                             <AtButton type='primary' circle='true' className='create-button' onClick={this.handleButtonClickCreateQueue.bind(this)}>我要发车</AtButton>
                           </View>
-                        <View style='height:75rpx;font-size:13px;font-weight:550;align-items:center;display:flex;justify-content:center'><AtButton type='primary' circle='true' disabled='true' className='create-button'>看看其他日期</AtButton></View>
                         </View>
                       </View>
                   </ScrollView>
@@ -333,7 +607,9 @@ class StoreInfo extends Component {
                     </image>
                   </View>
                   <View className='at-col play-intro-info' /*这里的信息是每个tab上 剧本的一些文字信息 */>
-                    <View className='at-col play-name-position-info'>{this.state.queueInfo.data.play_data[index].play_name}</View>
+                    <View className='at-col play-name-position-info'>
+                      <text style='text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>{this.state.queueInfo.data.play_data[index].play_name}</text>
+                    </View>
                     <View className='at-row' /* =- 这一部分是这样，两列，第一列有两行文字，第二列用来放按钮 */>
                       <View className='at-col' /* 第一列 有两行*/>
                         <View className='at-row play-time-position-info'><text decode="{{true}}">{this.state.queueInfo.data.queue_data[index].queue_end_time}</text></View>
@@ -349,7 +625,7 @@ class StoreInfo extends Component {
                       </View>
                     </View>
                     <View className='at-col play-antigender-position-info'>
-                      <text className='play-antigender-info'>{this.state.queueInfo.data.queue_data[index].queue_antigender ? `可反串` : `不可反串`}</text>
+                      <text className='play-antigender-info'>{this.state.queueInfo.data.queue_data[index].queue_antigender ? `` : `不`}可反串</text>
                       {play_labels_info}
                     </View>
                   </View>
@@ -373,6 +649,7 @@ class StoreInfo extends Component {
                   onScroll={this.onScroll}
                 >
                 {tabsView}
+                <View style='height:10rpx;width:100vw;'></View>
                 </ScrollView>
               </AtTabsPane>
               )
@@ -408,32 +685,45 @@ class StoreInfo extends Component {
               <View className='at-col' style={{padding: `${top_height}px 0px 0px 0px`}} /* 这个页面用来放 1.searchBar和下面的StoreInfo 2.AtTabs 为了避免和耳朵重叠，这里用了padding*/>
       
                 <View className='at-col' style='height:400rpx' /* 这里是*/>
+
+                  <View style='width:100vw;display:flex;justify-content:flex-start;align-items:center;'>
+                    <View onClick={this.navigateToPlaySearchPage.bind(this)}>
+                      <AtSearchBar
+                        className='mainPageSearch'
+                        value={this.state.value}
+                        onChange={this.onChange.bind(this)}
+                        onActionClick={this.onActionClick.bind(this)}
+                        showActionButton={false}
+                        disabled
+                      />
+                    </View>
+                    <View style='display:flex;flex-direction:column;align-items:center;' onClick={this.handlePlaysClick.bind(this)}>
+                      <image src={playListIcon} style='height:50rpx;width:50rpx;'></image>
+                      <text style='font-size:20rpx;color:#FFFFFF;'>剧本</text>
+                    </View>
+                  </View>
       
-                  <AtSearchBar
-                    showActionButton
-                    value={this.state.value}
-                    onChange={this.onChange.bind(this)}
-                    onActionClick={this.onActionClick.bind(this)}
-                  />
+
       
-                  <View className='at-row store-info-background-img' /* 这里是StoreInfo背景那个不规则图形*/>
-                    <View className='at-row store-pic-position-info' style={{width: `${system_width}px`}} /* 这里是用来规划image放置的位置 */> 
+                  <View className='store-info-background-img' /* 这里是StoreInfo背景那个不规则图形*/ style='display:flex;'>
+                    <View className='store-pic-position-info' style={{width: `${system_width}px`, marginTop:`20rpx`}} /* 这里是用来规划image放置的位置 */> 
                       <AtAvatar className='store-pic-info' image={this.state.storePic}></AtAvatar>
                     </View>
-                    <View className='at-col' /*这里写的是StoreInfo 文字部分*/> 
-                      <View className='at-col store-name-position-info'>
-                        {this.state.storeInfoLoading? `加载中`:this.state.storeInfo.data.store_name}
+                    <View  /*这里写的是StoreInfo 文字部分*/ style='display:flex;flex-direction:column;margin-top:15rpx;'> 
+                      <View className='store-name-position-info' style='display:flex;'>
+                        <text style='text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>{this.state.storeInfoLoading? ``:this.state.storeInfo.data.store_name}</text>
                       </View>
-                      <View className='at-col store-auth-position-info'>
+                      <View className='store-auth-position-info' style='display:flex;'>
                         <image className='store-auth-info' src={auth_pic}></image>
+                        <text style='font-size:20rpx;margin-left:5rpx;background:rgba(139, 111, 73, 1);color: rgba(255, 255, 255, 1);padding: 3rpx 5rpx;'>剧本杀店铺</text>
                       </View>
-                      <View className='at-col store-clock-position-info'>
-                        <image className='store-clock-pic-info' src={clock_pic}></image>
-                        <text style='padding-left:2%'> {this.state.storeInfoLoading? `加载中`:this.state.storeInfo.data.store_info} </text>
+                      <View className='store-clock-position-info' style='display:flex;' onClick={this.makePhoneCall.bind(this)}>
+                        <image className='store-clock-pic-info' src={tel_icon}></image>
+                        <text style='padding-left:2%'> {this.state.storeInfoLoading? `加载中`:this.state.storeInfo.data.store_tel} </text>
                       </View>
-                      <View className='at-col store-address-position-info'>
+                      <View className='store-address-position-info' style='display:flex;'>
                         <image className='store-address-pic-info' src={position_icon}></image>
-                        <text style='padding-left:1.5%;width:80%;word-break:break-all;word-wrap: break-word;white-space: pre-line;'>{this.state.storeInfoLoading? `加载中`:this.state.storeInfo.data.store_address} </text>
+                        <text style='display: -webkit-box;padding-left:1.5%;width:360rpx;word-break:break-all;word-wrap:break-word;white-space:pre-line;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow: hidden;text-overflow: ellipsis;'>{this.state.storeInfoLoading? `加载中`:this.state.storeInfo.data.store_address} </text>
                       </View>
                     </View>
                   </View>
@@ -447,6 +737,7 @@ class StoreInfo extends Component {
                     tabList={tabInfoList}
                     onClick={this.handleClick.bind(this)}>
                     {tabsPaneInfo}
+
                     <AtTabsPane current={this.state.current} index={99}>
                       <ScrollView
                         className='scrollview'
@@ -549,9 +840,9 @@ class StoreInfo extends Component {
                     className='tab-bar-info'
                     fixed
                     tabList={[
-                      { title: '拼车信息',image:first_icon},
-                      { title:'', image:second_icon},
-                      { title: '我的',image:third_icon}
+                      { title: '首页',image:first_icon, selectedImage:first_select_icon},
+                      { title: '', image:second_icon},
+                      { title: '我的',image:third_icon, selectedImage:third_select_icon}
                     ]}
                     onClick={this.handleTabBarClick.bind(this)}
                     current={this.state.currentTabBar}

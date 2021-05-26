@@ -1,6 +1,6 @@
 import { Component } from 'react'
 import Taro from '@tarojs/taro'
-import { View, Text, ScrollView, Input } from '@tarojs/components'
+import { View, Text, ScrollView, Input, Textarea } from '@tarojs/components'
 import { AtButton, AtNavBar } from 'taro-ui'
 
 import './ComfirmQueueInfo.scss'
@@ -8,8 +8,8 @@ import background_img from '../../img/background.png'
 import playpic from '../../img/play_pic.jpg'
 import scoreActive from '../../img/scoreActive.png'
 import scoreDeactive from '../../img/scoreDeactive2.png'
-import telpic from '../../img/tel_icon.png'
-import mappic from '../../img/map_icon.png'
+import telpic from '../../img/telIcon.svg'
+import mappic from '../../img/map_icon.svg'
 import dayjs from 'dayjs';
 
 import {test_join_queue, test_create_queue} from '../../service/api'
@@ -107,7 +107,7 @@ export default class Comfirmqueueinfo extends Component {
         test_create_queue(formData).then(function(res){
           console.log(res);
           if (res.data.data.errcode == 0){
-            Taro.navigateTo({url: `../JoinQueueSuccessInfo/JoinQueueSuccessInfo?queueId=0`});
+            Taro.redirectTo({url: `../JoinQueueSuccessInfo/JoinQueueSuccessInfo?queueId=0`});
           }
         })
       } else {
@@ -135,7 +135,7 @@ export default class Comfirmqueueinfo extends Component {
               mask: false
             });
           } else if (res.data.data.errcode == 0){
-            Taro.navigateTo({url: `../JoinQueueSuccessInfo/JoinQueueSuccessInfo?queueId=${_this.state.queueInfo.queue_id}`});
+            Taro.redirectTo({url: `../JoinQueueSuccessInfo/JoinQueueSuccessInfo?queueId=${_this.state.queueInfo.queue_id}`});
           }
         })
       }
@@ -151,6 +151,25 @@ export default class Comfirmqueueinfo extends Component {
   handlePhoneNumInput(data) {
     this.state.playerPhoneNum = `${data.detail.value}`;
     console.log(data.detail.value)
+  }
+
+  makePhoneCall() {
+    console.log('call the store')
+    wx.makePhoneCall({
+      phoneNumber: this.state.storeInfo.store_tel //仅为示例，并非真实的电话号码
+    })
+  }
+
+  openLocation() {
+    var latitude = this.state.storeInfo.store_latitude;
+    var longitude = this.state.storeInfo.store_longitude;
+    var name = this.state.storeInfo.store_name;
+    wx.openLocation({
+      latitude,
+      longitude,
+      name,
+      scale: 15
+    })
   }
 
   render () {
@@ -174,6 +193,7 @@ export default class Comfirmqueueinfo extends Component {
     let play_labels_info;
     let phone_num_display = [];
     let phone_num_input_display = [];
+    let score_list = [];
     if (this.state.infoLoading == false){
       if (this.state.playInfo.play_male_num == 999 || this.state.playInfo.play_female_num == 999) {
         new_players_num_display.push(
@@ -229,12 +249,24 @@ export default class Comfirmqueueinfo extends Component {
       console.log(this.state.userInfo)
       if(this.state.userInfo.hasOwnProperty('phoneNumber')){
         phone_num_display.push(
-          <Input style='font-size:14px;font-weight:500;color:#000000;' onClick={console.log("clicked!")} value={this.state.userInfo.phoneNumber.length==0? "请输入联系方式":this.state.userInfo.phoneNumber} onblur={this.handlePhoneNumInput.bind(this)}></Input>
+          <Input type='number' style='font-size:14px;font-weight:500;color:#000000;' onClick={console.log("clicked!")} value={this.state.userInfo.phoneNumber.length==0? "请输入联系方式":this.state.userInfo.phoneNumber} onblur={this.handlePhoneNumInput.bind(this)}></Input>
         )
       }else{
         phone_num_display.push(
-          <Input style='font-size:14px;font-weight:500;color:#000000;' onClick={console.log("clicked!")} placeholder= "请输入联系方式"></Input>
+          <Input type='number' style='font-size:14px;font-weight:500;color:#000000;' onClick={console.log("clicked!")} placeholder= "请输入联系方式"></Input>
         )
+      }
+
+      for (let index = 0; index < 5; index++) {
+        if(index < this.state.playInfo.play_score){
+          score_list.push(
+            <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
+          )
+        } else {
+          score_list.push(
+            <image src={scoreDeactive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
+          )
+        }
       }
     }
 
@@ -265,17 +297,13 @@ export default class Comfirmqueueinfo extends Component {
                     <text className='play-pic-label-info'>{this.state.infoLoading? "":this.state.playInfo.play_labels[0]}</text>
                   </image>
               </View>
-              <text style='font-size:6vw;padding-left:4%;padding-top:2%;color:#fff'>{this.state.infoLoading? "加载中":this.state.playInfo.play_name}</text>
+              <text style='width:400rpx;font-size:6vw;padding-left:4%;padding-top:2%;color:#fff;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>{this.state.infoLoading? "加载中":this.state.playInfo.play_name}</text>
             </View>
             <View className='at-col' style={{backgroundColor:`#F9F9F9`,borderRadius:`15px`,paddingBottom:`5%`,minHeight:`${windowHeight_rpx - top_height_rpx - 250}rpx`}}>
               <View className='at-col' style='background-color:#ffff;border-radius:15px;'>
                 <View className='play-score-position-info' style='font-size:4vw;font-weight:bold;'>难度
                   <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%'>
-                    <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
-                    <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-3px;'></image>
-                    <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-6px;'></image>
-                    <image src={scoreDeactive} className='play-score-pic-info' style='position:relative;left:-9px;'></image>
-                    <image src={scoreDeactive} className='play-score-pic-info' style='position:relative;left:-12px;'></image>
+                    {score_list}
                   </View>
                 </View>
                 <View style='font-size:4vw;font-weight:bold;padding-left:38%;padding-top:3%;display:flex;align-items:flex-end;'>{this.state.infoLoading? 0:this.state.playInfo.play_headcount}人本</View>
@@ -283,22 +311,22 @@ export default class Comfirmqueueinfo extends Component {
                     {play_labels_info}
                 </View>
                 <View className='at-col' >
-                  <View style='font-size:16px;font-weight:550;color:#000;padding-top:13%;padding-left:4%;'>{this.state.infoLoading? "加载中":this.state.isCreateQueue? this.state.queueInfo.queue_end_time.slice(0,10)+" "+this.state.queueInfo.queue_end_time.slice(11):this.state.queueInfo.queue_end_time}</View>
+                  <View style='font-size:16px;font-weight:550;color:#000;padding-top:20rpx;padding-left:4%;'>{this.state.infoLoading? "加载中":this.state.isCreateQueue? this.state.queueInfo.queue_end_time.slice(0,10)+" "+this.state.queueInfo.queue_end_time.slice(11,-3):this.state.queueInfo.queue_end_time}</View>
                   <View style='font-size:12px;font-weight:550;color:#00000099;padding-left:4%;'>游戏时长约{this.state.infoLoading?0:this.state.playInfo.play_duration}小时（以实际游戏时间为准）</View>
                 </View>
                 <View style='width:650rpx;height:3px;border:0px solid #97979722;border-bottom-width:2px;margin-left:30rpx;padding-top:1%;padding-bottom:1%;'></View>
                 <View className='at-row' style='padding-bottom:3%;'>
-                  <View className='at-col' style=''>
-                    <View style='font-size:16px;font-weight:550;color:#000;padding-top:3%;padding-left:5%;'>{this.state.infoLoading?"":this.state.storeInfo.store_name}</View>
-                    <View style='padding-left:5%;width:500rpx;'>
-                      <text style='width:85%;font-size:12px;font-weight:550;color:#00000099;width:80%;word-break:break-all;word-wrap:break-word;white-space:pre-line;'>
-                        {this.state.infoLoading?"":this.state.storeInfo.store_address}
-                      </text>
-                    </View>
+                  <View style='width:550rpx;display:flex;flex-direction:column;'>
+                    <text style='font-size:16px;font-weight:550;color:#000;padding-top:3%;padding-left:5%;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>   
+                      {this.state.infoLoading?"":this.state.storeInfo.store_name}
+                    </text>
+                    <text style='padding-left:5%;font-size:12px;font-weight:550;color:#00000099;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>
+                      {this.state.infoLoading?"":this.state.storeInfo.store_address}
+                    </text>
                   </View>
-                  <image src={telpic} mode='heightFix' style='height:24px;padding-top:4.5%;padding-right:3%;'></image>
+                  <image src={telpic} mode='heightFix' style='height:25px;padding-top:4.5%;padding-right:3%;' onClick={this.makePhoneCall.bind(this)}></image>
                   <View style='height:30px;border:0px solid #97979722;border-left-width:2px;margin-top:4%;'></View>
-                  <image src={mappic} mode='heightFix' style='height:30px;padding-top:4%;padding-left:3%;padding-right:5%;'></image>
+                  <image src={mappic} mode='heightFix' style='height:25px;padding-top:4%;padding-left:3%;padding-right:5%;' onClick={this.openLocation.bind(this)}></image>
                 </View>
               </View>
 
@@ -329,7 +357,7 @@ export default class Comfirmqueueinfo extends Component {
                 <View style='width:680rpx;height:3px;border:0px solid #97979722;border-bottom-width:2px;margin-left:30rpx;padding-top:0%;padding-bottom:1%;'></View>
                 <View style='font-size:14px;font-weight:500;color:#000000;padding-left:4.5%;padding-top:1%;'>备注</View>
                 <View style='font-size:12px;font-weight:500;color:#00000099;padding-left:4.5%;padding-top:1%;width:90%;'>
-                  <Input style='word-break:break-all;word-wrap:break-word;white-space:pre-line;' placeholder='可将您的其他要求告知商家' onblur={this.handleCommentInput.bind(this)}></Input>
+                  <Textarea placeholder='可将您的其他要求告知商家' onblur={this.handleCommentInput.bind(this)}></Textarea>
                 </View>
               </View>
             </View>

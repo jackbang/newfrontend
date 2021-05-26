@@ -20,6 +20,8 @@ taroUI的css文件。
 @import "~taro-ui/dist/style/components/badge.scss";
 @import "~taro-ui/dist/style/components/input.scss";
 
+
+
 .at-search-bar{
     background-color: rgba(255, 255, 255, 0);
     border-inline: 0px none;
@@ -56,7 +58,7 @@ taroUI的css文件。
 }
 
 .at-tabs__header{
-    height: 110rpx;
+    height: 100rpx;
 }
 
 .store-pic-position-info{
@@ -67,17 +69,17 @@ taroUI的css文件。
 
 .store-name-position-info{
     height:100px;
-    width: 450rpx;
-    font-size: 40rpx;
+    width: 400rpx;
+    font-size: 36rpx;
     font-weight:bold;
     display:flex;
     align-items:flex-end;
-    padding-left: 5%;
+    margin-left: 20rpx;
 }
 
 .store-auth-position-info{
     height:50px;
-    padding-left: 2.75%;
+    margin-left: 20rpx;
     display:flex;
     align-items:center;
 }
@@ -95,7 +97,7 @@ taroUI的css文件。
 .store-clock-position-info{
     height:40px;
     width: 90%;
-    padding-left: 2.8%;
+    margin-left: 20rpx;
     font-size: 24px;
     display:flex;
     flex-direction:row;
@@ -109,7 +111,7 @@ taroUI的css文件。
 
 .store-address-position-info{
     height:100px;
-    padding-left: 2.8%;
+    margin-left: 20rpx;
     padding-top: 1%;
     font-size: 24px;
     display:flex;
@@ -129,7 +131,7 @@ taroUI的css文件。
 
 .store-info-background-img{
     height:320px;
-    background-image: url(../../img/storeinfobk.png);
+    background-image: url(../../img/storeinfobk.svg);
     background-position:50% 100%;
     background-repeat:no-repeat;
     background-size: 90%;
@@ -180,6 +182,7 @@ taroUI的css文件。
 
 .play-name-position-info{
     height: 60px;
+    width: 360rpx;
     font-size: 36px;
     font-weight:bold;
     display:flex;
@@ -245,12 +248,13 @@ taroUI的css文件。
 }
 
 .play-antigender-info{
+    width: auto;
     font-size: 20px;
     color: #046BFA;
     font-weight:bold;
     border: 3.5px solid #046BFA; 
     border-radius: 20px;
-    padding: 0% 2%;
+    padding: 0 10rpx;
 }
 
 .play-label-info{
@@ -259,7 +263,7 @@ taroUI的css文件。
     font-weight:bold;
     border: 3.5px solid #FCA62F; 
     border-radius: 20px;
-    padding: 0% 2%;
+    padding: 0 10rpx;
     margin-left: 3%;
 }
 
@@ -297,7 +301,20 @@ taroUI的css文件。
         align-items: center;
     }
     .at-tab-bar__inner-img{
-        height: 100rpx;
+        height: 50rpx;
+        width: 50rpx;
+    }
+
+    .at-tab-bar__item--active{
+        color:#FCA62F;
+    }
+}
+
+.mainPageSearch{
+    width:650rpx;
+    .at-search-bar__action{
+        color:#00000000;
+        background-color:#00000000;
     }
 }
 

@@ -46,6 +46,7 @@
 
 .play-name-position-info {
     height: 40px;
+    width: 400rpx;
     font-size: 40px;
     color: #fff;
     display: flex;
@@ -99,7 +100,7 @@
     color: #c0c0c0;
     border: 3.5px solid #c0c0c0;
     border-radius: 20px;
-    padding: 0% 2%;
+    padding: 0% 10rpx;
     margin-right: 3%;
 }
 
@@ -155,8 +156,8 @@
     display: flex;
     justify-content: flex-start;
     padding-left: 10%;
-    border: 0px solid #828282;
-    border-left-width: 2px;
+    border: 0px solid #82828290;
+    border-left-width: 1px;
 }
 
 .queue-join-tab-info {

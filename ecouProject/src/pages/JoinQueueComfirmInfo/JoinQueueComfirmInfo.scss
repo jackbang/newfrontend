@@ -8,10 +8,12 @@
 @import "~taro-ui/dist/style/components/input-number.scss";
 @import "~taro-ui/dist/style/components/switch.scss";
 @import "~taro-ui/dist/style/components/toast.scss";
+@import "~taro-ui/dist/style/components/activity-indicator.scss";
+@import '~taro-ui/dist/style/components/loading.scss';
 
 .queue-info-page{
     size: 100%;
-    filter: blur(20px) brightness(70%);  
+    filter: blur(20px) brightness(50%);  
 }
 
 .nav-bar-info{
@@ -45,6 +47,7 @@
 
 .play-name-position-info{
     height:40px;
+    width:400rpx;
     font-size: 40px;
     color:#fff;
     display:flex;
@@ -245,7 +248,7 @@
     zoom: 0.7;
     align-items: center;
     display:flex;
-    margin-right: 9%;
+    margin-right: 5%;
 }
 
 .room-select-icon{

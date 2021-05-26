@@ -135,6 +135,7 @@
 
 .play-name-position-info{
     height: 60px;
+    width: 360rpx;
     font-size: 36px;
     font-weight:bold;
     display:flex;
@@ -192,8 +193,8 @@
 }
 
 .gender-icon-info{
-    width:4vw;
-    height:4vw;
+    width:28rpx;
+    height:28rpx;
 }
 
 .play-label-position-info{
@@ -211,7 +212,7 @@
     color: rgb(70, 70, 70);
     border: 3.5px solid rgb(70, 70, 70); 
     border-radius: 20px;
-    padding: 0% 2%;
+    padding: 0 10rpx;
     margin-right: 3%;
 }
 

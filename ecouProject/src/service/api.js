@@ -56,3 +56,13 @@ export const test_create_queue = (form_data) => {
     let url = '/test/createQueue'
     return request.post(url, form_data, 'application/json')
 }
+
+export const test_store_plays_search = (body, params) => {
+    let url = `/test/store/search?`+params
+    return request.get(url, body)
+}
+
+export const test_store_queues_search = (body, params) => {
+    let url = `/test/queue/search?`+params
+    return request.get(url, body)
+}

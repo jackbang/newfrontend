@@ -5,12 +5,15 @@ import { AtButton, AtSearchBar, AtNavBar, AtTag} from 'taro-ui'
 
 import './JoinQueueSelectInfo.scss'
 
+import dayjs from 'dayjs'
+import 'dayjs/locale/zh-cn'
+
 import play_pic from '../../img/play_pic.jpg'
 import male_icon from '../../img/male.png'
 import female_icon from '../../img/female.png'
 import scoreActive from '../../img/scoreActive.png'
 
-import {test_search_plays} from '../../service/api'
+import {test_search_plays, test_store_plays_search} from '../../service/api'
 import {base} from '../../service/config'
 
 export default class Joinqueueselectinfo extends Component {
@@ -20,21 +23,47 @@ export default class Joinqueueselectinfo extends Component {
     this.state = {
       value: '',
       tagActiveNum: 0,
+      page: 1,
       plays_num: 0,
       store_info: {},
+      user_info: {},
       plays_list: []
     }
   }
 
-  async componentDidMount () {
+  componentDidShow () {
     this.state.store_info = Taro.getStorageSync('store_info');
+    this.state.user_info = Taro.getStorageSync('user_info')
+    
+    this.state.page = 1;
+    this.state.plays_list = [];
+
+    let cert_data = {
+      adminId: this.state.user_info.user_id,
+      sessionId: this.state.user_info.sessionId,
+      appId: wx.getAccountInfoSync().miniProgram.appId,
+      token: (dayjs().unix() + 1000)*2
+    }
+
+    let store_id = this.state.store_info.store_id;
+    let title = this.state.value;
+    let hd = this.state.tagActiveNum;
+    let type1 = '';
+    let type2 = '';
+    let type3 = '';
+    let page = this.state.page;
+
     let _this = this;
-    await test_search_plays(_this.state.store_info.store_id,this.state.value).then(res => {
-      _this.setState({
-        plays_num: res.data.data.total_play_num,
-        plays_list: res.data.data.plays_list
-      })
-    })
+
+    test_store_plays_search(cert_data, 
+      `store_id=${store_id}&title=${title}&hd=${hd}&type1=${type1}&type2=${type2}&type3=${type3}&page=${page}`).then(
+      function(res){
+        console.log(res.data)
+        _this.setState({
+          plays_list: _this.state.plays_list.concat(res.data)
+        })
+      }
+    )
   }
 
   handleCreateQueue (item){
@@ -59,6 +88,36 @@ export default class Joinqueueselectinfo extends Component {
     //console.log(e.detail)
   }
 
+  addPages() {
+    this.state.page = this.state.page + 1;
+    let cert_data = {
+      adminId: this.state.user_info.user_id,
+      sessionId: this.state.user_info.sessionId,
+      appId: wx.getAccountInfoSync().miniProgram.appId,
+      token: (dayjs().unix() + 1000)*2
+    }
+
+    let store_id = this.state.store_info.store_id;
+    let title = this.state.value;
+    let hd = this.state.tagActiveNum;
+    let type1 = '';
+    let type2 = '';
+    let type3 = '';
+    let page = this.state.page;
+
+    let _this = this;
+
+    test_store_plays_search(cert_data, 
+      `store_id=${store_id}&title=${title}&hd=${hd}&type1=${type1}&type2=${type2}&type3=${type3}&page=${page}`).then(
+      function(res){
+        console.log(res.data)
+        _this.setState({
+          plays_list: _this.state.plays_list.concat(res.data)
+        })
+      }
+    )
+  }
+
   onChange (value) {
     this.setState({
       value: value
@@ -70,13 +129,34 @@ export default class Joinqueueselectinfo extends Component {
   }
 
   onActionClick () {
+    this.state.page = 1;
+    this.state.plays_list = [];
+    let cert_data = {
+      adminId: this.state.user_info.user_id,
+      sessionId: this.state.user_info.sessionId,
+      appId: wx.getAccountInfoSync().miniProgram.appId,
+      token: (dayjs().unix() + 1000)*2
+    }
+
+    let store_id = this.state.store_info.store_id;
+    let title = this.state.value;
+    let hd = this.state.tagActiveNum;
+    let type1 = '';
+    let type2 = '';
+    let type3 = '';
+    let page = this.state.page;
+
     let _this = this;
-    test_search_plays(this.state.store_info.store_id,this.state.value).then(res => {
-      _this.setState({
-        plays_num: res.data.data.total_play_num,
-        plays_list: res.data.data.plays_list
-      })
-    })
+
+    test_store_plays_search(cert_data, 
+      `store_id=${store_id}&title=${title}&hd=${hd}&type1=${type1}&type2=${type2}&type3=${type3}&page=${page}`).then(
+      function(res){
+        console.log(res.data)
+        _this.setState({
+          plays_list: _this.state.plays_list.concat(res.data)
+        })
+      }
+    )
   }
 
   onTagClick (active){
@@ -84,6 +164,35 @@ export default class Joinqueueselectinfo extends Component {
     this.setState({
       tagActiveNum: active
     })
+
+    this.state.page = 1;
+    this.state.plays_list = [];
+    let cert_data = {
+      adminId: this.state.user_info.user_id,
+      sessionId: this.state.user_info.sessionId,
+      appId: wx.getAccountInfoSync().miniProgram.appId,
+      token: (dayjs().unix() + 1000)*2
+    }
+
+    let store_id = this.state.store_info.store_id;
+    let title = this.state.value;
+    let hd = active;
+    let type1 = '';
+    let type2 = '';
+    let type3 = '';
+    let page = this.state.page;
+
+    let _this = this;
+
+    test_store_plays_search(cert_data, 
+      `store_id=${store_id}&title=${title}&hd=${hd}&type1=${type1}&type2=${type2}&type3=${type3}&page=${page}`).then(
+      function(res){
+        console.log(res.data)
+        _this.setState({
+          plays_list: _this.state.plays_list.concat(res.data)
+        })
+      }
+    )
   }
 
   render () {
@@ -110,6 +219,8 @@ export default class Joinqueueselectinfo extends Component {
     
 
     let play_tab_list = this.state.plays_list.map((item, i)=>{
+
+      this.state.plays_list[i]['play_pic'] = item.play_img;
 
       let maleFemaleDisplay = [];
       if (item.play_male_num == 999 | item.play_female_num == 999){
@@ -139,6 +250,13 @@ export default class Joinqueueselectinfo extends Component {
           <text className='play-label-info'>{label_item}</text>
         )
       })
+
+      let score_list = [];
+      for (let index = 0; index < item.play_score; index++) {
+        score_list.push(
+          <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
+        )
+      }
       return(
       <View className='at-row queue-tab-info'>
         <View className='at-row play-pic-position-info' style='width:21vw' /* 这里写的是 每个tab上剧本图片的位置*/>
@@ -147,14 +265,12 @@ export default class Joinqueueselectinfo extends Component {
           </image>
         </View>
         <View className='at-col play-intro-info' /*这里的信息是每个tab上 剧本的一些文字信息 */>
-          <View className='at-col play-name-position-info'>{item.play_name}</View>
+          <View className='at-col play-name-position-info'><text style='text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>{item.play_name}</text></View>
           <View className='at-row' /* =- 这一部分是这样，两列，第一列有两行文字，第二列用来放按钮 */>
             <View className='at-col' /* 第一列 有两行*/>
               <View className='play-score-position-info'>难度
                 <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%'>
-                  <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
-                  <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-3px;'></image>
-                  <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-6px;'></image>
+                  {score_list}
                 </View>
               </View>
               <View className='at-row play-headcount-position-info' /* 这一部分有三列 */>
@@ -192,6 +308,7 @@ export default class Joinqueueselectinfo extends Component {
               value={this.state.value}
               onChange={this.onChange.bind(this)}
               onActionClick={this.onActionClick.bind(this)}
+              onConfirm={this.onActionClick.bind(this)}
             />
             <View className='at-row' style='margin-top: 2%;margin-bottom: 2%;'>
               <View className='' style='width:15vw;align-items:flex-end;display:flex;justify-content:flex-end;'>
@@ -241,6 +358,7 @@ export default class Joinqueueselectinfo extends Component {
             lowerThreshold={Threshold}
             upperThreshold={Threshold}
             onScrollToUpper={this.onScrollToUpperY.bind(this)} // 使用箭头函数的时候 可以这样写 `onScrollToUpper={this.onScrollToUpper}`
+            onScrollToLower={this.addPages.bind(this)}
             onScroll={this.onScrollY}
             >
               {play_tab_list}

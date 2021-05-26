@@ -11,13 +11,20 @@ import './MineInfo.scss'
 
 import play_pic from '../../img/play_pic.jpg'
 import background_img from '../../img/background.png'
-import user_avatar from '../../img/empty.png'
+import user_avatar from '../../img/empty.svg'
 import femalePic from '../../img/female.png'
 import malePic from '../../img/male.png'
 import store_icon from '../../img/store_icon.svg'
-import first_icon from '../../img/queueList.png'
+
+import first_icon from '../../img/queueList.svg'
+import first_select_icon from '../../img/queueListSelect.svg'
+
 import second_icon from '../../img/createQueue.png'
-import third_icon from '../../img/mineInfo.png'
+
+import third_icon from '../../img/mineInfo.svg'
+import third_select_icon from '../../img/mineInfoSelect.svg'
+
+import notLogin from '../../img/notLogin.svg'
 
 import {test_wechat_login, test_get_mine_history_queues} from '../../service/api'
 import {base} from '../../service/config'
@@ -44,7 +51,7 @@ export default class Mineinfo extends Component {
     }
   }
 
-  async componentDidShow() {
+  componentDidShow() {
     if (this.state.userInfo) {
       let _this = this;
       let confirmData = {
@@ -72,7 +79,56 @@ export default class Mineinfo extends Component {
       Taro.navigateBack()
     }else if (value ==1){
       /* 进入JoinQueueSelectPage*/
-      Taro.navigateTo({url: '../JoinQueueSelectInfo/JoinQueueSelectInfo'})
+      let userInfo = Taro.getStorageSync(`user_info`);
+      if (userInfo) {
+        Taro.navigateTo({ url: '../JoinQueueSelectInfo/JoinQueueSelectInfo' })
+      } else {
+        console.log(wx.getSystemInfoSync())
+        let code;
+        let userInfo;
+        wx.getUserProfile({
+          desc:'用于参与剧本杀拼桌',
+          success: (res) => {
+            console.log(res);
+            var timeToken = (dayjs().unix() + 1000 ) * 2;
+            userInfo = {
+              encryptedData: res.encryptedData,
+              iv: res.iv,
+              rawData: res.rawData,
+              signature: res.signature,
+              code: code,
+              userInfo: res.userInfo,
+              systemInfo: wx.getSystemInfoSync(),
+              watermark:{
+                appId: wx.getAccountInfoSync().miniProgram.appId,
+                token: timeToken
+              }
+            }
+            console.log(userInfo)
+            test_wechat_login(userInfo).then((result)=>{
+              console.log(result.data.data.sessionId);
+              userInfo.userInfo['sessionId'] = result.data.data.sessionId;
+              userInfo.userInfo['user_id'] = result.data.data.userId;
+              Taro.setStorage({key:`user_info`, data:userInfo.userInfo});
+              Taro.navigateTo({ url: '../JoinQueueSelectInfo/JoinQueueSelectInfo' })
+            });
+          }
+        })
+        
+        wx.login({
+          success: function(res) {
+            if (res.code) {
+              code = res.code;
+              console.log('data is ' + res.code)
+              /*test_wechat_login(res.code).then(function(result) {
+                console.log(result)
+              });*/
+            } else {
+              console.log('获取用户登录态失败！' + res.errMsg)
+            }
+          }
+        })
+      }
     }else if (value ==2){
       
     }
@@ -82,6 +138,24 @@ export default class Mineinfo extends Component {
     this.setState({
       current: value
     })
+
+    if (this.state.userInfo) {
+      let _this = this;
+      let confirmData = {
+          user_id: this.state.userInfo.user_id,
+          sessionId: this.state.userInfo.sessionId,
+          watermark: {
+              appId: wx.getAccountInfoSync().miniProgram.appId,
+              token: (dayjs().unix() + 1000) * 2
+          }
+      }
+      test_get_mine_history_queues(confirmData).then(function(res) {
+          _this.setState({
+            mineQueueInfo: res.data.data,
+            infoLoading: false
+          })
+      })
+    }
   }
 
   handleNavBack() {
@@ -128,66 +202,89 @@ export default class Mineinfo extends Component {
   } 
 
   handleLogin() {
+    let temp = Taro.getStorageSync('user_info') 
+    if(temp) {
+      console.log('logined')
+    } else {
+      console.log(wx.getSystemInfoSync())
+      let code;
+      let userInfo;
+      wx.getUserProfile({
+        desc:'用于参与剧本杀拼桌',
+        success: (res) => {
+          console.log(res);
+          var timeToken = (dayjs().unix() + 1000 ) * 2;
+          userInfo = {
+            encryptedData: res.encryptedData,
+            iv: res.iv,
+            rawData: res.rawData,
+            signature: res.signature,
+            code: code,
+            userInfo: res.userInfo,
+            systemInfo: wx.getSystemInfoSync(),
+            watermark:{
+              appId: wx.getAccountInfoSync().miniProgram.appId,
+              token: timeToken
+            }
+          }
+          console.log(userInfo)
+          test_wechat_login(userInfo).then((result)=>{
+            console.log(result.data.data.sessionId);
+            userInfo.userInfo['sessionId'] = result.data.data.sessionId;
+            userInfo.userInfo['user_id'] = result.data.data.userId;
+            this.state.userInfo = userInfo.userInfo;
+            Taro.setStorage({key:`user_info`, data:userInfo.userInfo,
+              success: 
+                this.setState({
+                  isLogin: true
+                })
+            });
 
-    console.log(wx.getSystemInfoSync())
-    let code;
-    let userInfo;
-    wx.getUserProfile({
-      desc:'用于参与剧本杀拼桌',
-      success: (res) => {
-        console.log(res);
-        var timeToken = (dayjs().unix() + 1000 ) * 2;
-        userInfo = {
-          encryptedData: res.encryptedData,
-          iv: res.iv,
-          rawData: res.rawData,
-          signature: res.signature,
-          code: code,
-          userInfo: res.userInfo,
-          systemInfo: wx.getSystemInfoSync(),
-          watermark:{
-            appId: wx.getAccountInfoSync().miniProgram.appId,
-            token: timeToken
+            if (this.state.userInfo) {
+              let _this = this;
+              let confirmData = {
+                  user_id: this.state.userInfo.user_id,
+                  sessionId: this.state.userInfo.sessionId,
+                  watermark: {
+                      appId: wx.getAccountInfoSync().miniProgram.appId,
+                      token: (dayjs().unix() + 1000) * 2
+                  }
+              }
+              test_get_mine_history_queues(confirmData).then(function(res) {
+                  _this.setState({
+                    mineQueueInfo: res.data.data,
+                    infoLoading: false
+                  })
+              })
+            }
+
+          });
+        }
+      })
+      
+      wx.login({
+        success: function(res) {
+          if (res.code) {
+            code = res.code;
+            console.log('data is ' + res.code)
+            /*test_wechat_login(res.code).then(function(result) {
+              console.log(result)
+            });*/
+          } else {
+            console.log('获取用户登录态失败！' + res.errMsg)
           }
         }
-        console.log(userInfo)
-        test_wechat_login(userInfo).then((result)=>{
-          console.log(result.data.data.sessionId);
-          userInfo.userInfo['sessionId'] = result.data.data.sessionId;
-          userInfo.userInfo['user_id'] = result.data.data.userId;
-          this.state.userInfo = userInfo.userInfo;
-          Taro.setStorage({key:`user_info`, data:userInfo.userInfo,
-            success: 
-              this.setState({
-                isLogin: true
-              })
-          });
-        });
-      }
-    })
-    
-    wx.login({
-      success: function(res) {
-        if (res.code) {
-          code = res.code;
-          console.log('data is ' + res.code)
-          /*test_wechat_login(res.code).then(function(result) {
-            console.log(result)
-          });*/
-        } else {
-          console.log('获取用户登录态失败！' + res.errMsg)
+      })
+      
+      /*
+      wx.getUserProfile({
+        desc: '用于加入或创建车队', // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
+        success: (res) => {
+            console.log(res)
         }
-      }
-    })
-    
-    /*
-    wx.getUserProfile({
-      desc: '用于加入或创建车队', // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
-      success: (res) => {
-          console.log(res)
-      }
-    })
-    */
+      })
+      */
+    }
   }
 
   onScrollToUpper() {}
@@ -220,11 +317,21 @@ export default class Mineinfo extends Component {
     let finish_tab = [];
     if (this.state.isLogin == false) {
       login_tab.push(
-        <View className='at-row queue-tab-info'>
-          {/*  每个tab上信息显示 */}
-          <View style='width:100%;align-items:center;display:flex;justify-content:center;'>
-            <AtButton type='primary' circle='true' className='login-button' onClick={this.handleLogin.bind(this)} /*openType="getPhoneNumber" OnGetPhoneNumber="getPhoneNumber"*/>登录</AtButton>
-          </View>
+        <View style='width:100vw;height:400rpx;display:flex;flex-direction:column;align-items:center;'>
+          <image src={notLogin} style='width:100vw;height:100%;'></image>
+          <text style='font-size:18px;color:#A5A5A5;'>登陆后查看更多信息哦</text>
+        </View>
+        //<View className='at-row queue-tab-info'>
+        //  {/*  每个tab上信息显示 */}
+        //  <View style='width:100%;align-items:center;display:flex;justify-content:center;'>
+        //    <AtButton type='primary' circle='true' className='login-button' onClick={this.handleLogin.bind(this)} /*openType="getPhoneNumber" OnGetPhoneNumber="getPhoneNumber"*/>登录</AtButton>
+        //  </View>
+        //</View>
+      )
+      finish_tab.push(
+        <View style='width:100vw;height:400rpx;display:flex;flex-direction:column;align-items:center;'>
+          <image src={notLogin} style='width:100vw;height:100%;'></image>
+          <text style='font-size:18px;color:#A5A5A5;'>登陆后查看更多信息哦</text>
         </View>
       )
     }else{
@@ -260,7 +367,9 @@ export default class Mineinfo extends Component {
                   </image>
                 </View>
                 <View className='at-col play-intro-info'>
-                  <View className='at-col play-name-position-info'>{this.state.mineQueueInfo.playList[Idx].play_name}</View>
+                  <View className='at-col play-name-position-info'>
+                    <text style='text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>{this.state.mineQueueInfo.playList[Idx].play_name}</text>
+                  </View>
                   <View className='at-row'>
                     <View className='at-col'>
                       <View className='at-row play-time-position-info'><text decode="{{true}}">{queueItem.queue_end_time.slice(0,10)+" "+queueItem.queue_end_time.slice(11,-3)}</text></View>
@@ -277,7 +386,7 @@ export default class Mineinfo extends Component {
                   </View>
                   <View className='at-col play-store-position-info'>
                     <image src={store_icon} style='width:4vw;height:4vw;'></image>
-                    <text style='margin-left:10rpx;'>{this.state.mineQueueInfo.storeList[Idx].store_name}</text>
+                    <text style='width:400rpx;margin-left:10rpx;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>{this.state.mineQueueInfo.storeList[Idx].store_name}</text>
                   </View>
                 </View>
               </View>
@@ -344,13 +453,31 @@ export default class Mineinfo extends Component {
           color='#ffff'
           leftIconType='chevron-left'
           ><View style='color:#fff;font-size:18px;padding-bottom:5rpx;'>我的</View></AtNavBar>
-          <View style='height:400rpx;display:flex;justify-content:center;align-items:center;'>
-            <image src={this.state.isLogin? this.state.userInfo.avatarUrl : user_avatar} style='height:200rpx;width:200rpx;background-color:#fff;border: 3.5px solid #fff;border-radius: 100rpx;'></image>
-            <View style='position:absolute;bottom:0;left:40rpx;display:flex;justify-content:center;align-items:center;'>
-              <text style='color:#fff;font-size:20px;'>{this.state.isLogin? this.state.userInfo.nickName : '用户名'}</text>
-              <image src={this.handleGender(this.state.isLogin)} style='height:36rpx;width:36rpx;background-color:#fff;margin-left:10rpx;padding: 2rpx 8rpx;border-radius: 20rpx;'></image>
+          <View style='height:400rpx;display:flex;flex-direction:column;justify-content:center;align-items:center;' onClick={this.handleLogin.bind(this)}>
+            <image src={this.state.isLogin? this.state.userInfo.avatarUrl : user_avatar} style='height:200rpx;width:200rpx;background-color:#fff;border: 3.5px solid #fff;border-radius: 107rpx;'></image>
+            <text style={{fontSize:`18px`, color:`#FEFFFF`, visibility:this.state.isLogin? 'hidden':'visible'}}>点击登录</text>
+            <View style='position:absolute;bottom:0;left:40rpx;display:flex;justify-content:flex-start;align-items:center;width:456rpx;'>
+              <text style='color:#fff;font-size:20px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;max-width:400rpx;'>{this.state.isLogin? this.state.userInfo.nickName : ''}</text>
+              <image 
+                src={this.handleGender(this.state.isLogin)} 
+                style={{height:`36rpx`,width:`36rpx`,backgroundColor:`#fff`,marginLeft:`10rpx`,padding: `2rpx 8rpx`,borderRadius: `20rpx`, visibility:this.state.isLogin? 'visible':'hidden'}}
+                ></image>
             </View>
-            <View style='background:rgba(225, 232, 156, 0.16);position:absolute;bottom:0;right:40rpx;width:196rpx;height:140rpx;border-radius:20rpx;border: 1px solid #97979770;display:flex;justify-content:center;align-items:center;'>
+            <View 
+              style={{
+                background:`rgba(225, 232, 156, 0.16)`,
+                position:`absolute`,
+                bottom:`0`,
+                right:`40rpx`,
+                width:`196rpx`,
+                height:`140rpx`,
+                borderRadius:`20rpx`,
+                border:` 1px solid #97979770`,
+                display:`flex`,
+                justifyContent:`center`,
+                alignItems:`center`,
+                visibility: this.state.isLogin? 'visible':'hidden'}}
+              >
               <View style='background: #D8D8D8;width:6rpx;height:6rpx;border: 0.5px solid #979797;border-radius:6rpx;position:absolute;top:14rpx;left:35rpx;'></View>
               <View style='background: #D8D8D8;width:6rpx;height:6rpx;border: 0.5px solid #979797;border-radius:6rpx;position:absolute;top:14rpx;right:35rpx;'></View>
               <text style='font-size:20px;color: #FEFFFF;'>0</text>
@@ -410,9 +537,9 @@ export default class Mineinfo extends Component {
               className='tab-bar-info'
               fixed
               tabList={[
-                { title: '拼车信息',image:first_icon},
-                { title:'', image:second_icon},
-                { title: '我的',image:third_icon}
+                { title: '首页',image:first_icon, selectedImage:first_select_icon},
+                { title: '', image:second_icon},
+                { title: '我的',image:third_icon, selectedImage:third_select_icon}
               ]}
               onClick={this.handleTabBarClick.bind(this)}
               current={this.state.currentTabBar}

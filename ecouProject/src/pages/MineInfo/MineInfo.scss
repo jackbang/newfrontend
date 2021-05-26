@@ -94,6 +94,7 @@
 
 .play-name-position-info {
     height: 60px;
+    width: 400rpx;
     font-size: 36px;
     font-weight: bold;
     display: flex;
@@ -180,7 +181,12 @@
         align-items: center;
     }
     .at-tab-bar__inner-img {
-        height: 100rpx;
+        height: 50rpx;
+        width: 50rpx;
+    }
+
+    .at-tab-bar__item--active{
+        color:#FCA62F;
     }
 }
 

@@ -19,6 +19,7 @@ export default class Joinqueuesuccessinfo extends Component {
 
   componentWillMount() {
     var pages = getCurrentPages();
+    console.log(pages)
     let currentPage = pages[pages.length-1];
     let pages_option = currentPage.options;
     this.state.queueInfo = Taro.getStorageSync(`queue_id_${pages_option.queueId}`);
