@@ -66,3 +66,8 @@ export const test_store_queues_search = (body, params) => {
     let url = `/test/queue/search?`+params
     return request.get(url, body)
 }
+
+export const test_get_queue_info = (body) => {
+    let url = `/test/queue/get`
+    return request.get(url, body)
+}

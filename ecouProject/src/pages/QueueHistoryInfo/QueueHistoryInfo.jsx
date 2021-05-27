@@ -124,6 +124,15 @@ export default class Queueinfo extends Component {
     })
   }
 
+  onShareAppMessage (res) {
+    console.log(res)
+    let store_info = Taro.getStorageSync('store_info');
+    return {
+      title: `aaaaaaaaa\naaaaaaaa`,
+      path: `/pages/QueueInfo/QueueInfo?queueId=${this.state.queueInfo.queue_id}&storeId=${store_info.store_id}`
+    }
+  }
+
   render () {
 
     var top_height = wx.getSystemInfoSync().statusBarHeight;
@@ -159,7 +168,7 @@ export default class Queueinfo extends Component {
         if (player_index < this.state.playerInfo.length) {
           this.players_info.push(
             <View className='at-row' style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative'>
-              <image src={this.state.playerInfo[player_index].player_pic} style='height:15vw;width:15vw;border-radius:100%;background-color:gray;'></image>
+              <image src={this.state.playerInfo[player_index].player_pic} style='height:15vw;width:15vw;border-radius:100%;background-color:#D8D8D8;'></image>
               <View style='width:15vw;position:absolute;top:19vw;align-items:flex-end;display:flex;justify-content:center;'>
                 <image src={this.state.playerInfo[player_index].player_gender==3? null:this.state.playerInfo[player_index].player_gender? malePic:femalePic} style='height:4vw;width:4vw;'></image>
                 <text style='width:12vw;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;'>{this.state.playerInfo[player_index].player_name}</text>
@@ -169,7 +178,7 @@ export default class Queueinfo extends Component {
         } else {
           this.players_info.push(
             <View className='at-row' style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative'>
-              <image src={emptyPic} style='height:15vw;width:15vw;border-radius:100%;background-color:gray;'></image>
+              <image src={emptyPic} style='height:15vw;width:15vw;border-radius:100%;background-color:#D8D8D8;'></image>
               <View style='width:15vw;position:absolute;top:19vw;align-items:flex-end;display:flex;justify-content:center;'>
                 <text style='font-size:12px'>等待加入</text>
               </View>
@@ -208,7 +217,7 @@ export default class Queueinfo extends Component {
       if (this.state.canInv == true | this.state.canInv == "null") {
         invButDisplay.push(
           <View className='at-row' style='position:fixed;bottom:0;height:150rpx;padding-top:2%;background-color:#fff'>
-              <AtButton type='primary' circle='true' className='join-queue-button' >邀请好友</AtButton>
+              <AtButton type='primary' circle='true' openType='share' disabled={this.state.queueInfo.queue_status == 1 | (this.state.queueInfo.queue_current_num==this.state.playInfo.play_headcount)} className='join-queue-button' >邀请好友</AtButton>
           </View>
         );
         scrollStyle = {

@@ -5,13 +5,14 @@ import { AtButton, AtNavBar, AtSearchBar, AtActivityIndicator} from 'taro-ui'
 
 import './playSearchPage.scss'
 
-import {test_store_plays_search, test_store_queues_search} from '../../service/api'
+import {test_store_plays_search, test_store_queues_search, test_get_history_queues} from '../../service/api'
 import {base} from '../../service/config'
 import dayjs from 'dayjs';
 
 import malePic from '../../img/male.png'
 import femalePic from '../../img/female.png'
 import scoreActive from '../../img/scoreActive.png'
+import noResult from '../../img/noResult.svg'
 
 export default class Playsearchpage extends Component {
 
@@ -25,6 +26,7 @@ export default class Playsearchpage extends Component {
       storePlays: [],
       queues: [],
       queuePlays: [],
+      queueList:[],
       searchResultInfoLoading: false
     }
   }
@@ -61,7 +63,33 @@ export default class Playsearchpage extends Component {
     })
   }
 
+  refreshMineQueue() {
+    let storeId = this.state.store_info.store_id;
+    let _this = this;
+    let userInfo = Taro.getStorageSync(`user_info`);
+    if (userInfo) {
+      let confirmData = {
+          store_id: storeId,
+          user_id: userInfo.user_id,
+          sessionId: userInfo.sessionId,
+          watermark: {
+              appId: wx.getAccountInfoSync().miniProgram.appId,
+              token: (dayjs().unix() + 1000) * 2
+          }
+      }
+      test_get_history_queues(confirmData).then(function(res) {
+          _this.setState({
+              queueList: res.data.data.queueList
+          })
+          console.log(res.data)
+      })
+    }
+  }
+
   onActionClick(){
+
+    this.refreshMineQueue()
+
     this.state.storePlays = [];
     this.setState({
       searchResultInfoLoading: true
@@ -110,12 +138,22 @@ export default class Playsearchpage extends Component {
       )
   }
 
-  handleButtonClick(item) {
-    console.log(item)
+  handleButtonClick(queueInfo) {
+    console.log(queueInfo)
+    let userInfo = Taro.getStorageSync(`user_info`);
+    queueInfo.queue_end_time = queueInfo.queue_end_time.slice(0,10)+" "+queueInfo.queue_end_time.slice(11,-3)
+    Taro.setStorage({ key: `queue_id_${queueInfo.queue_id}`, data: queueInfo });
+    Taro.navigateTo({ url: `../QueueInfo/QueueInfo?queueId=${queueInfo.queue_id}` });
   }
 
-  handleCreateQueue(item) {
-    console.log(item)
+  handleInfoButtonClick(queueInfo) {
+    let userInfo = Taro.getStorageSync(`user_info`);
+    Taro.setStorage({ key: `queue_id_${queueInfo.queue_id}`, data: queueInfo });
+    Taro.navigateTo({ url: `../QueueHistoryInfo/QueueHistoryInfo?queueId=${queueInfo.queue_id}` });
+  }
+
+  handleCreateQueue (item){
+    Taro.navigateTo({url: `../JoinQueueComfirmInfo/JoinQueueComfirmInfo?playId=${item.play_id}`})
   }
 
   render () {
@@ -152,6 +190,11 @@ export default class Playsearchpage extends Component {
       this.state.queues.map((item, itemIdx) => {
 
         this.state.queuePlays[itemIdx]['play_pic'] = this.state.queuePlays[itemIdx].play_img;
+        console.log(this.state.queuePlays[itemIdx])
+        Taro.setStorage({
+          key:`play_id_${this.state.queuePlays[itemIdx].play_id}`,
+          data: this.state.queuePlays[itemIdx]
+        })
 
         let male_female_display = [];
         if (this.state.queuePlays[itemIdx].play_male_num == 999 | this.state.queuePlays[itemIdx].play_female_num == 999) {
@@ -177,6 +220,17 @@ export default class Playsearchpage extends Component {
           )
         })
 
+        let buttonDisplay = [];
+        if(this.state.queueList.find((repeatQueue) => repeatQueue.queue_id == item.queue_id)){
+          buttonDisplay.push(
+            <AtButton type='primary' circle='true' className='join-button' onClick={this.handleInfoButtonClick.bind(this, item)}>查看详情</AtButton>
+          )
+        } else {
+          buttonDisplay.push(
+            <AtButton type='primary' circle='true' className='join-button' disabled={item.queue_current_num==this.state.queuePlays[itemIdx].play_headcount} onClick={this.handleButtonClick.bind(this, item)}>{item.queue_current_num==this.state.queuePlays[itemIdx].play_headcount? '已拼满':'我要上车'}</AtButton>
+          )
+        }
+
         queueTabs.push(
           <View className='at-row queue-tab-info'>
             {/*  每个tab上信息显示 */}
@@ -186,7 +240,9 @@ export default class Playsearchpage extends Component {
               </image>
             </View>
             <View className='at-col play-intro-info' /*这里的信息是每个tab上 剧本的一些文字信息 */>
-              <View className='at-col play-name-position-info'>{this.state.queuePlays[itemIdx].play_name}</View>
+              <View className='at-col play-name-position-info'>
+                <text style='text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>{this.state.queuePlays[itemIdx].play_name}</text>
+              </View>
               <View className='at-row' /* =- 这一部分是这样，两列，第一列有两行文字，第二列用来放按钮 */>
                 <View className='at-col' /* 第一列 有两行*/>
                   <View className='at-row play-time-position-info'><text decode="{{true}}">{item.queue_end_time.slice(0,10)+" "+item.queue_end_time.slice(11,-3)}</text></View>
@@ -198,7 +254,7 @@ export default class Playsearchpage extends Component {
                 </View>
                 <View className='at-row' style='width:20vw' /*第二列是用来放按钮 */>
                   {/* Button  激活与不激活 具体看taroui中的文档*/}
-                  <AtButton type='primary' circle='true' className='join-button' onClick={this.handleButtonClick.bind(this, item)}>我要上车</AtButton>
+                  {buttonDisplay}
                 </View>
               </View>
               <View className='at-col play-antigender-position-info'>
@@ -214,6 +270,11 @@ export default class Playsearchpage extends Component {
       this.state.storePlays.map((item, itemIdx)=>{
 
         this.state.storePlays[itemIdx]['play_pic'] = this.state.storePlays[itemIdx].play_img;
+        console.log(this.state.storePlays[itemIdx])
+        Taro.setStorage({
+          key:`play_id_${this.state.storePlays[itemIdx].play_id}`,
+          data: this.state.storePlays[itemIdx]
+        })
 
         let male_female_display = [];
         if (item.play_male_num == 999 | item.play_female_num == 999) {
@@ -239,6 +300,13 @@ export default class Playsearchpage extends Component {
           )
         })
 
+        let score_list = [];
+        for (let index = 0; index <item.play_score; index++) {
+          score_list.push(
+            <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
+          )
+        }
+
         playTabs.push(
           <View className='at-row queue-tab-info'>
             <View className='at-row play-pic-position-info' style='width:21vw' /* 这里写的是 每个tab上剧本图片的位置*/>
@@ -247,14 +315,14 @@ export default class Playsearchpage extends Component {
               </image>
             </View>
             <View className='at-col play-intro-info' /*这里的信息是每个tab上 剧本的一些文字信息 */>
-              <View className='at-col play-name-position-info'>{item.play_name}</View>
+              <View className='at-col play-name-position-info'>
+                <text style='text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>{item.play_name}</text>
+              </View>
               <View className='at-row' /* =- 这一部分是这样，两列，第一列有两行文字，第二列用来放按钮 */>
                 <View className='at-col' /* 第一列 有两行*/>
                   <View className='play-score-position-info'>难度
                     <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%'>
-                      <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
-                      <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-3px;'></image>
-                      <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-6px;'></image>
+                      {score_list}
                     </View>
                   </View>
                   <View className='at-row play-headcount-position-info' /* 这一部分有三列 */>
@@ -280,6 +348,7 @@ export default class Playsearchpage extends Component {
         <View style='height:auto;width:100vw;'>
             <text style='font-size:40rpx;font-weight:550;color:#000000;margin-left:50rpx;margin-top:40rpx;'>{this.state.queues.length==0? '':'在拼车队'}</text>
             {queueTabs}
+            {((this.state.queues.length==0)&&(this.state.storePlays.length==0))? <image src={noResult} style='width:100vw;height:100%;' ></image>:null}
         </View>
       )
 
@@ -289,6 +358,15 @@ export default class Playsearchpage extends Component {
             {playTabs}
         </View>
       )
+
+      if ((this.state.queues.length==0) & (this.state.storePlays.length==0)) {
+        console.log('empty')
+        content.push(
+          <View style='height:auto;width:100vw;'>
+            <image src={noResult} style='width:100vw;height:50vh;' ></image>
+          </View>
+        )
+      }
     }
     return (
       <View className='playSearchPage'>
@@ -305,6 +383,7 @@ export default class Playsearchpage extends Component {
             onActionClick={this.onActionClick.bind(this)}
             showActionButton={true}
             onConfirm={this.onActionClick.bind(this)}
+            focus
           />
           <ScrollView
             className='scrollview'

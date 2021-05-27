@@ -10,7 +10,7 @@ import "taro-ui/dist/style/components/button.scss" // 按需引入
 import './MineInfo.scss'
 
 import play_pic from '../../img/play_pic.jpg'
-import background_img from '../../img/background.png'
+import background_img from '../../img/background.jpg'
 import user_avatar from '../../img/empty.svg'
 import femalePic from '../../img/female.png'
 import malePic from '../../img/male.png'
@@ -338,7 +338,7 @@ export default class Mineinfo extends Component {
       if (this.state.infoLoading == false){
         console.log(this.state.mineQueueInfo.queueList)
         this.state.mineQueueInfo.queueList.map((queueItem, Idx) => {
-          if(dayjs(queueItem.queue_end_time).isAfter(dayjs())) {
+          if(dayjs(queueItem.queue_end_time).isAfter(dayjs()) & (queueItem.queue_status == 0)) {
             let tempGenderDisplay = [];
             if (this.state.mineQueueInfo.playList[Idx].play_male_num == 999 | this.state.mineQueueInfo.playList[Idx].play_female_num == 999)
             {
@@ -442,6 +442,22 @@ export default class Mineinfo extends Component {
             )
           }
         })
+
+        if (login_tab.length==0){
+          login_tab.push(
+            <View style='width:100vw;height:400rpx;display:flex;flex-direction:column;align-items:center;'>
+              <image src={notLogin} style='width:100vw;height:100%;'></image>
+            </View>
+          )
+        }
+
+        if (finish_tab.length==0){
+          finish_tab.push(
+            <View style='width:100vw;height:400rpx;display:flex;flex-direction:column;align-items:center;'>
+              <image src={notLogin} style='width:100vw;height:100%;'></image>
+            </View>
+          )
+        }
       }
     }
 

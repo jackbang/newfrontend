@@ -34,7 +34,9 @@ export default class Joinqueuesuccessinfo extends Component {
   handleComfirmClick() {
     Taro.removeStorage({key: `queue_id_${this.state.queueInfo.queue_id}_newPlayers`});
     Taro.removeStorage({key: `queue_id_${this.state.queueInfo.queue_id}`});
-    Taro.navigateBack({ delta: 15 });
+    Taro.reLaunch({
+      url: `/pages/StoreInfo/StoreInfo?storeId=${this.state.storeInfo.store_id}`
+    })
   }
 
   render () {

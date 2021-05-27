@@ -12,6 +12,7 @@ import play_pic from '../../img/play_pic.jpg'
 import male_icon from '../../img/male.png'
 import female_icon from '../../img/female.png'
 import scoreActive from '../../img/scoreActive.png'
+import noResult from '../../img/noResult.svg'
 
 import {test_search_plays, test_store_plays_search} from '../../service/api'
 import {base} from '../../service/config'
@@ -218,7 +219,8 @@ export default class Joinqueueselectinfo extends Component {
     console.log(this.state.plays_list)
     
 
-    let play_tab_list = this.state.plays_list.map((item, i)=>{
+    let play_tab_list = [];
+    this.state.plays_list.map((item, i)=>{
 
       this.state.plays_list[i]['play_pic'] = item.play_img;
 
@@ -257,7 +259,7 @@ export default class Joinqueueselectinfo extends Component {
           <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
         )
       }
-      return(
+      play_tab_list.push(
       <View className='at-row queue-tab-info'>
         <View className='at-row play-pic-position-info' style='width:21vw' /* 这里写的是 每个tab上剧本图片的位置*/>
           <image className='play-pic-info' src={base+item.play_pic}>
@@ -290,6 +292,14 @@ export default class Joinqueueselectinfo extends Component {
       </View>
       )
     });
+
+    if (play_tab_list.length == 0) {
+      play_tab_list.push(
+        <View style='height:auto;width:100vw;'>
+          <image src={noResult} style='width:100vw;height:50vh;' ></image>
+        </View>
+      )
+    }
 
 
 

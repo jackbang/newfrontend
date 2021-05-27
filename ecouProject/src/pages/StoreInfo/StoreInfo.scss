@@ -19,8 +19,14 @@ taroUI的css文件。
 @import "~taro-ui/dist/style/components/tab-bar.scss";
 @import "~taro-ui/dist/style/components/badge.scss";
 @import "~taro-ui/dist/style/components/input.scss";
+@import "~taro-ui/dist/style/components/activity-indicator.scss";
+@import '~taro-ui/dist/style/components/loading.scss';
 
-
+.load {
+    .at-loading__ring{
+        border-width: 2PX;
+    }
+}
 
 .at-search-bar{
     background-color: rgba(255, 255, 255, 0);
@@ -125,7 +131,7 @@ taroUI的css文件。
 }
 
 .store-info-page{
-    background-image: url(../../img/background.png);
+    background-image: url(../../img/background.jpg);
     background-size: 100%;
 }
 

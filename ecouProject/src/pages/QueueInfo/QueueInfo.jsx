@@ -14,7 +14,7 @@ import emptyPic from '../../img/empty.svg'
 import femalePic from '../../img/female.png'
 import malePic from '../../img/male.png'
 
-import {test_queue_players_info, test_get_phonenum_info} from '../../service/api'
+import {test_queue_players_info, test_get_phonenum_info, test_store_info, test_get_queue_info, test_wechat_login} from '../../service/api'
 import {base} from '../../service/config'
 import dayjs from 'dayjs';
 
@@ -34,6 +34,9 @@ export default class Queueinfo extends Component {
       userInfo:{},
       playerInfo:[],
       newPlayerInfo:[],
+      storeInfo:{},
+      fromShare: false,
+      login: false,
       infoLoading: true
     },
     this.players_info = []
@@ -43,16 +46,64 @@ export default class Queueinfo extends Component {
     var pages = getCurrentPages();
     let currentPage = pages[pages.length-1];
     let pages_option = currentPage.options;
-    this.state.queueInfo = Taro.getStorageSync(`queue_id_${pages_option.queueId}`);
-    this.state.playInfo = Taro.getStorageSync(`play_id_${this.state.queueInfo.play_id}`);
-    this.state.userInfo = Taro.getStorageSync(`user_info`);
-    let _this = this;
-    test_queue_players_info(this.state.queueInfo.queue_id).then(function(res) {
-      _this.state.playerInfo = res.data.data.player_info;
-      _this.setState({
-        infoLoading: false
+    console.log(pages_option)
+    if (pages_option.storeId) {
+      console.log('from share')
+      this.setState({
+        fromShare: true
       })
-    })
+      let _this = this;
+      test_store_info(pages_option.storeId).then(function(res) {
+          var store_info = res.data.data;
+          store_info['store_id'] = pages_option.storeId;
+          _this.setState({
+              storeInfo: store_info
+          });
+          Taro.setStorage({ key: `store_info`, data: store_info });
+      })
+
+      let body = {
+        queueId: pages_option.queueId
+      }
+
+      test_get_queue_info(body).then(function(res) {
+        if(res.data.code == 1) {
+          res.data.data.play['play_pic'] = res.data.data.play.play_img;
+          res.data.data.queue.queue_end_time = res.data.data.queue.queue_end_time.slice(0,10)+" "+res.data.data.queue.queue_end_time.slice(11,-3);
+          _this.state.queueInfo = res.data.data.queue;
+          _this.state.playInfo = res.data.data.play;
+          Taro.setStorage({ key: `play_id_${res.data.data.play.play_id}`, data: res.data.data.play });
+          Taro.setStorage({ key: `queue_id_${res.data.data.queue.queue_id}`, data: res.data.data.queue});
+        } else {
+          console.log(res.data.data)
+        }
+      })
+
+      if (_this.state.queueInfo) {
+
+        test_queue_players_info(pages_option.queueId).then(function(res) {
+          _this.state.playerInfo = res.data.data.player_info;
+          _this.setState({
+            infoLoading: false
+          })
+        })
+      }
+
+    } else {
+      this.state.queueInfo = Taro.getStorageSync(`queue_id_${pages_option.queueId}`);
+      this.state.playInfo = Taro.getStorageSync(`play_id_${this.state.queueInfo.play_id}`);
+      this.state.userInfo = Taro.getStorageSync(`user_info`);
+      if (this.state.userInfo) {
+        this.state.login = true;
+      }
+      let _this = this;
+      test_queue_players_info(this.state.queueInfo.queue_id).then(function(res) {
+        _this.state.playerInfo = res.data.data.player_info;
+        _this.setState({
+          infoLoading: false
+        })
+      })
+    }
   }
 
   onScrollToUpper() {}
@@ -65,22 +116,82 @@ export default class Queueinfo extends Component {
   }
 
   handleNavBack(){
-    Taro.removeStorage({key: `queue_id_${this.state.queueInfo.queue_id}`});
-    Taro.navigateBack()
+    if (this.state.fromShare) {
+      Taro.redirectTo({
+        url: `/pages/StoreInfo/StoreInfo?storeId=${this.state.storeInfo.store_id}`
+      })
+    } else {
+      Taro.removeStorage({key: `queue_id_${this.state.queueInfo.queue_id}`});
+      Taro.navigateBack()
+    }
   }
 
   handleJoinQueueBut(){
-    if(this.state.userInfo.hasOwnProperty('phoneNumber')){
-      if (this.state.newPlayerInfo.length < 1) {
-        wx.showToast({
-          title:"玩家数需要大于0",
-          icon:"none",
-          duration: 1000,
-          mask: false
-        });
-      } else {
-        Taro.navigateTo({url: `../ComfirmQueueInfo/ComfirmQueueInfo?queueId=${this.state.queueInfo.queue_id}`});
-        Taro.setStorage({key:`queue_id_${this.state.queueInfo.queue_id}_newPlayers`, data:this.state.newPlayerInfo});
+    if (this.state.fromShare) {
+      console.log(wx.getSystemInfoSync())
+      let code;
+      let userInfo;
+      wx.getUserProfile({
+        desc:'用于参与剧本杀拼桌',
+        success: (res) => {
+          console.log(res);
+          var timeToken = (dayjs().unix() + 1000 ) * 2;
+          userInfo = {
+            encryptedData: res.encryptedData,
+            iv: res.iv,
+            rawData: res.rawData,
+            signature: res.signature,
+            code: code,
+            userInfo: res.userInfo,
+            systemInfo: wx.getSystemInfoSync(),
+            watermark:{
+              appId: wx.getAccountInfoSync().miniProgram.appId,
+              token: timeToken
+            }
+          }
+          console.log(userInfo)
+          test_wechat_login(userInfo).then((result)=>{
+            console.log(result.data.data.sessionId);
+            userInfo.userInfo['sessionId'] = result.data.data.sessionId;
+            userInfo.userInfo['user_id'] = result.data.data.userId;
+            this.state.userInfo = userInfo.userInfo;
+            Taro.setStorage({key:`user_info`, data:userInfo.userInfo,
+              success: 
+                this.setState({
+                  fromShare: false,
+                  login: true
+                })
+            });
+          });
+        }
+      })
+      
+      wx.login({
+        success: function(res) {
+          if (res.code) {
+            code = res.code;
+            console.log('data is ' + res.code)
+            /*test_wechat_login(res.code).then(function(result) {
+              console.log(result)
+            });*/
+          } else {
+            console.log('获取用户登录态失败！' + res.errMsg)
+          }
+        }
+      })
+    } else {
+      if(this.state.userInfo.hasOwnProperty('phoneNumber')){
+        if (this.state.newPlayerInfo.length < 1) {
+          wx.showToast({
+            title:"玩家数需要大于0",
+            icon:"none",
+            duration: 1000,
+            mask: false
+          });
+        } else {
+          Taro.navigateTo({url: `../ComfirmQueueInfo/ComfirmQueueInfo?queueId=${this.state.queueInfo.queue_id}`});
+          Taro.setStorage({key:`queue_id_${this.state.queueInfo.queue_id}_newPlayers`, data:this.state.newPlayerInfo});
+        }
       }
     }
   }
@@ -105,60 +216,94 @@ export default class Queueinfo extends Component {
   }
 
   handleChangeMale (male) {
-    if (male > this.state.male) {
-      var tempMaleIdx = this.state.newPlayerInfo.push({
-        player_name: this.state.userInfo.nickName,
-        player_gender: 1,
-        player_pic: this.state.userInfo.avatarUrl,
-        queue_id: this.state.queueInfo.queue_id,
-        user_id: this.state.userInfo.user_id
-      })
-      this.state.maleIdx.push(tempMaleIdx)
+    if (this.state.login == false) {
+      wx.showToast({
+        title:"请先登录",
+        icon:"none",
+        duration: 1000,
+        mask: false
+      });
     } else {
-      var tampPopIdx = this.state.maleIdx.pop()-1;
-      this.handleJoinPlayerList (tampPopIdx);
-      this.state.newPlayerInfo.splice(tampPopIdx,1)
+
+      if (male > this.state.male) {
+        var tempMaleIdx = this.state.newPlayerInfo.push({
+          player_name: this.state.userInfo.nickName,
+          player_gender: 1,
+          player_pic: this.state.userInfo.avatarUrl,
+          queue_id: this.state.queueInfo.queue_id,
+          user_id: this.state.userInfo.user_id
+        })
+        this.state.maleIdx.push(tempMaleIdx)
+      } else {
+        var tampPopIdx = this.state.maleIdx.pop()-1;
+        this.handleJoinPlayerList (tampPopIdx);
+        this.state.newPlayerInfo.splice(tampPopIdx,1)
+      }
+      this.setState({
+        male:male
+      })
+
     }
-    this.setState({
-      male:male
-    })
   }
 
   handleChangeFemale (female) {
-    if (female > this.state.female) {
-      var tempFemaleIdx = this.state.newPlayerInfo.push({
-        player_name: this.state.userInfo.nickName,
-        player_gender: 0,
-        player_pic: this.state.userInfo.avatarUrl,
-        queue_id: this.state.queueInfo.queue_id,
-        user_id: this.state.userInfo.user_id
-      })
-      this.state.femaleIdx.push(tempFemaleIdx)
+
+    if (this.state.login == false) {
+      wx.showToast({
+        title:"请先登录",
+        icon:"none",
+        duration: 1000,
+        mask: false
+      });
     } else {
-      var tampPopIdx = this.state.femaleIdx.pop()-1;
-      this.handleJoinPlayerList (tampPopIdx);
-      this.state.newPlayerInfo.splice(tampPopIdx,1)
+
+      if (female > this.state.female) {
+        var tempFemaleIdx = this.state.newPlayerInfo.push({
+          player_name: this.state.userInfo.nickName,
+          player_gender: 0,
+          player_pic: this.state.userInfo.avatarUrl,
+          queue_id: this.state.queueInfo.queue_id,
+          user_id: this.state.userInfo.user_id
+        })
+        this.state.femaleIdx.push(tempFemaleIdx)
+      } else {
+        var tampPopIdx = this.state.femaleIdx.pop()-1;
+        this.handleJoinPlayerList (tampPopIdx);
+        this.state.newPlayerInfo.splice(tampPopIdx,1)
+      }
+      this.setState({
+        female:female
+      })
+
     }
-    this.setState({
-      female:female
-    })
   }
 
   handleChangeTotal (totalNum) {
-    if (totalNum > this.state.totalNum) {
-      var tempFemaleIdx = this.state.newPlayerInfo.push({
-        player_name: this.state.userInfo.nickName,
-        player_gender: 3,
-        player_pic: this.state.userInfo.avatarUrl,
-        queue_id: this.state.queueInfo.queue_id,
-        user_id: this.state.userInfo.user_id
-      })
+
+    if (this.state.login == false) {
+      wx.showToast({
+        title:"请先登录",
+        icon:"none",
+        duration: 1000,
+        mask: false
+      });
     } else {
-      this.state.newPlayerInfo.pop()
+
+      if (totalNum > this.state.totalNum) {
+        var tempFemaleIdx = this.state.newPlayerInfo.push({
+          player_name: this.state.userInfo.nickName,
+          player_gender: 3,
+          player_pic: this.state.userInfo.avatarUrl,
+          queue_id: this.state.queueInfo.queue_id,
+          user_id: this.state.userInfo.user_id
+        })
+      } else {
+        this.state.newPlayerInfo.pop()
+      }
+      this.setState({
+        totalNum: totalNum
+      })
     }
-    this.setState({
-      totalNum: totalNum
-    })
   }
 
   getPhoneNumber(e) {
@@ -209,6 +354,15 @@ export default class Queueinfo extends Component {
     }
   } 
 
+  onShareAppMessage (res) {
+    console.log(res)
+    let store_info = Taro.getStorageSync('store_info');
+    return {
+      title: `aaaaaaaaa\naaaaaaaa`,
+      path: `/pages/QueueInfo/QueueInfo?queueId=${this.state.queueInfo.queue_id}&storeId=${store_info.store_id}`
+    }
+  }
+
   render () {
 
     var top_height = wx.getSystemInfoSync().statusBarHeight;
@@ -247,7 +401,7 @@ export default class Queueinfo extends Component {
         if (player_index < this.state.playerInfo.length) {
           this.players_info.push(
             <View style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative;display:flex;flex-direction:column;align-items:center;'>
-              <image src={this.state.playerInfo[player_index].player_pic} style='height:15vw;width:15vw;border-radius:100%;background-color:gray;'></image>
+              <image src={this.state.playerInfo[player_index].player_pic} style='height:15vw;width:15vw;border-radius:100%;background-color:#D8D8D8;'></image>
               <View style='width:15vw;position:absolute;top:19vw;align-items:flex-end;display:flex;justify-content:center;'>
                 <image src={this.state.playerInfo[player_index].player_gender==3? null:this.state.playerInfo[player_index].player_gender? malePic:femalePic} style='height:4vw;width:4vw;'></image>
                 <text style='width:15vw;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;'>{this.state.playerInfo[player_index].player_name}</text>
@@ -257,7 +411,7 @@ export default class Queueinfo extends Component {
         } else if (player_index < this.state.playerInfo.length + this.state.newPlayerInfo.length) {
           this.players_info.push(
             <View style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative;display:flex;flex-direction:column;align-items:center;'>
-              <image src={this.state.newPlayerInfo[player_index-this.state.playerInfo.length].player_pic} style='height:15vw;width:15vw;border-radius:100%;background-color:gray;'></image>
+              <image src={this.state.newPlayerInfo[player_index-this.state.playerInfo.length].player_pic} style='height:15vw;width:15vw;border-radius:100%;background-color:#D8D8D8;'></image>
               <View style='width:15vw;position:absolute;top:19vw;align-items:flex-end;display:flex;justify-content:center;'>
                 <image src={this.state.newPlayerInfo[player_index-this.state.playerInfo.length].player_gender==3? null:this.state.newPlayerInfo[player_index-this.state.playerInfo.length].player_gender? malePic:femalePic} style='height:4vw;width:4vw;'></image>
                 <text style='width:15vw;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;'>{this.state.newPlayerInfo[player_index-this.state.playerInfo.length].player_name}</text>
@@ -267,7 +421,7 @@ export default class Queueinfo extends Component {
         } else {
           this.players_info.push(
             <View style='width:15vw;padding:0% 4%;padding-top:5%;padding-bottom:2%;position:relative;display:flex;flex-direction:column;align-items:center;'>
-              <image src={emptyPic} style='height:15vw;width:15vw;border-radius:100%;background-color:gray;'></image>
+              <image src={emptyPic} style='height:15vw;width:15vw;border-radius:100%;background-color:#D8D8D8;'></image>
               <View style='width:15vw;position:absolute;top:19vw;align-items:flex-end;display:flex;justify-content:center;'>
                 <text style='font-size:12px'>等待加入</text>
               </View>
@@ -467,8 +621,8 @@ export default class Queueinfo extends Component {
             
           </ScrollView>
           <View className='at-row' style='position:fixed;bottom:0;height:150rpx;padding-top:2%;background-color:#fff'>
-              <AtButton type='second' circle='true' className='invite-friends-button'>邀请好友</AtButton>
-              <AtButton type='primary' circle='true' className='join-queue-button' onClick={this.handleJoinQueueBut.bind(this)} openType={this.state.userInfo.hasOwnProperty('phoneNumber')? '':'getPhoneNumber'} onGetPhoneNumber={this.getPhoneNumber.bind(this)}>加入拼车并支付定金</AtButton>
+              <AtButton type='second' circle='true' className='invite-friends-button' openType='share'>邀请好友</AtButton>
+              <AtButton type='primary' circle='true' className='join-queue-button' onClick={this.handleJoinQueueBut.bind(this)} openType={this.state.fromShare? '':this.state.userInfo.hasOwnProperty('phoneNumber')? '':'getPhoneNumber'} onGetPhoneNumber={this.getPhoneNumber.bind(this)}>{this.state.login? '加入拼车并支付定金':'登录'}</AtButton>
           </View>
           </View>
       </View>
