@@ -5,6 +5,8 @@ import { AtButton, AtIcon } from 'taro-ui'
 
 import './JoinQueueSuccessInfo.scss'
 
+import {base} from '../../service/config'
+
 export default class Joinqueuesuccessinfo extends Component {
 
   constructor () {
@@ -13,6 +15,8 @@ export default class Joinqueuesuccessinfo extends Component {
       queueInfo:{},
       newPlayerInfo:[],
       storeInfo:{},
+      playInfo:{},
+      newId: null,
       infoLoading: true
     }
   }
@@ -22,7 +26,9 @@ export default class Joinqueuesuccessinfo extends Component {
     console.log(pages)
     let currentPage = pages[pages.length-1];
     let pages_option = currentPage.options;
+    this.state.newId = pages_option.newId;
     this.state.queueInfo = Taro.getStorageSync(`queue_id_${pages_option.queueId}`);
+    this.state.playInfo = Taro.getStorageSync(`play_id_${this.state.queueInfo.play_id}`);
     this.state.newPlayerInfo = Taro.getStorageSync(`queue_id_${pages_option.queueId}_newPlayers`);
     this.state.storeInfo = Taro.getStorageSync(`store_info`);
     this.setState({
@@ -37,6 +43,41 @@ export default class Joinqueuesuccessinfo extends Component {
     Taro.reLaunch({
       url: `/pages/StoreInfo/StoreInfo?storeId=${this.state.storeInfo.store_id}`
     })
+  }
+
+  onShareAppMessage (res) {
+    console.log(res)
+    let store_info = Taro.getStorageSync('store_info');
+
+    var name = '';
+
+    if (this.state.playInfo.play_name.length > 10) {
+      name = this.state.playInfo.play_name.slice(0,9)+'...';
+    } else {
+      name = this.state.playInfo.play_name;
+    }
+
+    let start_time = '';
+
+    if (this.state.queueInfo.queue_end_time.length>15){
+      start_time = this.state.queueInfo.queue_end_time.slice(5,10)+" "+this.state.queueInfo.queue_end_time.slice(11,-3);
+    } else {
+      start_time = this.state.queueInfo.queue_end_time;
+    }
+
+    let queue_id = '';
+    console.log(this.state.newId)
+    if (this.state.newId) {
+      queue_id = this.state.newId;
+    } else {
+      queue_id = this.state.queueInfo.queue_id;
+    }
+
+    return {
+      title: `剧本：${name}\n开车时间：${start_time}`,
+      path: `/pages/QueueInfo/QueueInfo?queueId=${queue_id}&storeId=${store_info.store_id}`,
+      imageUrl: `${base+this.state.playInfo.play_pic}`
+    }
   }
 
   render () {
@@ -57,7 +98,7 @@ export default class Joinqueuesuccessinfo extends Component {
           </View>
         </View>
         <View style='width:100vw;height:20vh;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;'>
-          <AtButton type='primary' circle='true' className='share-button'>分享车队给好友</AtButton>
+          <AtButton type='primary' circle='true' className='share-button' openType='share'>分享车队给好友</AtButton>
           <AtButton type='second' circle='true' className='comfirm-button' onClick={this.handleComfirmClick.bind(this)}>我知道了</AtButton>
         </View>
       </View>

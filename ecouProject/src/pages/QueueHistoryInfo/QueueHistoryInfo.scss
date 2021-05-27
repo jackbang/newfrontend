@@ -10,6 +10,8 @@
 //注释掉@include border-thin($width: 1PX); 
 //注释掉 @include border-thin($width: 1PX, $directions: left right);
 @import "~taro-ui/dist/style/components/button.scss";
+@import "~taro-ui/dist/style/components/activity-indicator.scss";
+@import '~taro-ui/dist/style/components/loading.scss';
 
 
 .queue-info-page{

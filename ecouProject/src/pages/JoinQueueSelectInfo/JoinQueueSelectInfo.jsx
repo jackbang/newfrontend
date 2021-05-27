@@ -13,8 +13,9 @@ import male_icon from '../../img/male.png'
 import female_icon from '../../img/female.png'
 import scoreActive from '../../img/scoreActive.png'
 import noResult from '../../img/noResult.svg'
+import login from '../../img/searchPageLogin.svg'
 
-import {test_search_plays, test_store_plays_search} from '../../service/api'
+import {test_search_plays, test_store_plays_search, test_store_info, test_wechat_login} from '../../service/api'
 import {base} from '../../service/config'
 
 export default class Joinqueueselectinfo extends Component {
@@ -28,44 +29,77 @@ export default class Joinqueueselectinfo extends Component {
       plays_num: 0,
       store_info: {},
       user_info: {},
+      fromShare: false,
       plays_list: []
     }
   }
 
-  componentDidShow () {
-    this.state.store_info = Taro.getStorageSync('store_info');
+  componentWillMount () {
+    var pages = getCurrentPages();
+    let currentPage = pages[pages.length-1];
+    let pages_option = currentPage.options;
+    console.log(pages_option)
     this.state.user_info = Taro.getStorageSync('user_info')
-    
-    this.state.page = 1;
-    this.state.plays_list = [];
-
-    let cert_data = {
-      adminId: this.state.user_info.user_id,
-      sessionId: this.state.user_info.sessionId,
-      appId: wx.getAccountInfoSync().miniProgram.appId,
-      token: (dayjs().unix() + 1000)*2
+    if (pages_option.storeId) {
+      console.log('from share')
+      this.setState({
+        fromShare: true
+      })
+      let _this = this;
+      test_store_info(pages_option.storeId).then(function(res) {
+        if (res.data.code == 1) {
+          var store_info = res.data.data;
+          store_info['store_id'] = pages_option.storeId;
+          _this.setState({
+            store_info: store_info
+          });
+          Taro.setStorage({ key: `store_info`, data: store_info });
+        } else {
+          console.log('storeId error')
+        }
+      })
     }
-
-    let store_id = this.state.store_info.store_id;
-    let title = this.state.value;
-    let hd = this.state.tagActiveNum;
-    let type1 = '';
-    let type2 = '';
-    let type3 = '';
-    let page = this.state.page;
-
-    let _this = this;
-
-    test_store_plays_search(cert_data, 
-      `store_id=${store_id}&title=${title}&hd=${hd}&type1=${type1}&type2=${type2}&type3=${type3}&page=${page}`).then(
-      function(res){
-        console.log(res.data)
-        _this.setState({
-          plays_list: _this.state.plays_list.concat(res.data)
-        })
-      }
-    )
   }
+
+  componentDidShow () {
+    if (this.state.fromShare) {
+
+    } else {
+      this.state.store_info = Taro.getStorageSync('store_info');
+      this.state.user_info = Taro.getStorageSync('user_info')
+      
+      this.state.page = 1;
+      this.state.plays_list = [];
+
+      let cert_data = {
+        adminId: this.state.user_info.user_id,
+        sessionId: this.state.user_info.sessionId,
+        appId: wx.getAccountInfoSync().miniProgram.appId,
+        token: (dayjs().unix() + 1000)*2
+      }
+
+      let store_id = this.state.store_info.store_id;
+      let title = this.state.value;
+      let hd = this.state.tagActiveNum;
+      let type1 = '';
+      let type2 = '';
+      let type3 = '';
+      let page = this.state.page;
+
+      let _this = this;
+
+      test_store_plays_search(cert_data, 
+        `store_id=${store_id}&title=${title}&hd=${hd}&type1=${type1}&type2=${type2}&type3=${type3}&page=${page}`).then(
+        function(res){
+          console.log(res.data)
+          _this.setState({
+            plays_list: _this.state.plays_list.concat(res.data)
+          })
+        }
+      )
+    }
+  }
+
 
   handleCreateQueue (item){
     Taro.navigateTo({url: `../JoinQueueComfirmInfo/JoinQueueComfirmInfo?playId=${item.play_id}`})
@@ -126,7 +160,13 @@ export default class Joinqueueselectinfo extends Component {
   }
 
   handleNavBack(){
-    Taro.navigateBack()
+    if (this.state.fromShare ){
+      Taro.reLaunch({
+        url: `/pages/StoreInfo/StoreInfo?storeId=${this.state.store_info.store_id}`
+      })
+    } else {
+      Taro.navigateBack()
+    }
   }
 
   onActionClick () {
@@ -196,6 +236,75 @@ export default class Joinqueueselectinfo extends Component {
     )
   }
 
+  login() {
+    console.log(wx.getSystemInfoSync())
+    let code;
+    let userInfo;
+    wx.getUserProfile({
+      desc:'用于参与剧本杀拼桌',
+      success: (res) => {
+        console.log(res);
+        var timeToken = (dayjs().unix() + 1000 ) * 2;
+        userInfo = {
+          encryptedData: res.encryptedData,
+          iv: res.iv,
+          rawData: res.rawData,
+          signature: res.signature,
+          code: code,
+          userInfo: res.userInfo,
+          systemInfo: wx.getSystemInfoSync(),
+          watermark:{
+            appId: wx.getAccountInfoSync().miniProgram.appId,
+            token: timeToken
+          }
+        }
+        console.log(userInfo)
+        test_wechat_login(userInfo).then((result)=>{
+          console.log(result.data.data.sessionId);
+          userInfo.userInfo['sessionId'] = result.data.data.sessionId;
+          userInfo.userInfo['user_id'] = result.data.data.userId;
+          this.state.user_info = userInfo.userInfo;
+          Taro.setStorage({key:`user_info`, data:userInfo.userInfo,
+            success: 
+             this.onActionClick()
+          });
+        });
+      }
+    })
+    
+    wx.login({
+      success: function(res) {
+        if (res.code) {
+          code = res.code;
+          console.log('data is ' + res.code)
+          /*test_wechat_login(res.code).then(function(result) {
+            console.log(result)
+          });*/
+        } else {
+          console.log('获取用户登录态失败！' + res.errMsg)
+        }
+      }
+    })
+  }
+
+  onShareAppMessage (res) {
+    console.log(res)
+    let store_info = Taro.getStorageSync('store_info');
+
+    var name = '';
+
+    if (store_info.store_name.length > 10) {
+      name = store_info.store_name.slice(0,9)+'...';
+    } else {
+      name = store_info.store_name;
+    }
+
+    return {
+      title: `${name}\n本店剧本在此，快去上车！`,
+      path: `/pages/JoinQueueSelectInfo/JoinQueueSelectInfo?storeId=${store_info.store_id}`
+    }
+  }
+
   render () {
     //Taro.hideTabBar();
 
@@ -220,94 +329,102 @@ export default class Joinqueueselectinfo extends Component {
     
 
     let play_tab_list = [];
-    this.state.plays_list.map((item, i)=>{
 
-      this.state.plays_list[i]['play_pic'] = item.play_img;
+    if (this.state.user_info.user_id) {
+      this.state.plays_list.map((item, i)=>{
 
-      let maleFemaleDisplay = [];
-      if (item.play_male_num == 999 | item.play_female_num == 999){
-        maleFemaleDisplay = [];
-      } else {
-        maleFemaleDisplay.push(
-          <View className='play-male-position-info'>
-            <image className='gender-icon-info' src={male_icon}></image>
-            <text>{item.play_male_num}</text>
-          </View>
-        )
-        maleFemaleDisplay.push(
-          <View className='play-female-position-info'>
-            <image className='gender-icon-info' src={female_icon}></image>
-            <text>{item.play_female_num}</text>
-          </View>
-        )
-      }
+        this.state.plays_list[i]['play_pic'] = item.play_img;
 
-      Taro.setStorage({key:`play_id_${item.play_id}`, data:item});
-      let main_label = "  ";
-      let play_labels_list = item.play_labels.map((label_item, item_idx)=>{
-        if (item_idx==0){
-          main_label = label_item;
+        let maleFemaleDisplay = [];
+        if (item.play_male_num == 999 | item.play_female_num == 999){
+          maleFemaleDisplay = [];
+        } else {
+          maleFemaleDisplay.push(
+            <View className='play-male-position-info'>
+              <image className='gender-icon-info' src={male_icon}></image>
+              <text>{item.play_male_num}</text>
+            </View>
+          )
+          maleFemaleDisplay.push(
+            <View className='play-female-position-info'>
+              <image className='gender-icon-info' src={female_icon}></image>
+              <text>{item.play_female_num}</text>
+            </View>
+          )
         }
-        return(
-          <text className='play-label-info'>{label_item}</text>
-        )
-      })
 
-      let score_list = [];
-      for (let index = 0; index < item.play_score; index++) {
-        score_list.push(
-          <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
-        )
-      }
-      play_tab_list.push(
-      <View className='at-row queue-tab-info'>
-        <View className='at-row play-pic-position-info' style='width:21vw' /* 这里写的是 每个tab上剧本图片的位置*/>
-          <image className='play-pic-info' src={base+item.play_pic}>
-          <text className='play-pic-label-info'>{main_label}</text>
-          </image>
-        </View>
-        <View className='at-col play-intro-info' /*这里的信息是每个tab上 剧本的一些文字信息 */>
-          <View className='at-col play-name-position-info'><text style='text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>{item.play_name}</text></View>
-          <View className='at-row' /* =- 这一部分是这样，两列，第一列有两行文字，第二列用来放按钮 */>
-            <View className='at-col' /* 第一列 有两行*/>
-              <View className='play-score-position-info'>难度
-                <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%'>
-                  {score_list}
+        Taro.setStorage({key:`play_id_${item.play_id}`, data:item});
+        let main_label = "  ";
+        let play_labels_list = item.play_labels.map((label_item, item_idx)=>{
+          if (item_idx==0){
+            main_label = label_item;
+          }
+          return(
+            <text className='play-label-info'>{label_item}</text>
+          )
+        })
+
+        let score_list = [];
+        for (let index = 0; index < item.play_score; index++) {
+          score_list.push(
+            <image src={scoreActive} className='play-score-pic-info' style='position:relative;left:-0px;'></image>
+          )
+        }
+        play_tab_list.push(
+        <View className='at-row queue-tab-info'>
+          <View className='at-row play-pic-position-info' style='width:21vw' /* 这里写的是 每个tab上剧本图片的位置*/>
+            <image className='play-pic-info' src={base+item.play_pic}>
+            <text className='play-pic-label-info'>{main_label}</text>
+            </image>
+          </View>
+          <View className='at-col play-intro-info' /*这里的信息是每个tab上 剧本的一些文字信息 */>
+            <View className='at-col play-name-position-info'><text style='text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>{item.play_name}</text></View>
+            <View className='at-row' /* =- 这一部分是这样，两列，第一列有两行文字，第二列用来放按钮 */>
+              <View className='at-col' /* 第一列 有两行*/>
+                <View className='play-score-position-info'>难度
+                  <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%'>
+                    {score_list}
+                  </View>
+                </View>
+                <View className='at-row play-headcount-position-info' /* 这一部分有三列 */>
+                  <View className='play-headcount-info'><text decode="{{true}}">{item.play_headcount}人本</text></View>
+                  {maleFemaleDisplay}
                 </View>
               </View>
-              <View className='at-row play-headcount-position-info' /* 这一部分有三列 */>
-                <View className='play-headcount-info'><text decode="{{true}}">{item.play_headcount}人本</text></View>
-                {maleFemaleDisplay}
+              <View className='at-row' style='width:20vw' /*第二列是用来放按钮 */>
+                {/* Button  激活与不激活 具体看taroui中的文档*/}
+                <AtButton type='primary' circle='true' className='join-button' onClick={this.handleCreateQueue.bind(this, item)}>发车</AtButton>
               </View>
             </View>
-            <View className='at-row' style='width:20vw' /*第二列是用来放按钮 */>
-              {/* Button  激活与不激活 具体看taroui中的文档*/}
-              <AtButton type='primary' circle='true' className='join-button' onClick={this.handleCreateQueue.bind(this, item)}>发车</AtButton>
+            <View className='at-col play-label-position-info'>
+              {play_labels_list}
             </View>
           </View>
-          <View className='at-col play-label-position-info'>
-            {play_labels_list}
-          </View>
         </View>
-      </View>
-      )
-    });
+        )
+      });
 
-    if (play_tab_list.length == 0) {
+      if (play_tab_list.length == 0) {
+        play_tab_list.push(
+          <View style='height:auto;width:100vw;'>
+            <image src={noResult} style='width:100vw;height:50vh;' ></image>
+          </View>
+        )
+      }
+    } else {
       play_tab_list.push(
-        <View style='height:auto;width:100vw;'>
-          <image src={noResult} style='width:100vw;height:50vh;' ></image>
+        <View style='height:auto;width:100vw;' onClick={this.login.bind(this)}>
+          <image src={login} style='width:100vw;height:50vh;' ></image>
         </View>
       )
     }
-
 
 
     return (
       <View className='JoinQueueSelectInfo'>
         <View className='at-col' style={{padding: `${top_height}px 0px 0px 0px`}}>
           <AtNavBar className='nav-bar-info'
-              onClickLeftIcon={this.handleNavBack}
+              onClickLeftIcon={this.handleNavBack.bind(this)}
               color='#ffff'
               leftIconType='chevron-left'
               ><View style='color:#fff;font-size:18px'>剧本列表</View></AtNavBar>

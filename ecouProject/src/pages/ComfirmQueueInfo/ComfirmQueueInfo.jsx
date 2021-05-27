@@ -10,9 +10,10 @@ import scoreActive from '../../img/scoreActive.png'
 import scoreDeactive from '../../img/scoreDeactive2.png'
 import telpic from '../../img/telIcon.svg'
 import mappic from '../../img/map_icon.svg'
+
 import dayjs from 'dayjs';
 
-import {test_join_queue, test_create_queue} from '../../service/api'
+import {test_join_queue, test_create_queue, test_check_queue} from '../../service/api'
 import {base} from '../../service/config'
 
 export default class Comfirmqueueinfo extends Component {
@@ -27,15 +28,28 @@ export default class Comfirmqueueinfo extends Component {
       storeInfo:{},
       playerPhoneNum:"",
       comment:"",
+      repeatedChoice: 0,
+      queueId:0,
       isCreateQueue:false,
       infoLoading: true
     }
   }
 
   handleNavBack() {
-    console.log(this.state)
-    Taro.removeStorage({key: `queue_id_${this.state.queueInfo.queue_id}_newPlayers`});
-    Taro.navigateBack()
+    let _this = this;
+    wx.showModal({
+      content: '确定不玩该剧本了吗？',
+      success (res) {
+        if (res.confirm) {
+          console.log('用户点击确定')
+          Taro.removeStorage({key: `queue_id_${_this.state.queueInfo.queue_id}_newPlayers`});
+          Taro.navigateBack()
+        } else if (res.cancel) {
+          console.log('用户点击取消')
+        }
+      }
+    })
+    
   }
 
   componentWillMount() {
@@ -76,6 +90,9 @@ export default class Comfirmqueueinfo extends Component {
   }
 
   handleComfirm() {
+    if (this.state.playerPhoneNum.length==0) {
+      this.state.playerPhoneNum = this.state.userInfo.phoneNumber
+    }
     if (this.state.playerPhoneNum.length != 11){
       if (this.state.userInfo.phoneNumber.length != 11) {
         wx.showToast({
@@ -104,12 +121,45 @@ export default class Comfirmqueueinfo extends Component {
         }
         console.log(formData);
         let _this = this;
-        test_create_queue(formData).then(function(res){
-          console.log(res);
-          if (res.data.data.errcode == 0){
-            Taro.redirectTo({url: `../JoinQueueSuccessInfo/JoinQueueSuccessInfo?queueId=0`});
+        test_check_queue(formData).then(function(result){
+          if (result.data.code == 2) {
+            if (_this.state.repeatedChoice == 0) {
+              wx.showModal({
+                content:"该时间段剧本已被选择，可能存在冲突，请与店家沟通。",
+                showCancel:false
+              });
+              _this.state.repeatedChoice = 1;
+            } else {
+              test_create_queue(formData).then(function(res){
+                console.log(res);
+                if (res.data.data.errcode == 0){
+                  Taro.redirectTo({url: `../JoinQueueSuccessInfo/JoinQueueSuccessInfo?queueId=0&newId=${res.data.data.queue_id}`});
+                }
+              })
+            }
+          } else if (result.data.code == 1) {
+            test_create_queue(formData).then(function(res){
+              console.log(res);
+              if (res.data.data.errcode == 0){
+                Taro.redirectTo({url: `../JoinQueueSuccessInfo/JoinQueueSuccessInfo?queueId=0&newId=${res.data.data.queue_id}`});
+              }
+            })
+          } else {
+            wx.showToast({
+              title:result.data.data,
+              icon:"none",
+              duration: 1000,
+              mask: false
+            });
           }
         })
+
+        //test_create_queue(formData).then(function(res){
+        //  console.log(res);
+        //  if (res.data.data.errcode == 0){
+        //    Taro.redirectTo({url: `../JoinQueueSuccessInfo/JoinQueueSuccessInfo?queueId=0`});
+        //  }
+        //})
       } else {
         let formData = {
           player_info: this.state.newPlayerInfo,
@@ -140,8 +190,6 @@ export default class Comfirmqueueinfo extends Component {
         })
       }
     }
-
-    
   }
 
   handleCommentInput(data) {

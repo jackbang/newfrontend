@@ -1,5 +1,5 @@
 import { Component } from 'react'
-import Taro from '@tarojs/taro'
+import Taro, { connectSocket } from '@tarojs/taro'
 import { View, Text, ScrollView } from '@tarojs/components'
 import { AtButton, AtNavBar, AtTabs, AtTabsPane, AtTabBar} from 'taro-ui'
 
@@ -63,6 +63,7 @@ export default class Mineinfo extends Component {
           }
       }
       test_get_mine_history_queues(confirmData).then(function(res) {
+        console.log(res.data)
           _this.setState({
             mineQueueInfo: res.data.data,
             infoLoading: false
@@ -295,6 +296,42 @@ export default class Mineinfo extends Component {
     //console.log(e.detail)
   }
 
+  calculatePlays(that) {
+    console.log(that.state)
+    var playedNum = 0;
+    for (let index = 0; index < that.state.mineQueueInfo.queueList.length; index++) {
+      if (that.state.mineQueueInfo.queueList[index].queue_status==1|(that.state.mineQueueInfo.queueList[index].queue_current_num==that.state.mineQueueInfo.playList[index].play_headcount)){
+        playedNum = playedNum + 1
+      }
+    }
+    return playedNum
+  }
+
+  onShareAppMessage (res) {
+    console.log(res)
+    if (res.from == 'button') {
+      let Idx = res.target.dataset.queueIdx;
+      let store_id = res.target.dataset.storeId
+      this.state.mineQueueInfo.playList[Idx]
+
+      var name = '';
+
+      if (this.state.mineQueueInfo.playList[Idx].play_name.length > 10) {
+        name = this.state.mineQueueInfo.playList[Idx].play_name.slice(0,9)+'...';
+      } else {
+        name = this.state.mineQueueInfo.playList[Idx].play_name;
+      }
+
+      return {
+        title: `《${name}》\n开车时间：${this.state.mineQueueInfo.queueList[Idx].queue_end_time.slice(5,10)+" "+this.state.mineQueueInfo.queueList[Idx].queue_end_time.slice(11,-3)}`,
+        path: `/pages/QueueInfo/QueueInfo?queueId=${this.state.mineQueueInfo.queueList[Idx].queue_id}&storeId=${store_id}`,
+        imageUrl: `${base+this.state.mineQueueInfo.playList[Idx].play_pic}`
+      }
+    } else {
+      console.log( 'not share')
+    }
+  }
+
   render () {
     this.state.currentTabBar=2;
     var top_height = wx.getSystemInfoSync().statusBarHeight;
@@ -331,7 +368,7 @@ export default class Mineinfo extends Component {
       finish_tab.push(
         <View style='width:100vw;height:400rpx;display:flex;flex-direction:column;align-items:center;'>
           <image src={notLogin} style='width:100vw;height:100%;'></image>
-          <text style='font-size:18px;color:#A5A5A5;'>登陆后查看更多信息哦</text>
+          <text style='font-size:18px;color:#A5A5A5;'>登录后查看更多信息哦</text>
         </View>
       )
     }else{
@@ -381,7 +418,12 @@ export default class Mineinfo extends Component {
                     </View>
                     <View className='at-row' style='width:20vw'>
                       {/* Button */}
-                      <AtButton type='primary' circle='true' className='join-button' onClick={this.handelInviteBut.bind(this, 1)}>邀请好友</AtButton>
+                      <button 
+                        style='width:135rpx;height:50rpx;display:flex;justify-content:center;align-items:center;font-size:26rpx;margin-top:25rpx;background:#FCA62F;border-radius:25rpx;color:#FFFFFF;border 0px solid;'
+                        open-type='share' 
+                        data-queueIdx={Idx} 
+                        data-storeId={this.state.mineQueueInfo.storeList[Idx].store_id}
+                        onClick={this.handelInviteBut.bind(this, 1)} >邀请好友</button>
                     </View>
                   </View>
                   <View className='at-col play-store-position-info'>
@@ -478,7 +520,7 @@ export default class Mineinfo extends Component {
               <text style='color:#fff;font-size:20px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;max-width:400rpx;'>{this.state.isLogin? this.state.userInfo.nickName : ''}</text>
               <image 
                 src={this.handleGender(this.state.isLogin)} 
-                style={{height:`36rpx`,width:`36rpx`,backgroundColor:`#fff`,marginLeft:`10rpx`,padding: `2rpx 8rpx`,borderRadius: `20rpx`, visibility:this.state.isLogin? 'visible':'hidden'}}
+                style={{height:`36rpx`,width:`36rpx`,backgroundColor:`#fff`,marginLeft:`10rpx`,padding: `2rpx 8rpx`,borderRadius: `20rpx`, visibility:this.state.isLogin? (this.state.userInfo.gender==0? 'hidden':'visible'):'hidden'}}
                 ></image>
             </View>
             <View 
@@ -498,7 +540,7 @@ export default class Mineinfo extends Component {
               >
               <View style='background: #D8D8D8;width:6rpx;height:6rpx;border: 0.5px solid #979797;border-radius:6rpx;position:absolute;top:14rpx;left:35rpx;'></View>
               <View style='background: #D8D8D8;width:6rpx;height:6rpx;border: 0.5px solid #979797;border-radius:6rpx;position:absolute;top:14rpx;right:35rpx;'></View>
-              <text style='font-size:20px;color: #FEFFFF;'>0</text>
+              <text style='font-size:20px;color: #FEFFFF;'>{this.state.infoLoading==false? this.calculatePlays(this):0}</text>
               <text style='font-size:10px;color: #FEFFFF;position:absolute;bottom:10rpx;'>玩过的本</text>
             </View>
           </View>

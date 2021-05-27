@@ -598,7 +598,7 @@ export default class Joinqueuecomfirminfo extends Component {
               <View style='height:250rpx;background-color:#F9F9F9;padding-bottom:5%;'></View>
             
             <View className='at-row' style='position:fixed;bottom:0;height:150rpx;padding-top:2%;background-color:#fff'>
-                <AtButton type='second' circle='true' className='invite-friends-button'>邀请好友</AtButton>
+                
                 <AtButton type='primary' circle='true' className='join-queue-button' onClick={this.handleJoinQueueBut.bind(this)} openType={this.state.userInfo.hasOwnProperty('phoneNumber')? '':'getPhoneNumber'} onGetPhoneNumber={this.getPhoneNumber.bind(this)}>确认发车并支付定金</AtButton>
             </View>
           </ScrollView>

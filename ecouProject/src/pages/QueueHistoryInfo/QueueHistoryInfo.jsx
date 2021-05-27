@@ -1,7 +1,7 @@
 import Taro from '@tarojs/taro'
 import { Component } from 'react'
 import { View, ScrollView} from '@tarojs/components'
-import { AtNavBar, AtIcon, AtAvatar, AtInputNumber, AtButton } from 'taro-ui'
+import { AtNavBar, AtIcon, AtAvatar, AtInputNumber, AtButton, AtActivityIndicator } from 'taro-ui'
 import classNames from 'classnames';
 import {setGlobalData, getGlobalData} from "../../globaldata"
 import './QueueHistoryInfo.scss'
@@ -127,9 +127,27 @@ export default class Queueinfo extends Component {
   onShareAppMessage (res) {
     console.log(res)
     let store_info = Taro.getStorageSync('store_info');
+
+    var name = '';
+
+    if (this.state.playInfo.play_name.length > 10) {
+      name = this.state.playInfo.play_name.slice(0,9)+'...';
+    } else {
+      name = this.state.playInfo.play_name;
+    }
+
+    let start_time = '';
+
+    if (this.state.queueInfo.queue_end_time.length>15){
+      start_time = this.state.queueInfo.queue_end_time.slice(5,10)+" "+this.state.queueInfo.queue_end_time.slice(11,-3);
+    } else {
+      start_time = this.state.queueInfo.queue_end_time;
+    }
+
     return {
-      title: `aaaaaaaaa\naaaaaaaa`,
-      path: `/pages/QueueInfo/QueueInfo?queueId=${this.state.queueInfo.queue_id}&storeId=${store_info.store_id}`
+      title: `剧本：${name}\n开车时间：${start_time}`,
+      path: `/pages/QueueInfo/QueueInfo?queueId=${this.state.queueInfo.queue_id}&storeId=${store_info.store_id}`,
+      imageUrl: `${base+this.state.playInfo.play_pic}`
     }
   }
 
@@ -240,116 +258,126 @@ export default class Queueinfo extends Component {
           )
         }
       }
-    }
-    return (
-      <View className='at-col Queueinfo' style='position:relative'>
-        <image className='queue-info-page' src={this.state.infoLoading? null: base+this.state.playInfo.play_pic} style='width:100vw;height:100vh;position:absolute'></image>
-        <View className='at-col' style={{padding: `${top_height}px 0px 0px 0px`, position:'absolute', top:0, left:0, width:'100%'}}>
-            <AtNavBar className='nav-bar-info'
-              onClickLeftIcon={this.handleNavBack}
-              color='#ffff'
-              leftIconType='chevron-left'
-            ><View style='color:#fff;font-size:18px'>拼车详情</View></AtNavBar>
-          <ScrollView
-            className='scrollview'
-            scrollY
-            scrollWithAnimation
-            show-scrollbar='false'
-            scrollTop={scrollTop}
-            style={scrollStyle}
-            lowerThreshold={Threshold}
-            upperThreshold={Threshold}
-            onScrollToUpper={this.onScrollToUpper.bind(this)} // 使用箭头函数的时候 可以这样写 `onScrollToUpper={this.onScrollToUpper}`
-            onScroll={this.onScroll}
-            >
-            
-              <View className='at-row' style='height:300rpx;padding-top:5%;'>
-                <View className='at-row play-pic-position-info' style={{width: `${system_width}px`}} /* 这里是用来规划image放置的位置 */> 
-                    <image src={this.state.infoLoading? null: base+this.state.playInfo.play_pic} style='height:100%;width:90%;border-radius:10px;'>
-                      <text className='play-pic-label-info'>{this.state.infoLoading? "": this.state.playInfo.play_labels[0]}</text>
-                    </image>
-                </View>
-                <View className='at-col' /*这里写的是StoreInfo 文字部分*/> 
-                  <View className='play-name-position-info'>
-                    <text style='text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>{this.state.infoLoading? "加载中": this.state.playInfo.play_name}</text>
-                  </View>
-                  <View className='play-score-position-info'>难度
-                    <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%'>
-                      {score_list}
-                    </View>
-                  </View>
-                  <View className='play-headcount-position-info'>{this.state.infoLoading? 0: this.state.playInfo.play_headcount}人本
-                    {play_info_male_female_display}
-                  </View>
-                  <View className='play-duration-position-info'>游戏时长约{this.state.infoLoading? 0: this.state.playInfo.play_duration}小时</View>
-                  <View className='play-label-position-info'>
-                    {play_labels_info}
-                  </View>
-                </View>
-              </View>
-              <View className='at-row' style='padding-top:5%'>
-                <View className='at-col' style='background-color:rgba(201, 201, 201, 0.295);margin:0% 3.5%;padding-top:1%;border-radius:5px;'>
-                  <View className='at-row' style='position:relative;color:#c0c0c0;'>
-                    <View className='at-row' style='align-items:flex-end;display:flex;justify-content:flex-start;padding-left:2%;font-size:14px;'>剧情简介</View>
-                    <View className='at-row' style='align-items:center;display:flex;justify-content:flex-end;padding-right:2%;font-size:12px;' onClick={this.handleClick.bind(this)}>
-                      {this.state.isHide? '展开' : '收起'}
-                      <AtIcon value={this.state.isHide? 'chevron-down' : 'chevron-up'} size='20'></AtIcon> 
-                    </View>
-                  </View>
-                  <View className='at-row' style='padding-left:2%;'>
-                    <text className={this.state.isHide? 'play-intro-info play-intro-hide' : 'play-intro-info'}>{this.state.infoLoading? null: this.state.playInfo.play_intro.split('/n').join('\n')}</text>
-                  </View>
-                </View>
-              </View>
-              <View className='at-col' style='background-color:#F9F9F9;margin-top:1%;padding-bottom:5%;'>
 
-                <View className='at-row queue-time-tab-info' style='padding-top:2%'>
-                  {/*这部分是开车时间的tab */}
-                  <View className='at-row'>
-                    <View className='at-col'>
-                      <View className='at-row queue-start-time-info' >开局时间</View>
-                      <View className='at-row' style='font-size:14px;font-weight:550;color:#000;height:70%;align-items:center;display:flex;justify-content:flex-start;padding-left:10%;'>{this.state.infoLoading? "加载中": this.state.canInv=="null"?  this.state.queueInfo.queue_end_time:this.state.queueInfo.queue_end_time.slice(0,10)+" "+this.state.queueInfo.queue_end_time.slice(11,-3)}</View>
-                    </View>
+      return (
+        <View className='at-col Queueinfo' style='position:relative'>
+          <image className='queue-info-page' src={this.state.infoLoading? null: base+this.state.playInfo.play_pic} style='width:100vw;height:100vh;position:absolute'></image>
+          <View className='at-col' style={{padding: `${top_height}px 0px 0px 0px`, position:'absolute', top:0, left:0, width:'100%'}}>
+              <AtNavBar className='nav-bar-info'
+                onClickLeftIcon={this.handleNavBack}
+                color='#ffff'
+                leftIconType='chevron-left'
+              ><View style='color:#fff;font-size:18px'>拼车详情</View></AtNavBar>
+            <ScrollView
+              className='scrollview'
+              scrollY
+              scrollWithAnimation
+              show-scrollbar='false'
+              scrollTop={scrollTop}
+              style={scrollStyle}
+              lowerThreshold={Threshold}
+              upperThreshold={Threshold}
+              onScrollToUpper={this.onScrollToUpper.bind(this)} // 使用箭头函数的时候 可以这样写 `onScrollToUpper={this.onScrollToUpper}`
+              onScroll={this.onScroll}
+              >
+              
+                <View className='at-row' style='height:300rpx;padding-top:5%;'>
+                  <View className='at-row play-pic-position-info' style={{width: `${system_width}px`}} /* 这里是用来规划image放置的位置 */> 
+                      <image src={this.state.infoLoading? null: base+this.state.playInfo.play_pic} style='height:100%;width:90%;border-radius:10px;'>
+                        <text className='play-pic-label-info'>{this.state.infoLoading? "": this.state.playInfo.play_labels[0]}</text>
+                      </image>
                   </View>
-                  <View className='at-row'>
-                    <View className='at-col'>
-                      <View className='at-row queue-antigender-info'>是否接受反串</View>
-                      <View className='at-row' style='font-size:14px;font-weight:550;color:#000;height:70%;align-items:center;display:flex;justify-content:flex-start;padding-left:10%;'>{this.state.infoLoading? "加载中": this.state.queueInfo.queue_antigender? "接受":"不接受"}反串</View>
+                  <View className='at-col' /*这里写的是StoreInfo 文字部分*/> 
+                    <View className='play-name-position-info'>
+                      <text style='text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>{this.state.infoLoading? "加载中": this.state.playInfo.play_name}</text>
+                    </View>
+                    <View className='play-score-position-info'>难度
+                      <View style='display:flex;align-items:flex-end;padding-left:3%;position:relative;bottom:0%'>
+                        {score_list}
+                      </View>
+                    </View>
+                    <View className='play-headcount-position-info'>{this.state.infoLoading? 0: this.state.playInfo.play_headcount}人本
+                      {play_info_male_female_display}
+                    </View>
+                    <View className='play-duration-position-info'>游戏时长约{this.state.infoLoading? 0: this.state.playInfo.play_duration}小时</View>
+                    <View className='play-label-position-info'>
+                      {play_labels_info}
                     </View>
                   </View>
                 </View>
-
-                <View className='at-col queue-join-tab-info' style='padding-top:2%'>
-                  {/*这部分是加入车队的tab */}
-                  <View className='at-row' style='padding-bottom:3%;'>
-                    <View style='width:500rpx;display:flex;flex-direction:column;'>
-                      <text style='font-size:16px;font-weight:550;color:#000;padding-top:3%;padding-left:5%;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>   
-                        {this.state.infoLoading?"":this.state.storeInfo.store_name}
-                      </text>
-                      <text style='padding-left:5%;font-size:12px;font-weight:550;color:#00000099;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>
-                        {this.state.infoLoading?"":this.state.storeInfo.store_address}
-                      </text>
+                <View className='at-row' style='padding-top:5%'>
+                  <View className='at-col' style='background-color:rgba(201, 201, 201, 0.295);margin:0% 3.5%;padding-top:1%;border-radius:5px;'>
+                    <View className='at-row' style='position:relative;color:#c0c0c0;'>
+                      <View className='at-row' style='align-items:flex-end;display:flex;justify-content:flex-start;padding-left:2%;font-size:14px;'>剧情简介</View>
+                      <View className='at-row' style='align-items:center;display:flex;justify-content:flex-end;padding-right:2%;font-size:12px;' onClick={this.handleClick.bind(this)}>
+                        {this.state.isHide? '展开' : '收起'}
+                        <AtIcon value={this.state.isHide? 'chevron-down' : 'chevron-up'} size='20'></AtIcon> 
+                      </View>
                     </View>
-                    <image src={telpic} mode='heightFix' style='height:25px;padding-top:4.5%;padding-right:3%;' onClick={this.makePhoneCall.bind(this)}></image>
-                    <View style='height:30px;border:0px solid #97979722;border-left-width:2px;margin-top:4%;'></View>
-                    <image src={mappic} mode='heightFix' style='height:25px;padding-top:4%;padding-left:3%;padding-right:5%;' onClick={this.openLocation.bind(this)}></image>
+                    <View className='at-row' style='padding-left:2%;'>
+                      <text className={this.state.isHide? 'play-intro-info play-intro-hide' : 'play-intro-info'}>{this.state.infoLoading? null: this.state.playInfo.play_intro.split('/n').join('\n')}</text>
+                    </View>
                   </View>
                 </View>
-
-                <View className='at-row at-row--wrap queue-member-tab-info' style='padding-top:2%;padding-bottom:4%;'>
-                  {/* 车队成员列表 */}
-                  <View className='at-row' style='height:50rpx;border:0px solid #979797;border-bottom-width:1px;width:90%;margin-left:5%'>
-                    <View className='at-col' style='font-size:16px;font-weight:600;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:0%'>车队成员</View>
-                    {male_female_display}
+                <View className='at-col' style='background-color:#F9F9F9;margin-top:1%;padding-bottom:5%;'>
+  
+                  <View className='at-row queue-time-tab-info' style='padding-top:2%'>
+                    {/*这部分是开车时间的tab */}
+                    <View className='at-row'>
+                      <View className='at-col'>
+                        <View className='at-row queue-start-time-info' >开局时间</View>
+                        <View className='at-row' style='font-size:14px;font-weight:550;color:#000;height:70%;align-items:center;display:flex;justify-content:flex-start;padding-left:10%;'>{this.state.infoLoading? "加载中": this.state.canInv=="null"?  this.state.queueInfo.queue_end_time:this.state.queueInfo.queue_end_time.slice(0,10)+" "+this.state.queueInfo.queue_end_time.slice(11,-3)}</View>
+                      </View>
+                    </View>
+                    <View className='at-row'>
+                      <View className='at-col'>
+                        <View className='at-row queue-antigender-info'>是否接受反串</View>
+                        <View className='at-row' style='font-size:14px;font-weight:550;color:#000;height:70%;align-items:center;display:flex;justify-content:flex-start;padding-left:10%;'>{this.state.infoLoading? "加载中": this.state.queueInfo.queue_antigender? "接受":"不接受"}反串</View>
+                      </View>
+                    </View>
                   </View>
-                  {this.players_info}
+  
+                  <View className='at-col queue-join-tab-info' style='padding-top:2%'>
+                    {/*这部分是加入车队的tab */}
+                    <View className='at-row' style='padding-bottom:3%;'>
+                      <View style='width:500rpx;display:flex;flex-direction:column;'>
+                        <text style='font-size:16px;font-weight:550;color:#000;padding-top:3%;padding-left:5%;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>   
+                          {this.state.infoLoading?"":this.state.storeInfo.store_name}
+                        </text>
+                        <text style='padding-left:5%;font-size:12px;font-weight:550;color:#00000099;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;'>
+                          {this.state.infoLoading?"":this.state.storeInfo.store_address}
+                        </text>
+                      </View>
+                      <image src={telpic} mode='heightFix' style='height:25px;padding-top:4.5%;padding-right:3%;' onClick={this.makePhoneCall.bind(this)}></image>
+                      <View style='height:30px;border:0px solid #97979722;border-left-width:2px;margin-top:4%;'></View>
+                      <image src={mappic} mode='heightFix' style='height:25px;padding-top:4%;padding-left:3%;padding-right:5%;' onClick={this.openLocation.bind(this)}></image>
+                    </View>
+                  </View>
+  
+                  <View className='at-row at-row--wrap queue-member-tab-info' style='padding-top:2%;padding-bottom:4%;'>
+                    {/* 车队成员列表 */}
+                    <View className='at-row' style='height:50rpx;border:0px solid #979797;border-bottom-width:1px;width:90%;margin-left:5%'>
+                      <View className='at-col' style='font-size:16px;font-weight:600;color:#000;align-items:center;display:flex;justify-content:flex-start;padding-left:0%'>车队成员</View>
+                      {male_female_display}
+                    </View>
+                    {this.players_info}
+                  </View>
                 </View>
-              </View>
-            <View className='at-row' style='height:150rpx;background-color:#F9F9F9;padding-bottom:5%;'></View>
-          </ScrollView>
-          {invButDisplay}
+              <View className='at-row' style='height:150rpx;background-color:#F9F9F9;padding-bottom:5%;'></View>
+            </ScrollView>
+            {invButDisplay}
+            </View>
+        </View>
+      )
+    } else {
+      return (
+        <View className='at-col Queueinfo' style='position:relative'>
+          <View className='at-col' style={{padding: `${top_height+100}px 0px 0px 0px`, position:'absolute', top:0, left:0, width:'100%'}}>
+            <View style='height:40vh;width:100vw;'></View>
+            <AtActivityIndicator mode='center' size={64} content='Loading...' className='load'></AtActivityIndicator>
           </View>
-      </View>
-    )
+        </View>
+      )
+    }
   }
 }

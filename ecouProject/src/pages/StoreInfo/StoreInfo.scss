@@ -22,6 +22,21 @@ taroUI的css文件。
 @import "~taro-ui/dist/style/components/activity-indicator.scss";
 @import '~taro-ui/dist/style/components/loading.scss';
 
+.storeID-input-css{
+    &.at-input{
+        input{
+            font-size: 32px;
+        }
+    }
+    .at-input__title{
+        font-size: 32px;
+    }
+
+    .at-input__input{
+        font-size: 32px;
+    }
+}
+
 .load {
     .at-loading__ring{
         border-width: 2PX;
@@ -321,6 +336,19 @@ taroUI的css文件。
     .at-search-bar__action{
         color:#00000000;
         background-color:#00000000;
+    }
+}
+
+.enter-button {
+    align-items: center;
+    height: 76rpx;
+    width: 384rpx;
+    top: 30%;
+    font-size: 32px;
+    border: 0PX none;
+    background-color: #FCA62F;
+    &.at-button--disabled {
+        background-color: #A5A5A5;
     }
 }
 
