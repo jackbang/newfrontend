@@ -75,7 +75,16 @@ class StoreInfo extends Component {
             Taro.setStorage({ key: `store_info`, data: res.data.data });
         })
       } else {
-
+        let storeInfo = Taro.getStorageSync(`store_info`);
+        if (storeInfo.store_id) {
+          let data = {data:storeInfo};
+          this.setState({
+              storeId: storeInfo.store_id,
+              storeInfo: data,
+              storePic: base + storeInfo.store_logo,
+              storeInfoLoading: false
+          })
+        }
       }
     }
 
@@ -707,7 +716,7 @@ class StoreInfo extends Component {
         let dayList = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
         tabInfoList.push({title: "今天 "+dayjs().format('MM-DD')});
         for (let index = 1; index < 14; index++) {
-          tabInfoList.push({title: dayList[index%7]+" "+dayjs().add(index, 'day').format('MM-DD')});
+          tabInfoList.push({title: dayList[dayjs().add(index, 'day').day()]+" "+dayjs().add(index, 'day').format('MM-DD')});
         }
         let tabsPaneInfo;
         

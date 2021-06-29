@@ -6,6 +6,68 @@
 @import "~taro-ui/dist/style/components/tag.scss";
 @import "~taro-ui/dist/style/components/button.scss";
 
+.tag-label-button-info{
+    
+    &.at-tag{
+        padding: 0 15px;
+        height: 40px;
+        line-height: 40px;
+        font-size: 28px;
+        border: 1px solid #979797;
+        background-color: #00000000;
+        margin-right: 50rpx;
+        margin-bottom: 20rpx;
+    }
+
+    &.at-tag--active{
+        border: 1px solid #FCA62F;
+        background-color: #FCA62F;
+    }
+}
+
+.label-reset-button{
+    align-items: center;
+    height: 60%;
+    width: 300rpx;
+    font-size: 32px;
+    border: 1PX solid #FCA62F;
+    background-color: #FCA62F00;
+    &.at-button--disabled {
+        background-color: #A5A5A5;
+    }
+}
+
+.label-confirm-button{
+    align-items: center;
+    height: 60%;
+    width: 300rpx;
+    font-size: 32px;
+    border: 0PX none;
+    background-color: #FCA62F;
+    &.at-button--disabled {
+        background-color: #A5A5A5;
+    }
+}
+
+.tag-label-display-info{
+    
+    &.at-tag{
+        padding: 0 20px;
+        height: 40px;
+        line-height: 40px;
+        font-size: 28px;
+        background-color: #D8D8D8;
+        margin-right: 20rpx;
+        margin-top: 5rpx;
+        margin-bottom: 5rpx;
+    }
+
+    &.at-tag--active{
+        border: 1px solid #FCA62F;
+        background-color: #FCA62F;
+    }
+}
+
 .JoinQueueSelectInfo{
     background-image: url(../../img/background.jpg);
     background-size: 100%;

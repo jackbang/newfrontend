@@ -1,7 +1,7 @@
 import { Component } from 'react'
 import Taro from '@tarojs/taro'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { AtButton, AtSearchBar, AtNavBar, AtTag} from 'taro-ui'
+import { AtButton, AtSearchBar, AtNavBar, AtTag, AtIcon} from 'taro-ui'
 
 import './JoinQueueSelectInfo.scss'
 
@@ -9,6 +9,7 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
 
 import play_pic from '../../img/play_pic.jpg'
+import selectIcon from '../../img/selectIcon.svg'
 import male_icon from '../../img/male.png'
 import female_icon from '../../img/female.png'
 import scoreActive from '../../img/scoreActive.png'
@@ -17,6 +18,8 @@ import login from '../../img/searchPageLogin.svg'
 
 import {test_search_plays, test_store_plays_search, test_store_info, test_wechat_login} from '../../service/api'
 import {base} from '../../service/config'
+
+import '../../utils/labels'
 
 export default class Joinqueueselectinfo extends Component {
 
@@ -30,6 +33,16 @@ export default class Joinqueueselectinfo extends Component {
       store_info: {},
       user_info: {},
       fromShare: false,
+
+      showSelected: false,
+      showSelectTab: false,
+      type1:'',
+      type2:'',
+      type3:'',
+      temp_type1:'',
+      temp_type2:'',
+      temp_type3:'',
+
       plays_list: []
     }
   }
@@ -63,7 +76,13 @@ export default class Joinqueueselectinfo extends Component {
 
   componentDidShow () {
     if (this.state.fromShare) {
+      this.state.store_info = Taro.getStorageSync('store_info');
+      this.state.user_info = Taro.getStorageSync('user_info')
+      
+      this.state.page = 1;
+      this.state.plays_list = [];
 
+      this.searchPlays();
     } else {
       this.state.store_info = Taro.getStorageSync('store_info');
       this.state.user_info = Taro.getStorageSync('user_info')
@@ -71,38 +90,17 @@ export default class Joinqueueselectinfo extends Component {
       this.state.page = 1;
       this.state.plays_list = [];
 
-      let cert_data = {
-        adminId: this.state.user_info.user_id,
-        sessionId: this.state.user_info.sessionId,
-        appId: wx.getAccountInfoSync().miniProgram.appId,
-        token: (dayjs().unix() + 1000)*2
-      }
-
-      let store_id = this.state.store_info.store_id;
-      let title = this.state.value;
-      let hd = this.state.tagActiveNum;
-      let type1 = '';
-      let type2 = '';
-      let type3 = '';
-      let page = this.state.page;
-
-      let _this = this;
-
-      test_store_plays_search(cert_data, 
-        `store_id=${store_id}&title=${title}&hd=${hd}&type1=${type1}&type2=${type2}&type3=${type3}&page=${page}`).then(
-        function(res){
-          console.log(res.data)
-          _this.setState({
-            plays_list: _this.state.plays_list.concat(res.data)
-          })
-        }
-      )
+      this.searchPlays();
     }
   }
 
 
   handleCreateQueue (item){
-    Taro.navigateTo({url: `../JoinQueueComfirmInfo/JoinQueueComfirmInfo?playId=${item.play_id}`})
+    if (this.state.showSelectTab) {
+
+    } else {
+      Taro.navigateTo({url: `../JoinQueueComfirmInfo/JoinQueueComfirmInfo?playId=${item.play_id}`})
+    }
   }
 
   onScrollToUpper() {}
@@ -125,32 +123,7 @@ export default class Joinqueueselectinfo extends Component {
 
   addPages() {
     this.state.page = this.state.page + 1;
-    let cert_data = {
-      adminId: this.state.user_info.user_id,
-      sessionId: this.state.user_info.sessionId,
-      appId: wx.getAccountInfoSync().miniProgram.appId,
-      token: (dayjs().unix() + 1000)*2
-    }
-
-    let store_id = this.state.store_info.store_id;
-    let title = this.state.value;
-    let hd = this.state.tagActiveNum;
-    let type1 = '';
-    let type2 = '';
-    let type3 = '';
-    let page = this.state.page;
-
-    let _this = this;
-
-    test_store_plays_search(cert_data, 
-      `store_id=${store_id}&title=${title}&hd=${hd}&type1=${type1}&type2=${type2}&type3=${type3}&page=${page}`).then(
-      function(res){
-        console.log(res.data)
-        _this.setState({
-          plays_list: _this.state.plays_list.concat(res.data)
-        })
-      }
-    )
+    this.searchPlays();
   }
 
   onChange (value) {
@@ -172,6 +145,24 @@ export default class Joinqueueselectinfo extends Component {
   onActionClick () {
     this.state.page = 1;
     this.state.plays_list = [];
+    this.searchPlays();
+  }
+
+  onTagClick (active){
+    console.log(active)
+  
+    this.state.page = 1;
+    this.state.plays_list = [];
+    this.state.tagActiveNum = active;
+    this.setState({
+      tagActiveNum: active
+    })
+    this.searchPlays();
+  }
+
+  searchPlays() {
+    console.log('--------start search-----------')
+
     let cert_data = {
       adminId: this.state.user_info.user_id,
       sessionId: this.state.user_info.sessionId,
@@ -182,45 +173,9 @@ export default class Joinqueueselectinfo extends Component {
     let store_id = this.state.store_info.store_id;
     let title = this.state.value;
     let hd = this.state.tagActiveNum;
-    let type1 = '';
-    let type2 = '';
-    let type3 = '';
-    let page = this.state.page;
-
-    let _this = this;
-
-    test_store_plays_search(cert_data, 
-      `store_id=${store_id}&title=${title}&hd=${hd}&type1=${type1}&type2=${type2}&type3=${type3}&page=${page}`).then(
-      function(res){
-        console.log(res.data)
-        _this.setState({
-          plays_list: _this.state.plays_list.concat(res.data)
-        })
-      }
-    )
-  }
-
-  onTagClick (active){
-    console.log(active)
-    this.setState({
-      tagActiveNum: active
-    })
-
-    this.state.page = 1;
-    this.state.plays_list = [];
-    let cert_data = {
-      adminId: this.state.user_info.user_id,
-      sessionId: this.state.user_info.sessionId,
-      appId: wx.getAccountInfoSync().miniProgram.appId,
-      token: (dayjs().unix() + 1000)*2
-    }
-
-    let store_id = this.state.store_info.store_id;
-    let title = this.state.value;
-    let hd = active;
-    let type1 = '';
-    let type2 = '';
-    let type3 = '';
+    let type1 = this.state.type1;
+    let type2 = this.state.type2;
+    let type3 = this.state.type3;
     let page = this.state.page;
 
     let _this = this;
@@ -305,6 +260,90 @@ export default class Joinqueueselectinfo extends Component {
     }
   }
 
+  showSelect(){
+    this.setState({
+      showSelectTab: !this.state.showSelectTab
+    })
+  }
+
+  hideSelect(){
+    this.setState({
+      showSelectTab: false
+    })
+  }
+
+  resetLabels() {
+    this.state.page = 1;
+    this.state.type1 = '';
+    this.state.type2 = '';
+    this.state.type3 = '';
+    this.state.temp_type1 = '';
+    this.state.temp_type2 = '';
+    this.state.temp_type3 = '';
+    this.state.plays_list = [];
+    this.setState({
+      showSelected:false
+    })
+
+    //this.setState({
+    //  listLoading:true
+    //})
+    this.searchPlays();
+  }
+
+  confirmLabels() {
+    this.state.page = 1;
+    this.state.type1 = this.state.temp_type1;
+    this.state.type2 = this.state.temp_type2;
+    this.state.type3 = this.state.temp_type3;
+    this.state.plays_list = [];
+    this.setState({
+      showSelected:true,
+      showSelectTab:false
+    })
+
+    //this.setState({
+    //  listLoading: true
+    //})
+    this.searchPlays();
+  }
+
+  onLabelClick(label, num) {
+    console.log(label)
+    console.log(num)
+    if (num == 1) {
+      if (label == this.state.temp_type1) {
+        this.setState({
+          temp_type1:''
+        })
+      } else {
+        this.setState({
+          temp_type1:label
+        })
+      }
+    } else if (num == 2) {
+      if (label == this.state.temp_type2) {
+        this.setState({
+          temp_type2:''
+        })
+      } else {
+        this.setState({
+          temp_type2:label
+        })
+      }
+    } else if (num == 3) {
+      if (label == this.state.temp_type3) {
+        this.setState({
+          temp_type3:''
+        })
+      } else {
+        this.setState({
+          temp_type3:label
+        })
+      }
+    }
+  }
+
   render () {
     //Taro.hideTabBar();
 
@@ -329,8 +368,53 @@ export default class Joinqueueselectinfo extends Component {
     
 
     let play_tab_list = [];
+    let type1_list = [];
+    let type2_list = [];
+    let type3_list = [];
 
     if (this.state.user_info.user_id) {
+      for (let index = 0; index < type1.length; index++) {
+        type1_list.push(
+          <AtTag 
+            className='tag-label-button-info'
+            name={type1[index]}
+            type='primary' 
+            active={this.state.temp_type1==type1[index]? true:false} 
+            onClick={this.onLabelClick.bind(this, type1[index], 1)}
+            >
+              {type1[index]}
+          </AtTag>
+        )
+      }
+
+      for (let index = 0; index < type2.length; index++) {
+        type2_list.push(
+          <AtTag 
+            className='tag-label-button-info'
+            name={type2[index]}
+            type='primary' 
+            active={this.state.temp_type2==type2[index]? true:false} 
+            onClick={this.onLabelClick.bind(this, type2[index], 2)}
+            >
+              {type2[index]}
+          </AtTag>
+        )
+      }
+
+      for (let index = 0; index < type3.length; index++) {
+        type3_list.push(
+          <AtTag 
+            className='tag-label-button-info'
+            name={type3[index]}
+            type='primary' 
+            active={this.state.temp_type3==type3[index]? true:false} 
+            onClick={this.onLabelClick.bind(this, type3[index], 3)}
+            >
+              {type3[index]}
+          </AtTag>
+        )
+      }
+
       this.state.plays_list.map((item, i)=>{
 
         this.state.plays_list[i]['play_pic'] = item.play_img;
@@ -438,7 +522,7 @@ export default class Joinqueueselectinfo extends Component {
               onConfirm={this.onActionClick.bind(this)}
             />
             <View className='at-row' style='margin-top: 2%;margin-bottom: 2%;'>
-              <View className='' style='width:15vw;align-items:flex-end;display:flex;justify-content:flex-end;'>
+              <View className='' style='width:15vw;align-items:center;display:flex;justify-content:flex-end;'>
                 <AtTag 
                   className='tag-button-info'
                   name='ALL' 
@@ -471,9 +555,26 @@ export default class Joinqueueselectinfo extends Component {
                 <AtTag className='tag-num-button-info'name='12p' type='primary' active={this.state.tagActiveNum==12? true:false} circle onClick={this.onTagClick.bind(this, 12)}>12人</AtTag>
               </ScrollView>
               <View className='' style='width:10vw;align-items:flex-end;display:flex;justify-content:center;'>
-                o
+                <image src={selectIcon} style='height:50rpx;width:50rpx;' onClick={this.showSelect.bind(this)}></image>
               </View>
             </View>
+            {this.state.showSelected==false? null:
+            <View 
+              style={{
+                width:`100vw`,
+                height:`auto`,
+                background:`#FDF9F3`,
+                display:`flex`,
+                alignItems:`center`,
+                marginLeft: `30rpx`
+                }}>
+                {[
+                this.state.type1.length == 0? null:<AtTag className='tag-label-display-info' name={this.state.type1} type='primary' circle >{this.state.type1}</AtTag>,
+                this.state.type2.length == 0? null:<AtTag className='tag-label-display-info' name={this.state.type2} type='primary' circle >{this.state.type2}</AtTag>,
+                this.state.type3.length == 0? null:<AtTag className='tag-label-display-info' name={this.state.type3} type='primary' circle >{this.state.type3}</AtTag>
+                ]}
+            </View>
+            }
 
             <ScrollView
             className='scrollviewY'
@@ -493,6 +594,50 @@ export default class Joinqueueselectinfo extends Component {
               <View className='at-row tab-blank'></View> {/*切记，每个AtTabsPane最下面要加一小条空白，否则阴影部分显示不全，会很难看 */}
 
             </ScrollView>
+          </View>
+        </View>
+        <View 
+          style={{
+            position: `absolute`,
+            width:`100vw`,
+            height:`auto`,
+            background:`#FDF9F3`,
+            display:`flex`,
+            flexDirection:`column`,
+            visibility: this.state.showSelectTab==true? 'visible':'hidden',
+            zIndex: 999
+            }}>
+          <View style='width:100vw;height:auto;display:flex;flex-direction:column;'>
+            <View style='width:100vw;height:100rpx;display:flex;align-items:center;'>
+              <text style='margin-left:30rpx;font-size:40rpx;font-weight:550;'>题材</text>
+              <View style='position:absolute;right:50rpx;' onClick={this.hideSelect.bind(this)}>
+                <text style='font-size:28rpx;color:#A5A5A5;'>收起</text>
+                <AtIcon value='chevron-up' size='18' color='#A5A5A5'></AtIcon>
+              </View>
+            </View>
+            <View style='width:700rpx;margin-left:50rpx;display:flex;flex-wrap:wrap;'>
+              {type1_list}
+            </View>
+          </View>
+          <View style='width:100vw;height:auto;display:flex;flex-direction:column;'>
+            <View style='width:100vw;height:100rpx;display:flex;align-items:center;'>
+              <text style='margin-left:30rpx;font-size:40rpx;font-weight:550;'>类型</text>
+            </View>
+            <View style='width:700rpx;margin-left:50rpx;display:flex;flex-wrap:wrap;'>
+              {type2_list}
+            </View>
+          </View>
+          <View style='width:100vw;height:auto;display:flex;flex-direction:column;'>
+            <View style='width:100vw;height:100rpx;display:flex;align-items:center;'>
+              <text style='margin-left:30rpx;font-size:40rpx;font-weight:550;'>背景</text>
+            </View>
+            <View style='width:700rpx;margin-left:50rpx;display:flex;flex-wrap:wrap;'>
+              {type3_list}
+            </View>
+          </View>
+          <View style='width:100vw;height:100rpx;display:flex;align-items:center;border: 0rpx solid #A5A5A599;border-top-width:2rpx;'>
+            <AtButton type='second' circle='true' className='label-reset-button' onClick={this.resetLabels.bind(this)} >重置</AtButton>
+            <AtButton type='primary' circle='true' className='label-confirm-button' onClick={this.confirmLabels.bind(this)}>确定</AtButton>
           </View>
         </View>
       </View>
